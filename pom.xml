@@ -91,7 +91,7 @@
         <dependency>
             <groupId>com.github.houbb</groupId>
             <artifactId>lombok-ex</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.2</version>
         </dependency>
         <!--============================== OTHER ==============================-->
 

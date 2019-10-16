@@ -5,7 +5,7 @@ import org.junit.Ignore;
 
 /**
  * @author binbin.hou
- * @since 0,0,1
+ * @since 0.0.1
  */
 @Ignore
 public class RpcServerTest {
