@@ -11,7 +11,6 @@ import com.github.houbb.rpc.client.core.RpcClient;
 import com.github.houbb.rpc.common.model.CalculateResponse;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
