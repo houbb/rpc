@@ -2,7 +2,9 @@ package com.github.houbb.rpc.server.core;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.server.constant.RpcServerConst;
+import com.github.houbb.rpc.common.constant.RpcConstant;
+import com.github.houbb.rpc.server.decoder.CalculateRequestDecoder;
+import com.github.houbb.rpc.server.encoder.CalculateResponseEncoder;
 import com.github.houbb.rpc.server.handler.RpcServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -26,7 +28,7 @@ public class RpcServer extends Thread {
     private final int port;
 
     public RpcServer() {
-        this.port = RpcServerConst.DEFAULT_PORT;
+        this.port = RpcConstant.PORT;
     }
 
     public RpcServer(int port) {
@@ -50,7 +52,10 @@ public class RpcServer extends Thread {
                     .childHandler(new ChannelInitializer<Channel>() {
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
-                            ch.pipeline().addLast(new RpcServerHandler());
+                            ch.pipeline()
+                                    .addLast(new CalculateRequestDecoder())
+                                    .addLast(new CalculateResponseEncoder())
+                                    .addLast(new RpcServerHandler());
                         }
                     })
                     // 这个参数影响的是还没有被accept 取出的连接

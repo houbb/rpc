@@ -18,6 +18,12 @@
     <description>The client module of rpc framework.</description>
 
     <dependencies>
+        <!--============================== SELF ==============================-->
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>rpc-common</artifactId>
+        </dependency>
+
         <!--============================== INTER ==============================-->
         <dependency>
             <groupId>com.github.houbb</groupId>

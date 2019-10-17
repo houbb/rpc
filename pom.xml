@@ -12,6 +12,7 @@
         <module>rpc-server</module>
         <module>rpc-test</module>
         <module>rpc-client</module>
+        <module>rpc-common</module>
     </modules>
 
     <properties>
@@ -51,6 +52,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>rpc-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>rpc-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

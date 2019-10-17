@@ -5,6 +5,11 @@
 
 package com.github.houbb.rpc.client.handler;
 
+import com.github.houbb.log.integration.core.Log;
+import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.client.core.RpcClient;
+import com.github.houbb.rpc.common.model.CalculateRequest;
+import com.github.houbb.rpc.common.model.CalculateResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -19,9 +24,20 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 public class RpcClientHandler extends SimpleChannelInboundHandler {
 
+    private static final Log log = LogFactory.getLog(RpcClient.class);
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        CalculateRequest request = new CalculateRequest(1, 2);
+
+        ctx.writeAndFlush(request);
+        log.info("[Client] request is :{}", request);
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        // do nothing.
+        CalculateResponse response = (CalculateResponse)msg;
+        log.info("[Client] response is :{}", response);
     }
 
 }

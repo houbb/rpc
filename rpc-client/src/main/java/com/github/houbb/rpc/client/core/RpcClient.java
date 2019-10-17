@@ -7,8 +7,11 @@ package com.github.houbb.rpc.client.core;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.client.decoder.CalculateResponseDecoder;
+import com.github.houbb.rpc.client.encoder.CalculateRequestEncoder;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 
+import com.github.houbb.rpc.common.constant.RpcConstant;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -43,7 +46,7 @@ public class RpcClient extends Thread {
     }
 
     public RpcClient() {
-        this(9527);
+        this(RpcConstant.PORT);
     }
 
     @Override
@@ -63,10 +66,12 @@ public class RpcClient extends Thread {
                         protected void initChannel(Channel ch) throws Exception {
                             ch.pipeline()
                                     .addLast(new LoggingHandler(LogLevel.INFO))
+                                    .addLast(new CalculateRequestEncoder())
+                                    .addLast(new CalculateResponseDecoder())
                                     .addLast(new RpcClientHandler());
                         }
                     })
-                    .connect("localhost", port)
+                    .connect(RpcConstant.ADDRESS, port)
                     .syncUninterruptibly();
 
             log.info("RPC 服务启动客户端完成，监听端口：" + port);
