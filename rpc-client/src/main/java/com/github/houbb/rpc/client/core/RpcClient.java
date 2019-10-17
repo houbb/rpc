@@ -107,8 +107,9 @@ public class RpcClient {
         final Channel channel = channelFuture.channel();
         log.info("RPC 客户端发送请求，request: {}", request);
 
+        // 关闭当前线程，以获取对应的信息
         channel.writeAndFlush(request);
-//        channel.closeFuture().syncUninterruptibly();
+        channel.closeFuture().syncUninterruptibly();
 
         return channelHandler.getResponse();
     }
