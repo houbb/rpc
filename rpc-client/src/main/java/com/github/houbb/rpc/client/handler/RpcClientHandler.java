@@ -11,6 +11,7 @@ import com.github.houbb.rpc.client.core.RpcClient;
 import com.github.houbb.rpc.common.model.CalculateRequest;
 import com.github.houbb.rpc.common.model.CalculateResponse;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
@@ -22,22 +23,33 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @author houbinbin
  * @since 0.0.2
  */
-public class RpcClientHandler extends SimpleChannelInboundHandler {
+public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
     private static final Log log = LogFactory.getLog(RpcClient.class);
 
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        CalculateRequest request = new CalculateRequest(1, 2);
+    /**
+     * 响应信息
+     * @since 0.0.4
+     */
+    private CalculateResponse response;
 
-        ctx.writeAndFlush(request);
-        log.info("[Client] request is :{}", request);
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        CalculateResponse response = (CalculateResponse)msg;
+
+        this.response = response;
+        log.info("[Client] response is :{}", response);
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        CalculateResponse response = (CalculateResponse)msg;
-        log.info("[Client] response is :{}", response);
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        // 每次用完要关闭，不然拿不到response，我也不知道为啥（目测得了解netty才行）
+        ctx.flush();
+        ctx.close();
+    }
+
+    public CalculateResponse getResponse() {
+        return response;
     }
 
 }

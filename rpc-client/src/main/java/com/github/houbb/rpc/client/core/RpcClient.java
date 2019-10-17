@@ -12,16 +12,16 @@ import com.github.houbb.rpc.client.encoder.CalculateRequestEncoder;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 
 import com.github.houbb.rpc.common.constant.RpcConstant;
+import com.github.houbb.rpc.common.model.CalculateRequest;
+import com.github.houbb.rpc.common.model.CalculateResponse;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p> rpc 客户端 </p>
@@ -32,7 +32,7 @@ import io.netty.handler.logging.LoggingHandler;
  * @author houbinbin
  * @since 0.0.2
  */
-public class RpcClient extends Thread {
+public class RpcClient {
 
     private static final Log log = LogFactory.getLog(RpcClient.class);
 
@@ -40,6 +40,18 @@ public class RpcClient extends Thread {
      * 监听端口号
      */
     private final int port;
+
+    /**
+     * channel 信息
+     * @since 0.0.4
+     */
+    private ChannelFuture channelFuture;
+
+    /**
+     * 客户端处理 handler
+     * @since 0.0.4
+     */
+    private RpcClientHandler channelHandler;
 
     public RpcClient(int port) {
         this.port = port;
@@ -49,8 +61,10 @@ public class RpcClient extends Thread {
         this(RpcConstant.PORT);
     }
 
-    @Override
-    public void run() {
+    /**
+     * 开始运行
+     */
+    public void start() {
         // 启动服务端
         log.info("RPC 服务开始启动客户端");
 
@@ -58,30 +72,45 @@ public class RpcClient extends Thread {
 
         try {
             Bootstrap bootstrap = new Bootstrap();
-            ChannelFuture channelFuture = bootstrap.group(workerGroup)
+            channelFuture = bootstrap.group(workerGroup)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new ChannelInitializer<Channel>(){
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
+                            channelHandler = new RpcClientHandler();
                             ch.pipeline()
                                     .addLast(new LoggingHandler(LogLevel.INFO))
                                     .addLast(new CalculateRequestEncoder())
                                     .addLast(new CalculateResponseDecoder())
-                                    .addLast(new RpcClientHandler());
+                                    .addLast(channelHandler);
                         }
                     })
                     .connect(RpcConstant.ADDRESS, port)
                     .syncUninterruptibly();
-
             log.info("RPC 服务启动客户端完成，监听端口：" + port);
-            channelFuture.channel().closeFuture().syncUninterruptibly();
-            log.info("RPC 服务开始客户端已关闭");
         } catch (Exception e) {
             log.error("RPC 客户端遇到异常", e);
-        } finally {
-            workerGroup.shutdownGracefully();
+            throw new RuntimeException(e);
         }
+        // 不要关闭线程池！！！
+    }
+
+    /**
+     * 调用计算
+     * @param request 请求信息
+     * @return 结果
+     * @since 0.0.4
+     */
+    public CalculateResponse calculate(final CalculateRequest request) {
+        // 发送请求
+        final Channel channel = channelFuture.channel();
+        log.info("RPC 客户端发送请求，request: {}", request);
+
+        channel.writeAndFlush(request);
+//        channel.closeFuture().syncUninterruptibly();
+
+        return channelHandler.getResponse();
     }
 
 }
