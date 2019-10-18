@@ -9,6 +9,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * @author binbin.hou
  * @since 0.0.3
  */
+@Deprecated
 public class CalculateRequestEncoder extends MessageToByteEncoder<CalculateRequest> {
 
     @Override

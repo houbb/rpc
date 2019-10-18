@@ -12,6 +12,7 @@ import java.util.List;
  * @author binbin.hou
  * @since 0.0.3
  */
+@Deprecated
 public class CalculateResponseDecoder extends ByteToMessageDecoder {
 
     @Override

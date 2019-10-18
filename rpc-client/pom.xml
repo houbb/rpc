@@ -35,6 +35,11 @@
             <artifactId>heaven</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>json</artifactId>
+        </dependency>
+
         <!--============================== OTHER ==============================-->
         <dependency>
             <groupId>io.netty</groupId>

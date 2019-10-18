@@ -5,11 +5,13 @@
 
 package com.github.houbb.rpc.client.handler;
 
+import com.github.houbb.json.bs.JsonBs;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.core.RpcClient;
 import com.github.houbb.rpc.common.model.CalculateResponse;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -34,11 +36,18 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        CalculateResponse response = (CalculateResponse)msg;
+        ByteBuf byteBuf = (ByteBuf)msg;
+        byte[] bytes = new byte[byteBuf.readableBytes()];
+        byteBuf.readBytes(bytes);
+        String json = new String(bytes);
 
-        this.response = response;
+        log.info("[Client] receive response json: {} ", json);
+        this.response = JsonBs.deserialize(json, CalculateResponse.class);
         log.info("[Client] response is :{}", response);
     }
+
+    //TODO: 反序列化时添加 serialId 过滤。
+    // JsonBs 添加 bytes 与 object 之间的转换。
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {

@@ -5,23 +5,30 @@
 
 package com.github.houbb.rpc.client.core;
 
+import com.github.houbb.json.bs.JsonBs;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.decoder.CalculateResponseDecoder;
 import com.github.houbb.rpc.client.encoder.CalculateRequestEncoder;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
-
 import com.github.houbb.rpc.common.constant.RpcConstant;
 import com.github.houbb.rpc.common.model.CalculateRequest;
 import com.github.houbb.rpc.common.model.CalculateResponse;
+
+import java.nio.ByteBuffer;
+
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p> rpc 客户端 </p>
@@ -81,8 +88,6 @@ public class RpcClient {
                             channelHandler = new RpcClientHandler();
                             ch.pipeline()
                                     .addLast(new LoggingHandler(LogLevel.INFO))
-                                    .addLast(new CalculateRequestEncoder())
-                                    .addLast(new CalculateResponseDecoder())
                                     .addLast(channelHandler);
                         }
                     })
@@ -108,7 +113,11 @@ public class RpcClient {
         log.info("RPC 客户端发送请求，request: {}", request);
 
         // 关闭当前线程，以获取对应的信息
-        channel.writeAndFlush(request);
+        // 使用序列化的方式
+        final byte[] bytes = JsonBs.serialize(request).getBytes();
+        ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
+
+        channel.writeAndFlush(byteBuf);
         channel.closeFuture().syncUninterruptibly();
 
         return channelHandler.getResponse();
