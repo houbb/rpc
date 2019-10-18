@@ -34,17 +34,15 @@ public class RpcServerHandler extends SimpleChannelInboundHandler {
         ByteBuf byteBuf = (ByteBuf)msg;
         byte[] bytes = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(bytes);
-        String json = new String(bytes);
-        log.info("[Server] receive request json: {} ", json);
-        CalculateRequest request = JsonBs.deserialize(json, CalculateRequest.class);
+        CalculateRequest request = JsonBs.deserializeBytes(bytes, CalculateRequest.class);
         log.info("[Server] receive channel {} request: {} from ", id, request);
 
         Calculator calculator = new CalculatorService();
         CalculateResponse response = calculator.sum(request);
 
         // 回写到 client 端
-        String responseJson = JsonBs.serialize(response);
-        ByteBuf responseBuffer = Unpooled.copiedBuffer(responseJson.getBytes());
+        byte[] responseBytes = JsonBs.serializeBytes(response);
+        ByteBuf responseBuffer = Unpooled.copiedBuffer(responseBytes);
         ctx.writeAndFlush(responseBuffer);
         log.info("[Server] channel {} response {}", id, response);
     }

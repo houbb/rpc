@@ -39,15 +39,10 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
         ByteBuf byteBuf = (ByteBuf)msg;
         byte[] bytes = new byte[byteBuf.readableBytes()];
         byteBuf.readBytes(bytes);
-        String json = new String(bytes);
 
-        log.info("[Client] receive response json: {} ", json);
-        this.response = JsonBs.deserialize(json, CalculateResponse.class);
+        this.response = JsonBs.deserializeBytes(bytes, CalculateResponse.class);
         log.info("[Client] response is :{}", response);
     }
-
-    //TODO: 反序列化时添加 serialId 过滤。
-    // JsonBs 添加 bytes 与 object 之间的转换。
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {

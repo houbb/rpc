@@ -8,23 +8,14 @@ package com.github.houbb.rpc.client.core;
 import com.github.houbb.json.bs.JsonBs;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.client.decoder.CalculateResponseDecoder;
-import com.github.houbb.rpc.client.encoder.CalculateRequestEncoder;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 import com.github.houbb.rpc.common.constant.RpcConstant;
 import com.github.houbb.rpc.common.model.CalculateRequest;
 import com.github.houbb.rpc.common.model.CalculateResponse;
-
-import java.nio.ByteBuffer;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
@@ -114,7 +105,7 @@ public class RpcClient {
 
         // 关闭当前线程，以获取对应的信息
         // 使用序列化的方式
-        final byte[] bytes = JsonBs.serialize(request).getBytes();
+        final byte[] bytes = JsonBs.serializeBytes(request);
         ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
 
         channel.writeAndFlush(byteBuf);
