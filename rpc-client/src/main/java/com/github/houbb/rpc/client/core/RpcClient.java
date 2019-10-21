@@ -5,16 +5,11 @@
 
 package com.github.houbb.rpc.client.core;
 
-import com.github.houbb.json.bs.JsonBs;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 import com.github.houbb.rpc.common.constant.RpcConstant;
-import com.github.houbb.rpc.common.model.CalculateRequest;
-import com.github.houbb.rpc.common.model.CalculateResponse;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -92,26 +87,26 @@ public class RpcClient {
         // 不要关闭线程池！！！
     }
 
-    /**
-     * 调用计算
-     * @param request 请求信息
-     * @return 结果
-     * @since 0.0.4
-     */
-    public CalculateResponse calculate(final CalculateRequest request) {
-        // 发送请求
-        final Channel channel = channelFuture.channel();
-        log.info("RPC 客户端发送请求，request: {}", request);
-
-        // 关闭当前线程，以获取对应的信息
-        // 使用序列化的方式
-        final byte[] bytes = JsonBs.serializeBytes(request);
-        ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
-
-        channel.writeAndFlush(byteBuf);
-        channel.closeFuture().syncUninterruptibly();
-
-        return channelHandler.getResponse();
-    }
+//    /**
+//     * 调用计算
+//     * @param request 请求信息
+//     * @return 结果
+//     * @since 0.0.4
+//     */
+//    public CalculateResponse calculate(final CalculateRequest request) {
+//        // 发送请求
+//        final Channel channel = channelFuture.channel();
+//        log.info("RPC 客户端发送请求，request: {}", request);
+//
+//        // 关闭当前线程，以获取对应的信息
+//        // 使用序列化的方式
+//        final byte[] bytes = JsonBs.serializeBytes(request);
+//        ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
+//
+//        channel.writeAndFlush(byteBuf);
+//        channel.closeFuture().syncUninterruptibly();
+//
+//        return channelHandler.getResponse();
+//    }
 
 }
