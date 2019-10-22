@@ -13,8 +13,6 @@
         <module>rpc-test</module>
         <module>rpc-client</module>
         <module>rpc-common</module>
-        <module>rpc-client-test</module>
-        <module>rpc-server-test</module>
     </modules>
 
     <properties>
