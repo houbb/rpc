@@ -6,6 +6,9 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcResponse;
+import com.github.houbb.rpc.server.service.ServiceFactory;
+import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -53,9 +56,22 @@ public class RpcServerHandler extends SimpleChannelInboundHandler {
      */
     private DefaultRpcResponse handleRpcRequest(final RpcRequest rpcRequest) {
         DefaultRpcResponse rpcResponse = new DefaultRpcResponse();
-        // 获取对应的 service 实现类
-        // rpcRequest=>invocationRequest
-        // 执行 invoke
+        rpcResponse.seqId(rpcRequest.seqId());
+
+        try {
+            // 获取对应的 service 实现类
+            // rpcRequest=>invocationRequest
+            // 执行 invoke
+            Object result = DefaultServiceFactory.getInstance()
+                    .invoke(rpcRequest.serviceId(),
+                            rpcRequest.methodName(),
+                            rpcRequest.paramTypeNames(),
+                            rpcRequest.paramValues());
+            rpcResponse.result(result);
+        } catch (Exception e) {
+            rpcResponse.error(e);
+            log.error("[Server] execute meet ex for request", rpcRequest, e);
+        }
 
         // 构建结果值
         return rpcResponse;

@@ -2,6 +2,8 @@ package com.github.houbb.rpc.common.rpc.domain.impl;
 
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 
+import java.util.List;
+
 /**
  * 默认 rpc 入参
  * @author binbin.hou
@@ -46,6 +48,21 @@ public class DefaultRpcRequest implements RpcRequest {
     @Override
     public String serviceId() {
         return null;
+    }
+
+    @Override
+    public String methodName() {
+        return null;
+    }
+
+    @Override
+    public List<String> paramTypeNames() {
+        return null;
+    }
+
+    @Override
+    public Object[] paramValues() {
+        return new Object[0];
     }
 
     public DefaultRpcRequest createTime(long createTime) {

@@ -1,5 +1,7 @@
 package com.github.houbb.rpc.common.rpc.domain;
 
+import java.util.List;
+
 /**
  * 序列化相关处理
  * （1）调用创建时间-createTime
@@ -28,9 +30,27 @@ public interface RpcRequest extends BaseRpc {
      */
     String serviceId();
 
+    /**
+     * 方法名称
+     * @return 方法名称
+     * @since 0.0.6
+     */
+    String methodName();
 
+    /**
+     * 方法类型名称列表
+     * @return 名称列表
+     * @since 0.0.6
+     */
+    List<String> paramTypeNames();
 
     // 调用参数信息列表
-    // 调用方法信息
+
+    /**
+     * 调用参数值
+     * @return 参数值数组
+     * @since 0.0.6
+     */
+    Object[] paramValues();
 
 }
