@@ -51,6 +51,7 @@ public class ReferenceProxy<T> implements InvocationHandler {
      * @return 结果
      * @throws Throwable 异常
      * @since 0.0.6
+     * @see Method#getGenericSignature() 通用标识，可以根据这个来优化代码。
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
