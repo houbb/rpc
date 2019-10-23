@@ -1,6 +1,5 @@
 package com.github.houbb.rpc.common.rpc.domain.impl;
 
-import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 
 /**
@@ -59,5 +58,14 @@ public class DefaultRpcResponse implements RpcResponse {
     public DefaultRpcResponse result(Object result) {
         this.result = result;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultRpcResponse{" +
+                "seqId='" + seqId + '\'' +
+                ", error=" + error +
+                ", result=" + result +
+                '}';
     }
 }

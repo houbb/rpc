@@ -1,6 +1,6 @@
 package com.github.houbb.rpc.common.config.registry.impl;
 
-import com.github.houbb.rpc.common.config.component.Address;
+import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.config.component.Credential;
 import com.github.houbb.rpc.common.config.registry.RegistryConfig;
 
@@ -17,7 +17,7 @@ public class DefaultRegistryConfig implements RegistryConfig {
      * 地址配置列表
      * @since 0.0.6
      */
-    private List<Address> addressList;
+    private List<RpcAddress> rpcAddressList;
 
     /**
      * 凭证信息
@@ -26,12 +26,12 @@ public class DefaultRegistryConfig implements RegistryConfig {
     private Credential credential;
 
     @Override
-    public List<Address> addressList() {
-        return addressList;
+    public List<RpcAddress> addressList() {
+        return rpcAddressList;
     }
 
-    public DefaultRegistryConfig addressList(List<Address> addressList) {
-        this.addressList = addressList;
+    public DefaultRegistryConfig addressList(List<RpcAddress> rpcAddressList) {
+        this.rpcAddressList = rpcAddressList;
         return this;
     }
 

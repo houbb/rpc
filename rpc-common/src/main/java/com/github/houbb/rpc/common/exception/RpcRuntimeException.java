@@ -7,6 +7,8 @@ package com.github.houbb.rpc.common.exception;
  */
 public class RpcRuntimeException extends RuntimeException{
 
+    private static final long serialVersionUID = -2521814477982789832L;
+
     public RpcRuntimeException() {
     }
 

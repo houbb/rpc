@@ -2,6 +2,7 @@ package com.github.houbb.rpc.common.rpc.domain.impl;
 
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,6 +30,30 @@ public class DefaultRpcRequest implements RpcRequest {
      */
     private long createTime;
 
+    /**
+     * 服务名称唯一标识
+     * @since 0.0.6
+     */
+    private String serviceId;
+
+    /**
+     * 方法名称
+     * @since 0.0.6
+     */
+    private String methodName;
+
+    /**
+     * 参数类型名称列表
+     * @since 0.0.6
+     */
+    private List<String> paramTypeNames;
+
+    /**
+     * 参数值
+     * @since 0.0.6
+     */
+    private Object[] paramValues;
+
     @Override
     public String seqId() {
         return seqId;
@@ -45,28 +70,60 @@ public class DefaultRpcRequest implements RpcRequest {
         return createTime;
     }
 
+    public DefaultRpcRequest createTime(long createTime) {
+        this.createTime = createTime;
+        return this;
+    }
+
     @Override
     public String serviceId() {
-        return null;
+        return serviceId;
+    }
+
+    public DefaultRpcRequest serviceId(String serviceId) {
+        this.serviceId = serviceId;
+        return this;
     }
 
     @Override
     public String methodName() {
-        return null;
+        return methodName;
+    }
+
+    public DefaultRpcRequest methodName(String methodName) {
+        this.methodName = methodName;
+        return this;
     }
 
     @Override
     public List<String> paramTypeNames() {
-        return null;
+        return paramTypeNames;
+    }
+
+    public DefaultRpcRequest paramTypeNames(List<String> paramTypeNames) {
+        this.paramTypeNames = paramTypeNames;
+        return this;
     }
 
     @Override
     public Object[] paramValues() {
-        return new Object[0];
+        return paramValues;
     }
 
-    public DefaultRpcRequest createTime(long createTime) {
-        this.createTime = createTime;
+    public DefaultRpcRequest paramValues(Object[] paramValues) {
+        this.paramValues = paramValues;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultRpcRequest{" +
+                "seqId='" + seqId + '\'' +
+                ", createTime=" + createTime +
+                ", serviceId='" + serviceId + '\'' +
+                ", methodName='" + methodName + '\'' +
+                ", paramTypeNames=" + paramTypeNames +
+                ", paramValues=" + Arrays.toString(paramValues) +
+                '}';
     }
 }

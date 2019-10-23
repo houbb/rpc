@@ -1,16 +1,10 @@
 package com.github.houbb.rpc.server.handler;
 
-import com.github.houbb.json.bs.JsonBs;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
-import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcResponse;
-import com.github.houbb.rpc.server.service.ServiceFactory;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -31,21 +25,22 @@ public class RpcServerHandler extends SimpleChannelInboundHandler {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         final String id = ctx.channel().id().asLongText();
+        log.info("[Server] channel read start: {}", id);
 
-        ByteBuf byteBuf = (ByteBuf)msg;
-        byte[] bytes = new byte[byteBuf.readableBytes()];
-        byteBuf.readBytes(bytes);
-
-        DefaultRpcRequest rpcRequest = JsonBs.deserializeBytes(bytes, DefaultRpcRequest.class);
+        // 接受客户端请求
+        RpcRequest rpcRequest = (RpcRequest)msg;
         log.info("[Server] receive channel {} request: {}", id, rpcRequest);
 
-        DefaultRpcResponse rpcResponse = handleRpcRequest(rpcRequest);
-
         // 回写到 client 端
-        byte[] responseBytes = JsonBs.serializeBytes(rpcResponse);
-        ByteBuf responseBuffer = Unpooled.copiedBuffer(responseBytes);
-        ctx.writeAndFlush(responseBuffer);
+        DefaultRpcResponse rpcResponse = handleRpcRequest(rpcRequest);
+        ctx.writeAndFlush(rpcResponse);
         log.info("[Server] channel {} response {}", id, rpcResponse);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        ctx.close();
     }
 
     /**

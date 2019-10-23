@@ -5,13 +5,13 @@ package com.github.houbb.rpc.common.config.component;
  * @author binbin.hou
  * @since 0.0.6
  */
-public class Address {
+public class RpcAddress {
 
     /**
-     * ip 信息
+     * address 信息
      * @since 0.0.6
      */
-    private String ip;
+    private String address;
 
     /**
      * 端口号
@@ -25,12 +25,18 @@ public class Address {
      */
     private int weight;
 
-    public String ip() {
-        return ip;
+    public RpcAddress(String address, int port, int weight) {
+        this.address = address;
+        this.port = port;
+        this.weight = weight;
     }
 
-    public Address ip(String ip) {
-        this.ip = ip;
+    public String address() {
+        return address;
+    }
+
+    public RpcAddress address(String ip) {
+        this.address = ip;
         return this;
     }
 
@@ -38,7 +44,7 @@ public class Address {
         return port;
     }
 
-    public Address port(int port) {
+    public RpcAddress port(int port) {
         this.port = port;
         return this;
     }
@@ -47,7 +53,7 @@ public class Address {
         return weight;
     }
 
-    public Address weight(int weight) {
+    public RpcAddress weight(int weight) {
         this.weight = weight;
         return this;
     }

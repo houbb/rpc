@@ -8,6 +8,7 @@ import com.github.houbb.rpc.server.core.RpcServer;
 import com.github.houbb.rpc.server.registry.ServiceRegistry;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      * rpc 服务端端口号
      * @since 0.0.6
      */
-    private int innerPort = 9527;
+    private int rpcPort;
 
     /**
      * 协议配置
@@ -43,7 +44,11 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      */
     private List<ServiceConfig> serviceConfigList;
 
-    private DefaultServiceRegistry(){}
+    private DefaultServiceRegistry(){
+        // 初始化默认参数
+        this.serviceConfigList = new ArrayList<>();
+        this.rpcPort = 9527;
+    }
 
     public static DefaultServiceRegistry getInstance() {
         return INSTANCE;
@@ -53,7 +58,7 @@ public class DefaultServiceRegistry implements ServiceRegistry {
     public ServiceRegistry port(int port) {
         ArgUtil.positive(port, "port");
 
-        this.innerPort = port;
+        this.rpcPort = port;
         return this;
     }
 
@@ -75,7 +80,7 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public DefaultServiceRegistry register(final String serviceId, final Object serviceImpl) {
+    public synchronized DefaultServiceRegistry register(final String serviceId, final Object serviceImpl) {
         ArgUtil.notEmpty(serviceId, "serviceId");
         ArgUtil.notNull(serviceImpl, "serviceImpl");
 
@@ -94,7 +99,7 @@ public class DefaultServiceRegistry implements ServiceRegistry {
                 .registerServices(serviceConfigList);
 
         // 暴露 netty server 信息
-        new RpcServer(innerPort).start();
+        new RpcServer(rpcPort).start();
         return this;
     }
 

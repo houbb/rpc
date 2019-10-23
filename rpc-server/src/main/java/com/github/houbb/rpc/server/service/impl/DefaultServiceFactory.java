@@ -2,11 +2,11 @@ package com.github.houbb.rpc.server.service.impl;
 
 import com.github.houbb.heaven.constant.PunctuationConst;
 import com.github.houbb.heaven.util.common.ArgUtil;
+import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.server.config.service.ServiceConfig;
 import com.github.houbb.rpc.server.service.ServiceFactory;
-import com.github.houbb.rpc.server.util.MethodUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -71,11 +71,11 @@ public class DefaultServiceFactory implements ServiceFactory {
             Method[] methods = reference.getClass().getMethods();
             for(Method method : methods) {
                 String methodName = method.getName();
-                if(MethodUtil.isIgnoreMethod(methodName)) {
+                if(ReflectMethodUtil.isIgnoreMethod(methodName)) {
                     continue;
                 }
 
-                List<String> paramTypeNames = MethodUtil.getParamTypeNames(method);
+                List<String> paramTypeNames = ReflectMethodUtil.getParamTypeNames(method);
                 String key = buildMethodKey(serviceId, methodName, paramTypeNames);
                 methodMap.put(key, method);
             }

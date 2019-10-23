@@ -5,14 +5,19 @@
 
 package com.github.houbb.rpc.client.core;
 
+import com.github.houbb.heaven.annotation.ThreadSafe;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.client.core.context.RpcClientContext;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 import com.github.houbb.rpc.common.constant.RpcConstant;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.serialization.ClassResolvers;
+import io.netty.handler.codec.serialization.ObjectDecoder;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -25,44 +30,52 @@ import io.netty.handler.logging.LoggingHandler;
  * @author houbinbin
  * @since 0.0.2
  */
+@ThreadSafe
 public class RpcClient {
 
     private static final Log log = LogFactory.getLog(RpcClient.class);
 
     /**
+     * 地址信息
+     * @since 0.0.6
+     */
+    private final String address;
+
+    /**
      * 监听端口号
+     * @since 0.0.6
      */
     private final int port;
 
     /**
-     * channel 信息
-     * @since 0.0.4
-     */
-    private ChannelFuture channelFuture;
-
-    /**
      * 客户端处理 handler
+     * 作用：用于获取请求信息
      * @since 0.0.4
      */
-    private RpcClientHandler channelHandler;
+    private final ChannelHandler channelHandler;
 
-    public RpcClient(int port) {
-        this.port = port;
-    }
-
-    public RpcClient() {
-        this(RpcConstant.PORT);
+    public RpcClient(final RpcClientContext clientContext) {
+        this.address = clientContext.address();
+        this.port = clientContext.port();
+        this.channelHandler = clientContext.channelHandler();
     }
 
     /**
-     * 开始运行
+     * 进行连接
+     * @since 0.0.6
      */
-    public void start() {
+    public ChannelFuture connect() {
         // 启动服务端
         log.info("RPC 服务开始启动客户端");
 
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
+        /**
+         * channel future 信息
+         * 作用：用于写入请求信息
+         * @since 0.0.6
+         */
+        ChannelFuture channelFuture;
         try {
             Bootstrap bootstrap = new Bootstrap();
             channelFuture = bootstrap.group(workerGroup)
@@ -71,42 +84,26 @@ public class RpcClient {
                     .handler(new ChannelInitializer<Channel>(){
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
-                            channelHandler = new RpcClientHandler();
                             ch.pipeline()
+                                    // 解码 bytes=>resp
+                                    .addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                                    // request=>bytes
+                                    .addLast(new ObjectEncoder())
+                                    // 日志输出
                                     .addLast(new LoggingHandler(LogLevel.INFO))
                                     .addLast(channelHandler);
                         }
                     })
-                    .connect(RpcConstant.ADDRESS, port)
+                    .connect(address, port)
                     .syncUninterruptibly();
-            log.info("RPC 服务启动客户端完成，监听端口：" + port);
+            log.info("RPC 服务启动客户端完成，监听地址 {}:{}", address, port);
         } catch (Exception e) {
             log.error("RPC 客户端遇到异常", e);
             throw new RuntimeException(e);
         }
         // 不要关闭线程池！！！
-    }
 
-//    /**
-//     * 调用计算
-//     * @param request 请求信息
-//     * @return 结果
-//     * @since 0.0.4
-//     */
-//    public CalculateResponse calculate(final CalculateRequest request) {
-//        // 发送请求
-//        final Channel channel = channelFuture.channel();
-//        log.info("RPC 客户端发送请求，request: {}", request);
-//
-//        // 关闭当前线程，以获取对应的信息
-//        // 使用序列化的方式
-//        final byte[] bytes = JsonBs.serializeBytes(request);
-//        ByteBuf byteBuf = Unpooled.copiedBuffer(bytes);
-//
-//        channel.writeAndFlush(byteBuf);
-//        channel.closeFuture().syncUninterruptibly();
-//
-//        return channelHandler.getResponse();
-//    }
+        return channelFuture;
+    }
 
 }
