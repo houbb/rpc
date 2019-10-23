@@ -8,12 +8,13 @@ import com.github.houbb.rpc.client.proxy.context.ProxyContext;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.support.id.impl.Uuid;
-import com.github.houbb.rpc.common.support.time.impl.DefaultSystemTime;
-import io.netty.channel.Channel;
+import com.github.houbb.rpc.common.support.time.impl.Times;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
+import io.netty.channel.Channel;
 
 /**
  * 参考：https://blog.csdn.net/u012240455/article/details/79210250
@@ -51,13 +52,12 @@ public class ReferenceProxy<T> implements InvocationHandler {
      * @return 结果
      * @throws Throwable 异常
      * @since 0.0.6
-     * @see Method#getGenericSignature() 通用标识，可以根据这个来优化代码。
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // 反射信息处理成为 rpcRequest
         final String seqId = Uuid.getInstance().id();
-        final long createTime = DefaultSystemTime.getInstance().time();
+        final long createTime = Times.time();
         DefaultRpcRequest rpcRequest = new DefaultRpcRequest();
         rpcRequest.serviceId(proxyContext.serviceId());
         rpcRequest.seqId(seqId);
