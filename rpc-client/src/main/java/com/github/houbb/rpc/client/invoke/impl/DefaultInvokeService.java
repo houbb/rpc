@@ -1,16 +1,15 @@
 package com.github.houbb.rpc.client.invoke.impl;
 
-import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.client.core.RpcClient;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponseFactory;
+import com.github.houbb.rpc.common.support.time.impl.Times;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 /**
  * 调用服务接口
@@ -22,12 +21,15 @@ public class DefaultInvokeService implements InvokeService {
     private static final Log LOG = LogFactory.getLog(DefaultInvokeService.class);
 
     /**
-     * 请求序列号集合
+     * 请求序列号 map
      * （1）这里后期如果要添加超时检测，可以添加对应的超时时间。
      * 可以把这里调整为 map
-     * @since 0.0.6
+     *
+     * key: seqId 唯一标识一个请求
+     * value: 存入该请求最长的有效时间。用于定时删除和超时判断。
+     * @since 0.0.7
      */
-    private final Set<String> requestSet;
+    private final ConcurrentHashMap<String, Long> requestMap;
 
     /**
      * 响应结果
@@ -36,26 +38,50 @@ public class DefaultInvokeService implements InvokeService {
     private final ConcurrentHashMap<String, RpcResponse> responseMap;
 
     public DefaultInvokeService() {
-        requestSet = Guavas.newHashSet();
+        requestMap = new ConcurrentHashMap<>();
         responseMap = new ConcurrentHashMap<>();
+
+        final Runnable timeoutThread = new TimeoutCheckThread(requestMap, responseMap);
+        Executors.newScheduledThreadPool(1)
+                .scheduleAtFixedRate(timeoutThread,60, 60, TimeUnit.SECONDS);
     }
 
     @Override
-    public InvokeService addRequest(String seqId) {
-        LOG.info("[Client] start add request for seqId: {}", seqId);
-        requestSet.add(seqId);
+    public InvokeService addRequest(String seqId, long timeoutMills) {
+        LOG.info("[Client] start add request for seqId: {}, timeoutMills: {}", seqId,
+                timeoutMills);
+
+        final long expireTime = Times.time()+timeoutMills;
+        requestMap.putIfAbsent(seqId, expireTime);
+
         return this;
     }
 
     @Override
     public InvokeService addResponse(String seqId, RpcResponse rpcResponse) {
+        // 1. 判断是否有效
+        Long expireTime = this.requestMap.get(seqId);
+        // 如果为空，可能是这个结果已经超时了，被定时 job 移除之后，响应结果才过来。直接忽略
+        if(ObjectUtil.isNull(expireTime)) {
+            return this;
+        }
+
+        //2. 判断是否超时
+        if(Times.time() > expireTime) {
+            LOG.info("[Client] seqId:{} 信息已超时，直接返回超时结果。", seqId);
+            rpcResponse = RpcResponseFactory.timeout();
+        }
+
         // 这里放入之前，可以添加判断。
         // 如果 seqId 必须处理请求集合中，才允许放入。或者直接忽略丢弃。
-        LOG.info("[Client] 获取结果信息，seq: {}, rpcResponse: {}", seqId, rpcResponse);
-        responseMap.putIfAbsent(seqId, rpcResponse);
-
         // 通知所有等待方
-        LOG.info("[Client] seq 信息已经放入，通知所有等待方", seqId);
+        responseMap.putIfAbsent(seqId, rpcResponse);
+        LOG.info("[Client] 获取结果信息，seqId: {}, rpcResponse: {}", seqId, rpcResponse);
+        LOG.info("[Client] seqId:{} 信息已经放入，通知所有等待方", seqId);
+
+        // 移除对应的 requestMap
+        requestMap.remove(seqId);
+        LOG.info("[Client] seqId:{} remove from request map", seqId);
 
         synchronized (this) {
             this.notifyAll();
@@ -90,4 +116,5 @@ public class DefaultInvokeService implements InvokeService {
             throw new RpcRuntimeException(e);
         }
     }
+
 }

@@ -41,4 +41,13 @@ public interface ProxyContext<T> {
      * @since 0.0.6
      */
     InvokeService invokeService();
+
+    /**
+     * 超时时间
+     * 单位：mills
+     * @return 超时时间
+     * @since 0.0.7
+     */
+    long timeout();
+
 }

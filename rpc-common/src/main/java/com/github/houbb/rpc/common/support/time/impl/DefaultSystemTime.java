@@ -9,7 +9,7 @@ import com.github.houbb.rpc.common.support.time.Time;
  * @since 0.0.6
  */
 @ThreadSafe
-public class DefaultSystemTime implements Time {
+class DefaultSystemTime implements Time {
 
     private static final DefaultSystemTime INSTANCE = new DefaultSystemTime();
 

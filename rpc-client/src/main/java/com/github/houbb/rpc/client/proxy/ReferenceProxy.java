@@ -68,7 +68,7 @@ public class ReferenceProxy<T> implements InvocationHandler {
 
         // 调用远程
         LOG.info("[Client] start call remote with request: {}", rpcRequest);
-        proxyContext.invokeService().addRequest(seqId);
+        proxyContext.invokeService().addRequest(seqId, proxyContext.timeout());
 
         // 这里使用 load-balance 进行选择 channel 写入。
         final Channel channel = getChannel();
@@ -79,12 +79,7 @@ public class ReferenceProxy<T> implements InvocationHandler {
         // 支持的必须是 ByteBuf
         channel.writeAndFlush(rpcRequest).sync();
 
-        // 循环获取结果
-        // 通过 Loop+match  wait/notifyAll 来获取
-        // 分布式根据 redis+queue+loop
-        LOG.info("[Client] start get resp for seqId: {}", seqId);
         RpcResponse rpcResponse = proxyContext.invokeService().getResponse(seqId);
-        LOG.info("[Client] start get resp for seqId: {}", seqId);
         Throwable error = rpcResponse.error();
         if(ObjectUtil.isNotNull(error)) {
             throw error;
