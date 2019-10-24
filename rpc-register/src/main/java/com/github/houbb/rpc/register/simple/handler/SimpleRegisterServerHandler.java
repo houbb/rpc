@@ -5,6 +5,19 @@
 
 package com.github.houbb.rpc.register.simple.handler;
 
+import com.github.houbb.log.integration.core.Log;
+import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.register.api.RpcRegister;
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.message.RegisterMessage;
+import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
+import com.github.houbb.rpc.register.simple.SimpleRpcRegister;
+import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
+import com.github.houbb.rpc.register.simple.client.impl.DefaultClientRegisterService;
+import com.github.houbb.rpc.register.simple.constant.RegisterMessageTypeConst;
+import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
+import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -13,12 +26,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
  *
  * <pre> Created: 2019/10/23 10:29 下午  </pre>
  * <pre> Project: rpc  </pre>
- *
+ * <p>
  * 请求的标准化：
  * （1）对于 server 的服务注册，client 的配置拉取。
  * 二者都是将 register 作为服务端。所以需要统一请求信息。
- *（2）对于 server 的注册，不需要提供对应的反馈信息
- *（3）当配置发生变化时，需要及时通知所有的 client 端。
+ * （2）对于 server 的注册，不需要提供对应的反馈信息
+ * （3）当配置发生变化时，需要及时通知所有的 client 端。
  * 这里就需要知道哪些是客户端？？
  *
  * @author houbinbin
@@ -26,11 +39,75 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 public class SimpleRegisterServerHandler extends SimpleChannelInboundHandler {
 
+    private static final Log LOG = LogFactory.getLog(SimpleRegisterServerHandler.class);
+
+    /**
+     * 注册中心服务
+     * @since 0.0.8
+     */
+    private final RpcRegister rpcRegister;
+
+    public SimpleRegisterServerHandler() {
+        this.rpcRegister = this.buildSimpleRpcRegister();
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        final String id = ctx.channel().id().asLongText();
+        LOG.info("[Register Server] channel {} connected " + id);
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        // 这里和 rpc 调用一样。
-        // 可以对当前信息进行抽象化。
-        // 甚至不需要，直接调用即可。
+        RegisterMessage registerMessage = (RegisterMessage) msg;
+        Object body = registerMessage.body();
+        int type = RegisterMessages.type(registerMessage);
+        String seqId = RegisterMessages.seqId(registerMessage);
+        LOG.info("[Register Server] received message type: {}, seqId: {} ", type,
+                seqId);
+
+        final Channel channel = ctx.channel();
+        ServerEntry serverEntry = (ServerEntry)body;
+
+        switch (type) {
+            case RegisterMessageTypeConst.SERVER_REGISTER:
+                rpcRegister.register(serverEntry);
+                break;
+
+            case RegisterMessageTypeConst.SERVER_UN_REGISTER:
+                rpcRegister.unRegister(serverEntry);
+                break;
+
+            case RegisterMessageTypeConst.CLIENT_SUBSCRIBE:
+                rpcRegister.subscribe(serverEntry, channel);
+                break;
+
+            case RegisterMessageTypeConst.CLIENT_UN_SUBSCRIBE:
+                rpcRegister.unSubscribe(serverEntry, channel);
+                break;
+
+            case RegisterMessageTypeConst.CLIENT_LOOK_UP:
+                rpcRegister.lookUp(serverEntry, channel);
+                break;
+
+            default:
+                LOG.warn("[Register Center] not support type: {} and seqId: {}",
+                        type, seqId);
+        }
+
     }
+
+    /**
+     * 构建简单注册实现类
+     * @return 注册实现
+     * @since 0.0.8
+     */
+    private RpcRegister buildSimpleRpcRegister() {
+        final ServerRegisterService serverRegisterService = new DefaultServerRegisterService();
+        final ClientRegisterService clientRegisterService = new DefaultClientRegisterService();
+        return new SimpleRpcRegister(serverRegisterService, clientRegisterService);
+    }
+
+
 
 }

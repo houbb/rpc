@@ -3,7 +3,7 @@
  * rpc All rights reserved.
  */
 
-package com.github.houbb.rpc.register.domain;
+package com.github.houbb.rpc.register.domain.entry;
 
 import java.io.Serializable;
 
@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author houbinbin
  * @since 0.0.8
  */
-public interface ClientEntry extends Serializable {
+public interface ServerEntry extends Serializable {
 
     /**
      * 服务标识
@@ -25,6 +25,13 @@ public interface ClientEntry extends Serializable {
      * @since 0.0.8
      */
     String serviceId();
+
+    /**
+     * 服务描述
+     * @return 服务描述
+     * @since 0.0.8
+     */
+    String description();
 
     /**
      * 机器 ip 信息
@@ -38,4 +45,19 @@ public interface ClientEntry extends Serializable {
      * @since 0.0.8
      */
     String ip();
+
+    /**
+     * 端口信息
+     * @return 端口信息
+     * @since 0.0.8
+     */
+    int port();
+
+    /**
+     * 权重信息
+     * @return 权重信息
+     * @since 0.0.8
+     */
+    int weight();
+
 }

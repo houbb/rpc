@@ -11,8 +11,12 @@ import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.register.domain.ClientEntry;
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.message.RegisterMessage;
+import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
+import com.github.houbb.rpc.register.simple.constant.RegisterMessageTypeConst;
+import io.netty.channel.Channel;
 
 import java.util.List;
 import java.util.Map;
@@ -47,60 +51,83 @@ public class DefaultClientRegisterService implements ClientRegisterService {
      *
      * @since 0.0.8
      */
-    private final Map<String, Set<String>> SERVICE_CLIENT_MAP;
+    private final Map<String, Set<Channel>> serviceClientChannelMap;
 
     public DefaultClientRegisterService() {
-        this.SERVICE_CLIENT_MAP = new ConcurrentHashMap<>();
+        this.serviceClientChannelMap = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void subscribe(ClientEntry clientEntry) {
+    public void subscribe(ServerEntry clientEntry, Channel clientChannel) {
         paramCheck(clientEntry);
 
         final String serviceId = clientEntry.serviceId();
-        Set<String> hostSet = SERVICE_CLIENT_MAP.get(serviceId);
-        if (ObjectUtil.isNull(hostSet)) {
-            hostSet = Guavas.newHashSet();
+        Set<Channel> channelSet = serviceClientChannelMap.get(serviceId);
+        if (ObjectUtil.isNull(channelSet)) {
+            channelSet = Guavas.newHashSet();
         }
-        hostSet.add(clientEntry.ip());
-        SERVICE_CLIENT_MAP.put(serviceId, hostSet);
+        channelSet.add(clientChannel);
+        serviceClientChannelMap.put(serviceId, channelSet);
     }
 
     @Override
-    public void unSubscribe(ClientEntry clientEntry) {
+    public void unSubscribe(ServerEntry clientEntry, Channel clientChannel) {
         paramCheck(clientEntry);
 
         final String serviceId = clientEntry.serviceId();
-        Set<String> hostSet = SERVICE_CLIENT_MAP.get(serviceId);
+        Set<Channel> channelSet = serviceClientChannelMap.get(serviceId);
 
-        if (CollectionUtil.isEmpty(hostSet)) {
+        if (CollectionUtil.isEmpty(channelSet)) {
             // 服务列表为空
             LOG.info("[Register Client] remove host set is empty. entry: {}", clientEntry);
             return;
         }
 
-        hostSet.remove(clientEntry.ip());
-        SERVICE_CLIENT_MAP.put(serviceId, hostSet);
+        channelSet.remove(clientChannel);
+        serviceClientChannelMap.put(serviceId, channelSet);
     }
 
     @Override
-    public List<String> clientList(String serviceId) {
+    public void notify(String serviceId, List<ServerEntry> serverEntryList) {
         ArgUtil.notEmpty(serviceId, "serviceId");
 
-        Set<String> clientSet = SERVICE_CLIENT_MAP.get(serviceId);
-        return Guavas.newArrayList(clientSet);
+        List<Channel> clientChannelList = clientChannelList(serviceId);
+        if (CollectionUtil.isEmpty(clientChannelList)) {
+            LOG.info("[Register] notify clients is empty for service: {}",
+                    serviceId);
+            return;
+        }
+
+        // 循环通知
+        for(Channel channel : clientChannelList) {
+            RegisterMessage registerMessage = RegisterMessages.of(RegisterMessageTypeConst.REGISTER_NOTIFY, serverEntryList);
+            channel.writeAndFlush(registerMessage);
+        }
     }
 
     /**
      * 参数校验
      *
-     * @param clientEntry 入参信息
+     * @param serverEntry 入参信息
      * @since 0.0.8
      */
-    private void paramCheck(final ClientEntry clientEntry) {
-        ArgUtil.notNull(clientEntry, "clientEntry");
-        ArgUtil.notEmpty(clientEntry.serviceId(), "clientEntry.serviceId");
-        ArgUtil.notEmpty(clientEntry.ip(), "clientEntry.ip");
+    private void paramCheck(final ServerEntry serverEntry) {
+        ArgUtil.notNull(serverEntry, "serverEntry");
+        ArgUtil.notEmpty(serverEntry.serviceId(), "serverEntry.serviceId");
+        ArgUtil.notEmpty(serverEntry.ip(), "serverEntry.ip");
+    }
+
+    /**
+     * 获取所有的客户端列表
+     * @param serviceId 服务标识
+     * @return 客户端列表标识
+     * @since 0.0.8
+     */
+    private List<Channel> clientChannelList(String serviceId) {
+        ArgUtil.notEmpty(serviceId, "serviceId");
+
+        Set<Channel> clientSet = serviceClientChannelMap.get(serviceId);
+        return Guavas.newArrayList(clientSet);
     }
 
 }

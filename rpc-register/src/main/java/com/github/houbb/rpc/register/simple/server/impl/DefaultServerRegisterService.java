@@ -11,7 +11,7 @@ import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.register.domain.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
 import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
 
 import java.util.List;

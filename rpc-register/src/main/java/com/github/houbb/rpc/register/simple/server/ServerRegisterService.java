@@ -5,7 +5,8 @@
 
 package com.github.houbb.rpc.register.simple.server;
 
-import com.github.houbb.rpc.register.domain.ServerEntry;
+
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
 
 import java.util.List;
 

@@ -14,7 +14,9 @@ package com.github.houbb.rpc.register.simple.constant;
  * @author houbinbin
  * @since 0.0.8
  */
-public class SimpleRegisterConst {
+public final class SimpleRegisterConst {
+
+    private SimpleRegisterConst(){}
 
     /**
      * 默认端口号

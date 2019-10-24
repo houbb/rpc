@@ -5,10 +5,9 @@
 
 package com.github.houbb.rpc.register.api;
 
-import com.github.houbb.rpc.register.domain.ClientEntry;
-import com.github.houbb.rpc.register.domain.ServerEntry;
 
-import java.util.List;
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import io.netty.channel.Channel;
 
 /**
  * <p> 注册中心接口 </p>
@@ -23,8 +22,6 @@ public interface RpcRegister {
 
     /**
      * 注册当前服务信息
-     * （1）将该服务通过 {@link ServerEntry#serviceId()} 进行分组
-     * （2）每次发生变化，通知 {@link #subscribe(ClientEntry)} 中客户端
      * 订阅了这个 serviceId 的所有客户端
      * @param serverEntry 注册当前服务信息
      * @since 0.0.8
@@ -43,19 +40,29 @@ public interface RpcRegister {
      * （1）监听之后，如果有任何相关的机器信息发生变化，则进行推送。
      * （2）内置的信息，需要传送 ip 信息到注册中心。
      *
-     * @param clientEntry 客户端明细信息
+     * @param serverEntry 客户端明细信息
+     * @param channel 频道信息
      * @since 0.0.8
      */
-    void subscribe(final ClientEntry clientEntry);
+    void subscribe(final ServerEntry serverEntry, final Channel channel);
 
     /**
      * 取消监听服务信息
      *
      * （1）将改服务从客户端的监听列表中移除即可。
      *
-     * @param clientEntry 客户端明细信息
+     * @param server 客户端明细信息
+     * @param channel 频道信息
      * @since 0.0.8
      */
-    void unSubscribe(final ClientEntry clientEntry);
+    void unSubscribe(final ServerEntry server, final Channel channel);
+
+    /**
+     * 启动时查询 serviceId 对应的所有服务端信息
+     * @param clientEntry 客户端查询明细
+     * @param channel 频道信息
+     * @since 0.0.8
+     */
+    void lookUp(ServerEntry clientEntry, final Channel channel);
 
 }

@@ -18,6 +18,12 @@
     <description>The rpc register center.</description>
 
     <dependencies>
+        <!--============================== SELF ==============================-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>rpc-common</artifactId>
+        </dependency>
+
         <!--============================== INTER ==============================-->
         <dependency>
             <groupId>com.github.houbb</groupId>

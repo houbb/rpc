@@ -5,8 +5,9 @@
 
 package com.github.houbb.rpc.register.simple.client;
 
-import com.github.houbb.rpc.register.domain.ClientEntry;
-import com.github.houbb.rpc.register.domain.ServerEntry;
+
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import io.netty.channel.Channel;
 
 import java.util.List;
 
@@ -26,27 +27,36 @@ public interface ClientRegisterService {
      * （1）监听之后，如果有任何相关的机器信息发生变化，则进行推送。
      * （2）内置的信息，需要传送 ip 信息到注册中心。
      *
-     * @param clientEntry 客户端明细信息
+     * @param serverEntry 客户端明细信息
+     * @param clientChannel 客户端 channel 信息
      * @since 0.0.8
      */
-    void subscribe(final ClientEntry clientEntry);
+    void subscribe(final ServerEntry serverEntry,
+                   final Channel clientChannel);
 
     /**
      * 取消监听服务信息
      *
      * （1）将改服务从客户端的监听列表中移除即可。
      *
-     * @param clientEntry 客户端明细信息
+     * @param serverEntry 客户端明细信息
+     * @param clientChannel 客户端 channel 信息
      * @since 0.0.8
      */
-    void unSubscribe(final ClientEntry clientEntry);
+    void unSubscribe(final ServerEntry serverEntry,
+                     final Channel clientChannel);
 
     /**
-     * 客户端列表信息
-     * @param serviceId 服务标识
-     * @return 客户端列表信息
+     * 通知客户端变更
+     *
+     * 核心流程：
+     * （1）根据 serviceId 直接获取对应的所有 client 列表信息
+     * （2）根据 serviceId 获取所有的对应列表
+     * （3）循环通知。
+     * @param serviceId 服务信息（不可为空）
+     * @param serverEntryList 服务明细列表 可以为空，因为可能对应的服务列表全部不可用。
      * @since 0.0.8
      */
-    List<String> clientList(final String serviceId);
+    void notify(final String serviceId, final List<ServerEntry> serverEntryList);
 
 }

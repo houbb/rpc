@@ -52,9 +52,13 @@ public class RpcRegisterServer {
         this.port = port;
     }
 
+    /**
+     * 启动服务端
+     * @since 0.0.8
+     */
     public void start() {
         // 启动服务端
-        log.info("RPC Register 服务开始启动服务端");
+        log.info("[Register Server] 服务开始启动服务端");
 
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -83,12 +87,12 @@ public class RpcRegisterServer {
 
             // 绑定端口，开始接收进来的链接
             ChannelFuture channelFuture = serverBootstrap.bind(port).syncUninterruptibly();
-            log.info("RPC Register 服务端启动完成，监听【" + port + "】端口");
+            log.info("[Register Server] 服务端启动完成，监听【" + port + "】端口");
 
             channelFuture.channel().closeFuture().syncUninterruptibly();
-            log.info("RPC Register 服务端关闭完成");
+            log.info("[Register Server] 服务端关闭完成");
         } catch (Exception e) {
-            log.error("RPC Register 服务异常", e);
+            log.error("[Register Server] 服务异常", e);
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

@@ -3,7 +3,9 @@
  * rpc All rights reserved.
  */
 
-package com.github.houbb.rpc.register.domain;
+package com.github.houbb.rpc.register.domain.entry.impl;
+
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
 
 /**
  * <p> 默认服务明细 </p>
@@ -118,14 +120,21 @@ public class DefaultServerEntry implements ServerEntry {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         DefaultServerEntry that = (DefaultServerEntry) o;
 
-        if (port != that.port) return false;
-        if (serviceId != null ? !serviceId.equals(that.serviceId) : that.serviceId != null)
+        if (port != that.port) {
             return false;
+        }
+        if (serviceId != null ? !serviceId.equals(that.serviceId) : that.serviceId != null) {
+            return false;
+        }
         return ip != null ? ip.equals(that.ip) : that.ip == null;
     }
 

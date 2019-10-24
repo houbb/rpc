@@ -5,15 +5,17 @@
 
 package com.github.houbb.rpc.register.simple;
 
-import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.api.RpcRegister;
-import com.github.houbb.rpc.register.domain.ClientEntry;
-import com.github.houbb.rpc.register.domain.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.message.RegisterMessage;
+import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
+import com.github.houbb.rpc.register.simple.constant.RegisterMessageTypeConst;
 import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
 import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
+import io.netty.channel.Channel;
 
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class SimpleRpcRegister implements RpcRegister {
         List<ServerEntry> serverEntryList = serverRegisterService.register(serverEntry);
 
         // 通知监听者
-        notifyListener(serverEntry.serviceId(), serverEntryList);
+        clientRegisterService.notify(serverEntry.serviceId(), serverEntryList);
     }
 
     @Override
@@ -64,42 +66,28 @@ public class SimpleRpcRegister implements RpcRegister {
         List<ServerEntry> serverEntryList = serverRegisterService.unRegister(serverEntry);
 
         // 通知监听者
-        notifyListener(serverEntry.serviceId(), serverEntryList);
+        clientRegisterService.notify(serverEntry.serviceId(), serverEntryList);
     }
 
     @Override
-    public void subscribe(ClientEntry clientEntry) {
-        clientRegisterService.subscribe(clientEntry);
+    public void subscribe(ServerEntry clientEntry, final Channel channel) {
+        clientRegisterService.subscribe(clientEntry, channel);
     }
 
     @Override
-    public void unSubscribe(ClientEntry clientEntry) {
-        clientRegisterService.unSubscribe(clientEntry);
+    public void unSubscribe(ServerEntry clientEntry, Channel channel) {
+        clientRegisterService.unSubscribe(clientEntry, channel);
     }
 
-    /**
-     * 通知监听者
-     *
-     * @param serviceId       服务标识
-     * @param serverEntryList 服务端明细信息
-     * @since 0.0.8
-     */
-    private void notifyListener(final String serviceId, final List<ServerEntry> serverEntryList) {
-        // 列表信息变化，一定要通知。
-        // 可以后期添加优化，标识出是否发生变化。
+    @Override
+    public void lookUp(ServerEntry clientEntry, Channel channel) {
+        final String serviceId = clientEntry.serviceId();
+        List<ServerEntry> serverEntryList = serverRegisterService.lookUp(serviceId);
 
-        // 通知客户端变化
-        List<String> clientHosts = clientRegisterService.clientList(serviceId);
-        if (CollectionUtil.isEmpty(clientHosts)) {
-            LOG.info("[Register] notify clients is empty for service: {}",
-                    serviceId);
-            return;
-        }
-
-        // 循环获取对应的 ctx.writeAndFlush()
-        // 这里还缺少两样东西：
-        // (1) 服务端与注册中心的网络通信
-        // (2) 客户端与注册中心的网络通信
+        // 回写
+        RegisterMessage registerMessage = RegisterMessages.of(RegisterMessageTypeConst.REGISTER_LOOK_UP_RESP, serverEntryList);
+        channel.writeAndFlush(registerMessage);
     }
+
 
 }
