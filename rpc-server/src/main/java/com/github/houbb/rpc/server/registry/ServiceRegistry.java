@@ -30,10 +30,28 @@ public interface ServiceRegistry {
 
     /**
      * 暴露所有服务信息
-     * （1）启动服务端
+     * （1）本地初始化服务信息
+     * （2）启动服务端
+     * （3）注册服务到注册中心
      * @return this
      * @since 0.0.6
      */
     ServiceRegistry expose();
+
+    /**
+     * 注册中心地址信息
+     * @param addresses 地址信息
+     * @return this
+     * @since 0.0.8
+     */
+    ServiceRegistry registerAddresses(final String addresses);
+
+    /**
+     * 是否注册服务到注册中心
+     * @param register 是否注册
+     * @return this
+     * @since 0.0.8
+     */
+    ServiceRegistry register(final boolean register);
 
 }

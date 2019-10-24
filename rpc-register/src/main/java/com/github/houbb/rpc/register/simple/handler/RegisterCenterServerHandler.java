@@ -8,7 +8,7 @@ package com.github.houbb.rpc.register.simple.handler;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.api.RpcRegister;
-import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.SimpleRpcRegister;
@@ -67,27 +67,27 @@ public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
                 seqId);
 
         final Channel channel = ctx.channel();
-        ServerEntry serverEntry = (ServerEntry)body;
+        ServiceEntry serviceEntry = (ServiceEntry)body;
 
         switch (type) {
             case MessageTypeConst.SERVER_REGISTER:
-                rpcRegister.register(serverEntry);
+                rpcRegister.register(serviceEntry);
                 break;
 
             case MessageTypeConst.SERVER_UN_REGISTER:
-                rpcRegister.unRegister(serverEntry);
+                rpcRegister.unRegister(serviceEntry);
                 break;
 
             case MessageTypeConst.CLIENT_SUBSCRIBE:
-                rpcRegister.subscribe(serverEntry, channel);
+                rpcRegister.subscribe(serviceEntry, channel);
                 break;
 
             case MessageTypeConst.CLIENT_UN_SUBSCRIBE:
-                rpcRegister.unSubscribe(serverEntry, channel);
+                rpcRegister.unSubscribe(serviceEntry, channel);
                 break;
 
             case MessageTypeConst.CLIENT_LOOK_UP:
-                rpcRegister.lookUp(serverEntry, channel);
+                rpcRegister.lookUp(serviceEntry, channel);
                 break;
 
             default:

@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author houbinbin
  * @since 0.0.8
  */
-public interface ServerEntry extends Serializable {
+public interface ServiceEntry extends Serializable {
 
     /**
      * 服务标识

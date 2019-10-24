@@ -8,7 +8,7 @@ package com.github.houbb.rpc.register.simple;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.api.RpcRegister;
-import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
@@ -54,38 +54,38 @@ public class SimpleRpcRegister implements RpcRegister {
     }
 
     @Override
-    public void register(ServerEntry serverEntry) {
-        List<ServerEntry> serverEntryList = serverRegisterService.register(serverEntry);
+    public void register(ServiceEntry serviceEntry) {
+        List<ServiceEntry> serviceEntryList = serverRegisterService.register(serviceEntry);
 
         // 通知监听者
-        clientRegisterService.notify(serverEntry.serviceId(), serverEntryList);
+        clientRegisterService.notify(serviceEntry.serviceId(), serviceEntryList);
     }
 
     @Override
-    public void unRegister(ServerEntry serverEntry) {
-        List<ServerEntry> serverEntryList = serverRegisterService.unRegister(serverEntry);
+    public void unRegister(ServiceEntry serviceEntry) {
+        List<ServiceEntry> serviceEntryList = serverRegisterService.unRegister(serviceEntry);
 
         // 通知监听者
-        clientRegisterService.notify(serverEntry.serviceId(), serverEntryList);
+        clientRegisterService.notify(serviceEntry.serviceId(), serviceEntryList);
     }
 
     @Override
-    public void subscribe(ServerEntry clientEntry, final Channel channel) {
+    public void subscribe(ServiceEntry clientEntry, final Channel channel) {
         clientRegisterService.subscribe(clientEntry, channel);
     }
 
     @Override
-    public void unSubscribe(ServerEntry clientEntry, Channel channel) {
+    public void unSubscribe(ServiceEntry clientEntry, Channel channel) {
         clientRegisterService.unSubscribe(clientEntry, channel);
     }
 
     @Override
-    public void lookUp(ServerEntry clientEntry, Channel channel) {
+    public void lookUp(ServiceEntry clientEntry, Channel channel) {
         final String serviceId = clientEntry.serviceId();
-        List<ServerEntry> serverEntryList = serverRegisterService.lookUp(serviceId);
+        List<ServiceEntry> serviceEntryList = serverRegisterService.lookUp(serviceId);
 
         // 回写
-        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_LOOK_UP_RESP, serverEntryList);
+        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_LOOK_UP_RESP, serviceEntryList);
         channel.writeAndFlush(registerMessage);
     }
 

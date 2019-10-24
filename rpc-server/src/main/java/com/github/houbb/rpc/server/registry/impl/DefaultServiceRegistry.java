@@ -1,14 +1,23 @@
 package com.github.houbb.rpc.server.registry.impl;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
+import com.github.houbb.heaven.util.guava.Guavas;
+import com.github.houbb.heaven.util.util.CollectionUtil;
+import com.github.houbb.rpc.common.config.component.RpcAddress;
+import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.config.protocol.ProtocolConfig;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
+import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyServer;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.server.config.service.DefaultServiceConfig;
 import com.github.houbb.rpc.server.config.service.ServiceConfig;
 import com.github.houbb.rpc.server.handler.RpcServerHandler;
+import com.github.houbb.rpc.server.handler.RpcServerRegisterHandler;
 import com.github.houbb.rpc.server.registry.ServiceRegistry;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
+
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 
 import java.util.ArrayList;
@@ -47,10 +56,24 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      */
     private List<ServiceConfig> serviceConfigList;
 
+    /**
+     * 注册中心地址列表
+     * @since 0.0.8
+     */
+    private List<RpcAddress> registerAddressList;
+
+    /**
+     * 是否注册到注册中心
+     * @since 0.0.8
+     */
+    private boolean register;
+
     private DefaultServiceRegistry(){
         // 初始化默认参数
         this.serviceConfigList = new ArrayList<>();
         this.rpcPort = 9527;
+        this.registerAddressList = Guavas.newArrayList();
+        this.register = true;
     }
 
     public static DefaultServiceRegistry getInstance() {
@@ -101,10 +124,38 @@ public class DefaultServiceRegistry implements ServiceRegistry {
         DefaultServiceFactory.getInstance()
                 .registerServices(serviceConfigList);
 
-        // 暴露 netty server 信息
+        // 启动 netty server 信息
         final ChannelHandler channelHandler = ChannelHandlers
                 .objectCodecHandler(new RpcServerHandler());
         new DefaultNettyServer().start(rpcPort, channelHandler);
+
+        // 注册到配置中心
+        // 初期简单点，直接循环调用即可。
+        if(register && CollectionUtil.isNotEmpty(this.registerAddressList)) {
+            for(RpcAddress rpcAddress : registerAddressList) {
+                ChannelHandler registerHandler = ChannelHandlers.objectCodecHandler(new RpcServerRegisterHandler());
+                ChannelFuture channelFuture = DefaultNettyClient.newInstance()
+                        .connect(rpcAddress.address(), rpcAddress.port(),
+                                registerHandler);
+
+                // 直接写入信息
+                ServiceEntry serviceEntry = Service;
+                channelFuture.channel().writeAndFlush();
+            }
+        }
+
+        return this;
+    }
+
+    @Override
+    public ServiceRegistry registerAddresses(String addresses) {
+        this.registerAddressList = RpcAddressBuilder.of(addresses);
+        return this;
+    }
+
+    @Override
+    public ServiceRegistry register(boolean register) {
+        this.register = register;
         return this;
     }
 

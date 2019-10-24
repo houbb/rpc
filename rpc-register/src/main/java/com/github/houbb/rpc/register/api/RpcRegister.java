@@ -6,7 +6,7 @@
 package com.github.houbb.rpc.register.api;
 
 
-import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import io.netty.channel.Channel;
 
 /**
@@ -23,28 +23,28 @@ public interface RpcRegister {
     /**
      * 注册当前服务信息
      * 订阅了这个 serviceId 的所有客户端
-     * @param serverEntry 注册当前服务信息
+     * @param serviceEntry 注册当前服务信息
      * @since 0.0.8
      */
-    void register(final ServerEntry serverEntry);
+    void register(final ServiceEntry serviceEntry);
 
     /**
      * 注销当前服务信息
-     * @param serverEntry 注册当前服务信息
+     * @param serviceEntry 注册当前服务信息
      * @since 0.0.8
      */
-    void unRegister(final ServerEntry serverEntry);
+    void unRegister(final ServiceEntry serviceEntry);
 
     /**
      * 监听服务信息
      * （1）监听之后，如果有任何相关的机器信息发生变化，则进行推送。
      * （2）内置的信息，需要传送 ip 信息到注册中心。
      *
-     * @param serverEntry 客户端明细信息
+     * @param serviceEntry 客户端明细信息
      * @param channel 频道信息
      * @since 0.0.8
      */
-    void subscribe(final ServerEntry serverEntry, final Channel channel);
+    void subscribe(final ServiceEntry serviceEntry, final Channel channel);
 
     /**
      * 取消监听服务信息
@@ -55,7 +55,7 @@ public interface RpcRegister {
      * @param channel 频道信息
      * @since 0.0.8
      */
-    void unSubscribe(final ServerEntry server, final Channel channel);
+    void unSubscribe(final ServiceEntry server, final Channel channel);
 
     /**
      * 启动时查询 serviceId 对应的所有服务端信息
@@ -63,6 +63,6 @@ public interface RpcRegister {
      * @param channel 频道信息
      * @since 0.0.8
      */
-    void lookUp(ServerEntry clientEntry, final Channel channel);
+    void lookUp(ServiceEntry clientEntry, final Channel channel);
 
 }

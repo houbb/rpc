@@ -4,8 +4,14 @@ import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.NettyClient;
+
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
@@ -15,6 +21,15 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  * @since 0.0.8
  */
 public class DefaultNettyClient implements NettyClient {
+
+    /**
+     * 创建新的对象实例
+     * @return 对象实例
+     * @since 0.0.8
+     */
+    public static DefaultNettyClient newInstance() {
+        return new DefaultNettyClient();
+    }
 
     /**
      * 日志信息

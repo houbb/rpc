@@ -5,7 +5,7 @@
 
 package com.github.houbb.rpc.register.domain.entry.impl;
 
-import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 
 /**
  * <p> 默认服务明细 </p>
@@ -16,7 +16,7 @@ import com.github.houbb.rpc.register.domain.entry.ServerEntry;
  * @author houbinbin
  * @since 0.0.8
  */
-public class DefaultServerEntry implements ServerEntry {
+class DefaultServiceEntry implements ServiceEntry {
 
     private static final long serialVersionUID = 189302740666003309L;
 
@@ -62,7 +62,7 @@ public class DefaultServerEntry implements ServerEntry {
         return serviceId;
     }
 
-    public DefaultServerEntry serviceId(String serviceId) {
+    public DefaultServiceEntry serviceId(String serviceId) {
         this.serviceId = serviceId;
         return this;
     }
@@ -72,7 +72,7 @@ public class DefaultServerEntry implements ServerEntry {
         return description;
     }
 
-    public DefaultServerEntry description(String description) {
+    public DefaultServiceEntry description(String description) {
         this.description = description;
         return this;
     }
@@ -82,7 +82,7 @@ public class DefaultServerEntry implements ServerEntry {
         return ip;
     }
 
-    public DefaultServerEntry ip(String ip) {
+    public DefaultServiceEntry ip(String ip) {
         this.ip = ip;
         return this;
     }
@@ -92,7 +92,7 @@ public class DefaultServerEntry implements ServerEntry {
         return port;
     }
 
-    public DefaultServerEntry port(int port) {
+    public DefaultServiceEntry port(int port) {
         this.port = port;
         return this;
     }
@@ -102,7 +102,7 @@ public class DefaultServerEntry implements ServerEntry {
         return weight;
     }
 
-    public DefaultServerEntry weight(int weight) {
+    public DefaultServiceEntry weight(int weight) {
         this.weight = weight;
         return this;
     }
@@ -127,7 +127,7 @@ public class DefaultServerEntry implements ServerEntry {
             return false;
         }
 
-        DefaultServerEntry that = (DefaultServerEntry) o;
+        DefaultServiceEntry that = (DefaultServiceEntry) o;
 
         if (port != that.port) {
             return false;

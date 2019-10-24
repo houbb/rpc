@@ -11,7 +11,7 @@ import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
 
 import java.util.List;
@@ -36,68 +36,68 @@ public class DefaultServerRegisterService implements ServerRegisterService {
      * 存放对应的 map 信息
      * @since 0.0.8
      */
-    private final Map<String, Set<ServerEntry>> map;
+    private final Map<String, Set<ServiceEntry>> map;
 
     public DefaultServerRegisterService(){
         map = new ConcurrentHashMap<>();
     }
 
     @Override
-    public List<ServerEntry> register(ServerEntry serverEntry) {
-        paramCheck(serverEntry);
+    public List<ServiceEntry> register(ServiceEntry serviceEntry) {
+        paramCheck(serviceEntry);
 
-        final String serviceId = serverEntry.serviceId();
-        Set<ServerEntry> serverEntrySet = map.get(serviceId);
-        if(ObjectUtil.isNull(serverEntrySet)) {
-            serverEntrySet = Guavas.newHashSet();
+        final String serviceId = serviceEntry.serviceId();
+        Set<ServiceEntry> serviceEntrySet = map.get(serviceId);
+        if(ObjectUtil.isNull(serviceEntrySet)) {
+            serviceEntrySet = Guavas.newHashSet();
         }
 
-        LOG.info("[Register Server] add service: {}", serverEntry);
-        serverEntrySet.add(serverEntry);
-        map.put(serviceId, serverEntrySet);
+        LOG.info("[Register Server] add service: {}", serviceEntry);
+        serviceEntrySet.add(serviceEntry);
+        map.put(serviceId, serviceEntrySet);
 
         // 返回更新后的结果
-        return Guavas.newArrayList(serverEntrySet);
+        return Guavas.newArrayList(serviceEntrySet);
     }
 
     @Override
-    public List<ServerEntry> unRegister(ServerEntry serverEntry) {
-        paramCheck(serverEntry);
+    public List<ServiceEntry> unRegister(ServiceEntry serviceEntry) {
+        paramCheck(serviceEntry);
 
-        final String serviceId = serverEntry.serviceId();
-        Set<ServerEntry> serverEntrySet = map.get(serviceId);
+        final String serviceId = serviceEntry.serviceId();
+        Set<ServiceEntry> serviceEntrySet = map.get(serviceId);
 
-        if(CollectionUtil.isEmpty(serverEntrySet)) {
+        if(CollectionUtil.isEmpty(serviceEntrySet)) {
             // 服务列表为空
-            LOG.info("[Register Server] remove service set is empty. entry: {}", serverEntry);
+            LOG.info("[Register Server] remove service set is empty. entry: {}", serviceEntry);
             return Guavas.newArrayList();
         }
 
-        serverEntrySet.remove(serverEntry);
-        LOG.info("[Register Server] remove service: {}", serverEntry);
-        map.put(serviceId, serverEntrySet);
+        serviceEntrySet.remove(serviceEntry);
+        LOG.info("[Register Server] remove service: {}", serviceEntry);
+        map.put(serviceId, serviceEntrySet);
 
         // 返回更新后的结果
-        return Guavas.newArrayList(serverEntrySet);
+        return Guavas.newArrayList(serviceEntrySet);
     }
 
     @Override
-    public List<ServerEntry> lookUp(String serviceId) {
+    public List<ServiceEntry> lookUp(String serviceId) {
         ArgUtil.notEmpty(serviceId, "serviceId");
 
         LOG.info("[Register Server] start lookUp serviceId: {}", serviceId);
-        Set<ServerEntry> serverEntrySet = map.get(serviceId);
-        return Guavas.newArrayList(serverEntrySet);
+        Set<ServiceEntry> serviceEntrySet = map.get(serviceId);
+        return Guavas.newArrayList(serviceEntrySet);
     }
 
     /**
      * 参数校验
-     * @param serverEntry 服务明细
+     * @param serviceEntry 服务明细
      * @since 0.0.8
      */
-    private void paramCheck(final ServerEntry serverEntry) {
-        ArgUtil.notNull(serverEntry, "serviceEntry");
-        final String serviceId = serverEntry.serviceId();
+    private void paramCheck(final ServiceEntry serviceEntry) {
+        ArgUtil.notNull(serviceEntry, "serviceEntry");
+        final String serviceId = serviceEntry.serviceId();
         ArgUtil.notEmpty(serviceId, "serviceId");
     }
 

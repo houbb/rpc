@@ -16,6 +16,7 @@ public interface NettyClient {
      * @param port 服务端口号
      * @param channelHandler 处理器
      * @since 0.0.8
+     * @return 返回值信息
      */
     ChannelFuture connect(final String address,
                           final int port,

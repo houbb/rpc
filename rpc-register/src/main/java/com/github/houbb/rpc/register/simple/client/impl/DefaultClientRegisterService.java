@@ -11,7 +11,7 @@ import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
@@ -58,7 +58,7 @@ public class DefaultClientRegisterService implements ClientRegisterService {
     }
 
     @Override
-    public void subscribe(ServerEntry clientEntry, Channel clientChannel) {
+    public void subscribe(ServiceEntry clientEntry, Channel clientChannel) {
         paramCheck(clientEntry);
 
         final String serviceId = clientEntry.serviceId();
@@ -71,7 +71,7 @@ public class DefaultClientRegisterService implements ClientRegisterService {
     }
 
     @Override
-    public void unSubscribe(ServerEntry clientEntry, Channel clientChannel) {
+    public void unSubscribe(ServiceEntry clientEntry, Channel clientChannel) {
         paramCheck(clientEntry);
 
         final String serviceId = clientEntry.serviceId();
@@ -88,7 +88,7 @@ public class DefaultClientRegisterService implements ClientRegisterService {
     }
 
     @Override
-    public void notify(String serviceId, List<ServerEntry> serverEntryList) {
+    public void notify(String serviceId, List<ServiceEntry> serviceEntryList) {
         ArgUtil.notEmpty(serviceId, "serviceId");
 
         List<Channel> clientChannelList = clientChannelList(serviceId);
@@ -100,7 +100,7 @@ public class DefaultClientRegisterService implements ClientRegisterService {
 
         // 循环通知
         for(Channel channel : clientChannelList) {
-            RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_NOTIFY, serverEntryList);
+            RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_NOTIFY, serviceEntryList);
             channel.writeAndFlush(registerMessage);
         }
     }
@@ -108,13 +108,13 @@ public class DefaultClientRegisterService implements ClientRegisterService {
     /**
      * 参数校验
      *
-     * @param serverEntry 入参信息
+     * @param serviceEntry 入参信息
      * @since 0.0.8
      */
-    private void paramCheck(final ServerEntry serverEntry) {
-        ArgUtil.notNull(serverEntry, "serverEntry");
-        ArgUtil.notEmpty(serverEntry.serviceId(), "serverEntry.serviceId");
-        ArgUtil.notEmpty(serverEntry.ip(), "serverEntry.ip");
+    private void paramCheck(final ServiceEntry serviceEntry) {
+        ArgUtil.notNull(serviceEntry, "serverEntry");
+        ArgUtil.notEmpty(serviceEntry.serviceId(), "serverEntry.serviceId");
+        ArgUtil.notEmpty(serviceEntry.ip(), "serverEntry.ip");
     }
 
     /**

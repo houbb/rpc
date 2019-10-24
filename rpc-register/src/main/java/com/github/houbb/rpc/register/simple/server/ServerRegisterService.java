@@ -6,7 +6,7 @@
 package com.github.houbb.rpc.register.simple.server;
 
 
-import com.github.houbb.rpc.register.domain.entry.ServerEntry;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 
 import java.util.List;
 
@@ -23,21 +23,21 @@ public interface ServerRegisterService {
 
     /**
      * 注册当前服务信息
-     * （1）将该服务通过 {@link ServerEntry#serviceId()} 进行分组
+     * （1）将该服务通过 {@link ServiceEntry#serviceId()} 进行分组
      * 订阅了这个 serviceId 的所有客户端
-     * @param serverEntry 注册当前服务信息
+     * @param serviceEntry 注册当前服务信息
      * @since 0.0.8
      * @return 更新后的服务信息列表
      */
-    List<ServerEntry> register(final ServerEntry serverEntry);
+    List<ServiceEntry> register(final ServiceEntry serviceEntry);
 
     /**
      * 注销当前服务信息
-     * @param serverEntry 注册当前服务信息
+     * @param serviceEntry 注册当前服务信息
      * @since 0.0.8
      * @return 更新后的服务信息列表
      */
-    List<ServerEntry> unRegister(final ServerEntry serverEntry);
+    List<ServiceEntry> unRegister(final ServiceEntry serviceEntry);
 
     /**
      * 根据服务标识发现对应的服务器信息
@@ -46,6 +46,6 @@ public interface ServerRegisterService {
      * @return 服务信息列表
      * @since 0.0.8
      */
-    List<ServerEntry> lookUp(final String serviceId);
+    List<ServiceEntry> lookUp(final String serviceId);
 
 }
