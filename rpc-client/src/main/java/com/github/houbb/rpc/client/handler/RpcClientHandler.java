@@ -7,7 +7,6 @@ package com.github.houbb.rpc.client.handler;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.client.core.RpcClient;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,7 +23,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 public class RpcClientHandler extends SimpleChannelInboundHandler {
 
-    private static final Log log = LogFactory.getLog(RpcClient.class);
+    private static final Log log = LogFactory.getLog(RpcClientHandler.class);
 
     /**
      * 调用服务管理类

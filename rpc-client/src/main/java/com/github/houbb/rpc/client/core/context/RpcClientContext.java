@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandler;
  * @author binbin.hou
  * @since 0.0.6
  */
+@Deprecated
 public interface RpcClientContext {
 
     /**

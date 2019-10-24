@@ -15,7 +15,7 @@ import com.github.houbb.rpc.register.domain.entry.ServerEntry;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
-import com.github.houbb.rpc.register.simple.constant.RegisterMessageTypeConst;
+import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import io.netty.channel.Channel;
 
 import java.util.List;
@@ -100,7 +100,7 @@ public class DefaultClientRegisterService implements ClientRegisterService {
 
         // 循环通知
         for(Channel channel : clientChannelList) {
-            RegisterMessage registerMessage = RegisterMessages.of(RegisterMessageTypeConst.REGISTER_NOTIFY, serverEntryList);
+            RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_NOTIFY, serverEntryList);
             channel.writeAndFlush(registerMessage);
         }
     }

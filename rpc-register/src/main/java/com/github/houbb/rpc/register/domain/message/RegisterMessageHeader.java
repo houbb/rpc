@@ -1,5 +1,7 @@
 package com.github.houbb.rpc.register.domain.message;
 
+import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
+
 /**
  * 注冊信息頭
  * @author binbin.hou
@@ -11,7 +13,7 @@ public interface RegisterMessageHeader {
      * 消息类型
      * @return 消息类型
      * @since 0.0.8
-     * @see com.github.houbb.rpc.register.simple.constant.RegisterMessageTypeConst 类型常量
+     * @see MessageTypeConst 类型常量
      */
     int type();
 

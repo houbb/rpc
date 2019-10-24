@@ -14,7 +14,7 @@ import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.SimpleRpcRegister;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
 import com.github.houbb.rpc.register.simple.client.impl.DefaultClientRegisterService;
-import com.github.houbb.rpc.register.simple.constant.RegisterMessageTypeConst;
+import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
 import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
 import io.netty.channel.Channel;
@@ -37,9 +37,9 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @author houbinbin
  * @since 0.0.8
  */
-public class SimpleRegisterServerHandler extends SimpleChannelInboundHandler {
+public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
 
-    private static final Log LOG = LogFactory.getLog(SimpleRegisterServerHandler.class);
+    private static final Log LOG = LogFactory.getLog(RegisterCenterServerHandler.class);
 
     /**
      * 注册中心服务
@@ -47,7 +47,7 @@ public class SimpleRegisterServerHandler extends SimpleChannelInboundHandler {
      */
     private final RpcRegister rpcRegister;
 
-    public SimpleRegisterServerHandler() {
+    public RegisterCenterServerHandler() {
         this.rpcRegister = this.buildSimpleRpcRegister();
     }
 
@@ -70,23 +70,23 @@ public class SimpleRegisterServerHandler extends SimpleChannelInboundHandler {
         ServerEntry serverEntry = (ServerEntry)body;
 
         switch (type) {
-            case RegisterMessageTypeConst.SERVER_REGISTER:
+            case MessageTypeConst.SERVER_REGISTER:
                 rpcRegister.register(serverEntry);
                 break;
 
-            case RegisterMessageTypeConst.SERVER_UN_REGISTER:
+            case MessageTypeConst.SERVER_UN_REGISTER:
                 rpcRegister.unRegister(serverEntry);
                 break;
 
-            case RegisterMessageTypeConst.CLIENT_SUBSCRIBE:
+            case MessageTypeConst.CLIENT_SUBSCRIBE:
                 rpcRegister.subscribe(serverEntry, channel);
                 break;
 
-            case RegisterMessageTypeConst.CLIENT_UN_SUBSCRIBE:
+            case MessageTypeConst.CLIENT_UN_SUBSCRIBE:
                 rpcRegister.unSubscribe(serverEntry, channel);
                 break;
 
-            case RegisterMessageTypeConst.CLIENT_LOOK_UP:
+            case MessageTypeConst.CLIENT_LOOK_UP:
                 rpcRegister.lookUp(serverEntry, channel);
                 break;
 

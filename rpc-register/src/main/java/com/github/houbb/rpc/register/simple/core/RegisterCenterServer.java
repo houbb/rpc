@@ -8,7 +8,7 @@ package com.github.houbb.rpc.register.simple.core;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.simple.constant.SimpleRegisterConst;
-import com.github.houbb.rpc.register.simple.handler.SimpleRegisterServerHandler;
+import com.github.houbb.rpc.register.simple.handler.RegisterCenterServerHandler;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -33,9 +33,9 @@ import io.netty.handler.logging.LoggingHandler;
  * @author houbinbin
  * @since 0.0.8
  */
-public class RpcRegisterServer {
+public class RegisterCenterServer {
 
-    private static final Log log = LogFactory.getLog(RpcRegisterServer.class);
+    private static final Log log = LogFactory.getLog(RegisterCenterServer.class);
 
     /**
      * 端口号信息
@@ -44,11 +44,11 @@ public class RpcRegisterServer {
      */
     private final int port;
 
-    public RpcRegisterServer() {
+    public RegisterCenterServer() {
         this.port = SimpleRegisterConst.DEFAULT_PORT;
     }
 
-    public RpcRegisterServer(int port) {
+    public RegisterCenterServer(int port) {
         this.port = port;
     }
 
@@ -77,7 +77,7 @@ public class RpcRegisterServer {
                                     .addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
                                     // request=>bytes
                                     .addLast(new ObjectEncoder())
-                                    .addLast(new SimpleRegisterServerHandler());
+                                    .addLast(new RegisterCenterServerHandler());
                         }
                     })
                     // 这个参数影响的是还没有被accept 取出的连接

@@ -18,6 +18,10 @@
             <groupId>com.github.houbb</groupId>
             <artifactId>rpc-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>rpc-register</artifactId>
+        </dependency>
 
         <!--============================== INTER ==============================-->
         <dependency>

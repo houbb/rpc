@@ -8,9 +8,9 @@ package com.github.houbb.rpc.register.simple.constant;
  * @author binbin.hou
  * @since 0.0.8
  */
-public final class RegisterMessageTypeConst {
+public final class MessageTypeConst {
 
-    private RegisterMessageTypeConst(){}
+    private MessageTypeConst(){}
 
     /**
      * 服务端注册

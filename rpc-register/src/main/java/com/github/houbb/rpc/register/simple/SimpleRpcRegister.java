@@ -12,7 +12,7 @@ import com.github.houbb.rpc.register.domain.entry.ServerEntry;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
-import com.github.houbb.rpc.register.simple.constant.RegisterMessageTypeConst;
+import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
 import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
 import io.netty.channel.Channel;
@@ -85,7 +85,7 @@ public class SimpleRpcRegister implements RpcRegister {
         List<ServerEntry> serverEntryList = serverRegisterService.lookUp(serviceId);
 
         // 回写
-        RegisterMessage registerMessage = RegisterMessages.of(RegisterMessageTypeConst.REGISTER_LOOK_UP_RESP, serverEntryList);
+        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_LOOK_UP_RESP, serverEntryList);
         channel.writeAndFlush(registerMessage);
     }
 

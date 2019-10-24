@@ -1,7 +1,6 @@
 package com.github.houbb.rpc.client.core.context.impl;
 
 import com.github.houbb.rpc.client.core.context.RpcClientContext;
-import com.github.houbb.rpc.client.handler.RpcClientHandler;
 import io.netty.channel.ChannelHandler;
 
 /**
@@ -9,6 +8,7 @@ import io.netty.channel.ChannelHandler;
  * @author binbin.hou
  * @since 0.0.6
  */
+@Deprecated
 public class DefaultRpcClientContext implements RpcClientContext {
 
     /**

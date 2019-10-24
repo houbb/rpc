@@ -9,8 +9,6 @@ import com.github.houbb.heaven.annotation.ThreadSafe;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.core.context.RpcClientContext;
-import com.github.houbb.rpc.client.handler.RpcClientHandler;
-import com.github.houbb.rpc.common.constant.RpcConstant;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -31,6 +29,7 @@ import io.netty.handler.logging.LoggingHandler;
  * @since 0.0.2
  */
 @ThreadSafe
+@Deprecated
 public class RpcClient {
 
     private static final Log log = LogFactory.getLog(RpcClient.class);

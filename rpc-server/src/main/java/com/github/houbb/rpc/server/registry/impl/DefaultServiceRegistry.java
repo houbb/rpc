@@ -2,11 +2,14 @@ package com.github.houbb.rpc.server.registry.impl;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.rpc.common.config.protocol.ProtocolConfig;
+import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
+import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyServer;
 import com.github.houbb.rpc.server.config.service.DefaultServiceConfig;
 import com.github.houbb.rpc.server.config.service.ServiceConfig;
-import com.github.houbb.rpc.server.core.RpcServer;
+import com.github.houbb.rpc.server.handler.RpcServerHandler;
 import com.github.houbb.rpc.server.registry.ServiceRegistry;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
+import io.netty.channel.ChannelHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +102,9 @@ public class DefaultServiceRegistry implements ServiceRegistry {
                 .registerServices(serviceConfigList);
 
         // 暴露 netty server 信息
-        new RpcServer(rpcPort).start();
+        final ChannelHandler channelHandler = ChannelHandlers
+                .objectCodecHandler(new RpcServerHandler());
+        new DefaultNettyServer().start(rpcPort, channelHandler);
         return this;
     }
 
