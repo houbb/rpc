@@ -17,12 +17,6 @@ class DefaultRegisterMessageHeader implements RegisterMessageHeader {
      */
     private int type;
 
-    /**
-     * 请求标识
-     * @since 0.0.8
-     */
-    private String seqId;
-
     @Override
     public int type() {
         return type;
@@ -34,12 +28,10 @@ class DefaultRegisterMessageHeader implements RegisterMessageHeader {
     }
 
     @Override
-    public String seqId() {
-        return seqId;
+    public String toString() {
+        return "DefaultRegisterMessageHeader{" +
+                "type=" + type +
+                '}';
     }
 
-    public DefaultRegisterMessageHeader seqId(String seqId) {
-        this.seqId = seqId;
-        return this;
-    }
 }

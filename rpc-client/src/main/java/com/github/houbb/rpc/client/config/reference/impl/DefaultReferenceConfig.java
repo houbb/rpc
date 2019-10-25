@@ -177,7 +177,8 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
 
         for(RpcAddress rpcAddress : rpcAddressList) {
             final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
-            ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler).call();
+            final ChannelHandler actualChannlHandler = ChannelHandlers.objectCodecHandler(channelHandler);
+            ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), actualChannlHandler).call();
             channelFutures.add(channelFuture);
         }
 
@@ -225,7 +226,7 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
 
         //2. 查询服务信息
         List<ServiceEntry> serviceEntries = lookUpServiceEntryList();
-
+        LOG.info("[Client] register center serviceEntries: {}", serviceEntries);
         //3. 结果转换
         return CollectionUtil.toList(serviceEntries, new IHandler<ServiceEntry, RpcAddress>() {
             @Override
@@ -271,12 +272,12 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         //3. 发送查询请求
         ServiceEntry serviceEntry = ServiceEntryBuilder.of(serviceId);
         RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.CLIENT_LOOK_UP, serviceEntry);
-        final String seqId = RegisterMessages.seqId(registerMessage);
+        final String seqId = registerMessage.seqId();
         invokeService.addRequest(seqId, registerCenterTimeOut);
         channelFuture.channel().writeAndFlush(registerMessage);
 
         //4. 等待查询结果
-        RpcResponse rpcResponse = invokeService.getResponse(RegisterMessages.seqId(registerMessage));
+        RpcResponse rpcResponse = invokeService.getResponse(seqId);
         return (List<ServiceEntry>) RpcResponses.getResult(rpcResponse);
     }
 

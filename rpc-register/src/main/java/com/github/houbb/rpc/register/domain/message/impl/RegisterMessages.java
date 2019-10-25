@@ -39,8 +39,8 @@ public final class RegisterMessages {
         DefaultRegisterMessage registerMessage = new DefaultRegisterMessage();
         DefaultRegisterMessageHeader messageHeader = new DefaultRegisterMessageHeader();
         messageHeader.type(type);
-        messageHeader.seqId(seqId);
 
+        registerMessage.seqId(seqId);
         registerMessage.header(messageHeader);
         registerMessage.body(body);
         return registerMessage;
@@ -55,17 +55,6 @@ public final class RegisterMessages {
     public static int type(final RegisterMessage registerMessage) {
         RegisterMessageHeader header = header(registerMessage);
         return header.type();
-    }
-
-    /**
-     * 获取消息唯一标识
-     * @param registerMessage 注册消息
-     * @return 唯一标识
-     * @since 0.0.8
-     */
-    public static String seqId(final RegisterMessage registerMessage) {
-        RegisterMessageHeader header = header(registerMessage);
-        return header.seqId();
     }
 
     /**

@@ -13,6 +13,12 @@ class DefaultRegisterMessage implements RegisterMessage {
     private static final long serialVersionUID = 3979588494064088927L;
 
     /**
+     * 唯一序列号标识
+     * @since 0.0.8
+     */
+    private String seqId;
+
+    /**
      * 头信息
      * @since 0.0.8
      */
@@ -23,6 +29,17 @@ class DefaultRegisterMessage implements RegisterMessage {
      * @since 0.0.8
      */
     private Object body;
+
+    @Override
+    public String seqId() {
+        return seqId;
+    }
+
+    @Override
+    public DefaultRegisterMessage seqId(String seqId) {
+        this.seqId = seqId;
+        return this;
+    }
 
     @Override
     public RegisterMessageHeader header() {

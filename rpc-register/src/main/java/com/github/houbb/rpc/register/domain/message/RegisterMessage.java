@@ -1,5 +1,7 @@
 package com.github.houbb.rpc.register.domain.message;
 
+import com.github.houbb.rpc.common.rpc.domain.BaseRpc;
+
 import java.io.Serializable;
 
 /**
@@ -7,7 +9,7 @@ import java.io.Serializable;
  * @author binbin.hou
  * @since 0.0.8
  */
-public interface RegisterMessage extends Serializable {
+public interface RegisterMessage extends BaseRpc {
 
     /**
      * 头信息

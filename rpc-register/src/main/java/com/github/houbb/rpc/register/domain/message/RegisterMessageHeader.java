@@ -19,11 +19,4 @@ public interface RegisterMessageHeader extends Serializable {
      */
     int type();
 
-    /**
-     * 请求唯一标识
-     * @return 唯一标识
-     * @since 0.0.8
-     */
-    String seqId();
-
 }

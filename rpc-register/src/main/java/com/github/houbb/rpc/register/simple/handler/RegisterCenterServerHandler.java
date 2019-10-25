@@ -64,7 +64,7 @@ public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
         RegisterMessage registerMessage = (RegisterMessage) msg;
         Object body = registerMessage.body();
         int type = RegisterMessages.type(registerMessage);
-        String seqId = RegisterMessages.seqId(registerMessage);
+        String seqId = registerMessage.seqId();
         LOG.info("[Register Server] received message type: {}, seqId: {} ", type,
                 seqId);
 
