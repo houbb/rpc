@@ -1,9 +1,5 @@
 package com.github.houbb.rpc.client.config.reference;
 
-import com.github.houbb.rpc.common.config.component.RpcAddress;
-
-import java.util.List;
-
 /**
  * 引用配置类
  *
@@ -86,5 +82,22 @@ public interface ReferenceConfig<T> {
      * @return this
      */
     ReferenceConfig<T> timeout(final long timeoutInMills);
+
+    /**
+     * 是否订阅发现服务
+     * 注意：如果指定 {@link #addresses(String)} 信息，这个属性将会失效。
+     * @param subscribe 是否订阅模式
+     * @since 0.0.8
+     * @return this
+     */
+    ReferenceConfig<T> subscribe(final boolean subscribe);
+
+    /**
+     * 注册中心地址
+     * （1）正常使用中，这个属性是可以固定写死，对使用者不可见的。
+     * @since 0.0.8
+     * @return this
+     */
+    ReferenceConfig<T> registerCenter(final String addresses);
 
 }

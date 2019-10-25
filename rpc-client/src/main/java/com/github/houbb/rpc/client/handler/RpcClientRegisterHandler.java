@@ -13,34 +13,33 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
- * <p> 客户端处理类 </p>
+ * <p> 客户端注册中心处理类 </p>
  *
  * <pre> Created: 2019/10/16 11:30 下午  </pre>
  * <pre> Project: rpc  </pre>
  *
  * @author houbinbin
- * @since 0.0.2
+ * @since 0.0.8
  */
-public class RpcClientHandler extends SimpleChannelInboundHandler {
+public class RpcClientRegisterHandler extends SimpleChannelInboundHandler {
 
-    private static final Log log = LogFactory.getLog(RpcClientHandler.class);
+    private static final Log log = LogFactory.getLog(RpcClientRegisterHandler.class);
 
     /**
-     * 调用服务管理类
-     *
-     * @since 0.0.6
+     * 注册服务
+     * @since 0.0.8
      */
     private final InvokeService invokeService;
 
-    public RpcClientHandler(InvokeService invokeService) {
+    public RpcClientRegisterHandler(InvokeService invokeService) {
         this.invokeService = invokeService;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        RpcResponse rpcResponse = (RpcResponse)msg;
+        RpcResponse rpcResponse = (RpcResponse) msg;
+        log.info("[Client Register] response is :{}", rpcResponse);
         invokeService.addResponse(rpcResponse.seqId(), rpcResponse);
-        log.info("[Client] response is :{}", rpcResponse);
     }
 
     @Override

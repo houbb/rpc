@@ -59,10 +59,11 @@ public interface RpcRegister {
 
     /**
      * 启动时查询 serviceId 对应的所有服务端信息
+     * @param seqId 请求标识
      * @param clientEntry 客户端查询明细
      * @param channel 频道信息
      * @since 0.0.8
      */
-    void lookUp(ServiceEntry clientEntry, final Channel channel);
+    void lookUp(String seqId, ServiceEntry clientEntry, final Channel channel);
 
 }

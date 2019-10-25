@@ -7,11 +7,10 @@ package com.github.houbb.rpc.register.simple;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcResponse;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
-import com.github.houbb.rpc.register.domain.message.RegisterMessage;
-import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
-import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
 import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
 import com.github.houbb.rpc.register.spi.RpcRegister;
@@ -80,13 +79,15 @@ public class SimpleRpcRegister implements RpcRegister {
     }
 
     @Override
-    public void lookUp(ServiceEntry clientEntry, Channel channel) {
+    public void lookUp(String seqId, ServiceEntry clientEntry, Channel channel) {
         final String serviceId = clientEntry.serviceId();
         List<ServiceEntry> serviceEntryList = serverRegisterService.lookUp(serviceId);
 
         // 回写
-        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_LOOK_UP_RESP, serviceEntryList);
-        channel.writeAndFlush(registerMessage);
+        // 为了复用原先的相应结果，此处直接使用 rpc response
+        RpcResponse rpcResponse = DefaultRpcResponse.newInstance().seqId(seqId)
+                .result(serviceEntryList);
+        channel.writeAndFlush(rpcResponse);
     }
 
 
