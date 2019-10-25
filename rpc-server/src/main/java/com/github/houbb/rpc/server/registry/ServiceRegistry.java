@@ -46,12 +46,4 @@ public interface ServiceRegistry {
      */
     ServiceRegistry registerAddresses(final String addresses);
 
-    /**
-     * 是否注册服务到注册中心
-     * @param register 是否注册
-     * @return this
-     * @since 0.0.8
-     */
-    ServiceRegistry register(final boolean register);
-
 }

@@ -19,23 +19,32 @@ import java.net.UnknownHostException;
  */
 public final class NetUtil {
 
+    private NetUtil(){}
+
+    /**
+     * 本地服务地址
+     * @since 0.0.8
+     */
+    private static final String LOCAL_HOST;
+
+    static {
+        InetAddress address = null;
+        try {
+            address = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+
+        LOCAL_HOST = address.getHostAddress();
+    }
+
     /**
      * 获取本地 ip 地址
      * @return ip 地址
      * @since 0.0.8
      */
     public static String getLocalHost() {
-        try {
-            InetAddress address = InetAddress.getLocalHost();
-
-            return address.getHostAddress();
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(getLocalHost());
+        return LOCAL_HOST;
     }
 
 }
