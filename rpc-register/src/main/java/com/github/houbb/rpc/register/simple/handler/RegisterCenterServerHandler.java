@@ -18,6 +18,7 @@ import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
 import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
 import com.github.houbb.rpc.register.spi.RpcRegister;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -37,6 +38,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @author houbinbin
  * @since 0.0.8
  */
+@ChannelHandler.Sharable
 public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
 
     private static final Log LOG = LogFactory.getLog(RegisterCenterServerHandler.class);
