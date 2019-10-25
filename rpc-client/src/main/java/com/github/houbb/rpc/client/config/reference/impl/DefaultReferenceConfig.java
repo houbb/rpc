@@ -20,6 +20,7 @@ import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
@@ -113,6 +114,12 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
      */
     private List<RpcAddress> registerCenterList;
 
+    /**
+     * 注册中心超时时间
+     * @since 0.0.8
+     */
+    private long registerCenterTimeOut;
+
     public DefaultReferenceConfig() {
         // 初始化信息
         this.rpcAddresses = Guavas.newArrayList();
@@ -121,6 +128,7 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         // 默认为 60s 超时
         this.timeout = 60*1000;
         this.registerCenterList = Guavas.newArrayList();
+        this.registerCenterTimeOut = 60*1000;
     }
 
     @Override
@@ -264,20 +272,12 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         ServiceEntry serviceEntry = ServiceEntryBuilder.of(serviceId);
         RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.CLIENT_LOOK_UP, serviceEntry);
         final String seqId = RegisterMessages.seqId(registerMessage);
-        //TODO: 超时时间可以指定。
-        invokeService.addRequest(seqId, 6000);
+        invokeService.addRequest(seqId, registerCenterTimeOut);
         channelFuture.channel().writeAndFlush(registerMessage);
 
         //4. 等待查询结果
         RpcResponse rpcResponse = invokeService.getResponse(RegisterMessages.seqId(registerMessage));
-
-        //TODO: 这里可以抽象成为一个工具类。
-        Throwable error = rpcResponse.error();
-        if(ObjectUtil.isNotNull(error)) {
-            LOG.error("[Rpc Client] meet ex, ", error);
-            throw new RpcRuntimeException(error);
-        }
-        return (List<ServiceEntry>)rpcResponse.result();
+        return (List<ServiceEntry>) RpcResponses.getResult(rpcResponse);
     }
 
     /**

@@ -37,6 +37,7 @@ public interface ReferenceConfig<T> {
 
     /**
      * 服务唯一标识
+     * @return 服务唯一标识
      * @since 0.0.6
      */
     String serviceId();
