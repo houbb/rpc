@@ -5,6 +5,8 @@
 
 package com.github.houbb.rpc.common.util;
 
+import com.github.houbb.heaven.annotation.CommonEager;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -17,6 +19,7 @@ import java.net.UnknownHostException;
  * @author houbinbin
  * @since 0.0.8
  */
+@CommonEager
 public final class NetUtil {
 
     private NetUtil(){}

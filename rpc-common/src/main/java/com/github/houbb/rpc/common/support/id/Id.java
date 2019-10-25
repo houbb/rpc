@@ -1,10 +1,13 @@
 package com.github.houbb.rpc.common.support.id;
 
+import com.github.houbb.heaven.annotation.CommonEager;
+
 /**
  * 唯一标识
  * @author binbin.hou
  * @since 0.0.6
  */
+@CommonEager
 public interface Id {
 
     /**
