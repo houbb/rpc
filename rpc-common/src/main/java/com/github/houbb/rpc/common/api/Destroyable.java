@@ -5,12 +5,12 @@ package com.github.houbb.rpc.common.api;
  * @author binbin.hou
  * @since 0.0.8
  */
-public interface Destoryable {
+public interface Destroyable {
 
     /**
      * 销毁方法
      * @since 0.0.8
      */
-    void destory();
+    void destroy();
 
 }

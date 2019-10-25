@@ -44,6 +44,6 @@ public interface ServiceRegistry {
      * @return this
      * @since 0.0.8
      */
-    ServiceRegistry registerAddresses(final String addresses);
+    ServiceRegistry registerCenter(final String addresses);
 
 }

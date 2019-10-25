@@ -3,7 +3,7 @@
  * rpc All rights reserved.
  */
 
-package com.github.houbb.rpc.register.api;
+package com.github.houbb.rpc.register.spi;
 
 
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;

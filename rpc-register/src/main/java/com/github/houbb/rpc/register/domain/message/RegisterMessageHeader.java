@@ -2,12 +2,14 @@ package com.github.houbb.rpc.register.domain.message;
 
 import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 
+import java.io.Serializable;
+
 /**
  * 注冊信息頭
  * @author binbin.hou
  * @since 0.0.8
  */
-public interface RegisterMessageHeader {
+public interface RegisterMessageHeader extends Serializable {
 
     /**
      * 消息类型

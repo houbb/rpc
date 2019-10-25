@@ -70,13 +70,13 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      * 注册中心地址列表
      * @since 0.0.8
      */
-    private List<RpcAddress> registerAddressList;
+    private List<RpcAddress> registerCenterList;
 
     private DefaultServiceRegistry(){
         // 初始化默认参数
         this.serviceConfigList = new ArrayList<>();
         this.rpcPort = 9527;
-        this.registerAddressList = Guavas.newArrayList();
+        this.registerCenterList = Guavas.newArrayList();
     }
 
     public static DefaultServiceRegistry getInstance() {
@@ -115,7 +115,8 @@ public class DefaultServiceRegistry implements ServiceRegistry {
 
         // 构建对应的其他信息
         ServiceConfig serviceConfig = new DefaultServiceConfig();
-        serviceConfig.id(serviceId).reference(serviceImpl);
+        //TODO: 是否暴露服务，允许用户指定
+        serviceConfig.id(serviceId).reference(serviceImpl).register(true);
         serviceConfigList.add(serviceConfig);
 
         return this;
@@ -126,21 +127,24 @@ public class DefaultServiceRegistry implements ServiceRegistry {
         // 注册所有服务信息
         DefaultServiceFactory.getInstance()
                 .registerServicesLocal(serviceConfigList);
+        LOG.info("server register local finish.");
 
         // 启动 netty server 信息
         final ChannelHandler channelHandler = ChannelHandlers
                 .objectCodecHandler(new RpcServerHandler());
-        new DefaultNettyServer().start(rpcPort, channelHandler);
+        DefaultNettyServer.newInstance(rpcPort, channelHandler).asyncRun();
+        LOG.info("server service start finish.");
 
         // 注册到配置中心
         this.registerServiceCenter();
+        LOG.info("server service register finish.");
 
         return this;
     }
 
     @Override
-    public ServiceRegistry registerAddresses(String addresses) {
-        this.registerAddressList = RpcAddressBuilder.of(addresses);
+    public ServiceRegistry registerCenter(String addresses) {
+        this.registerCenterList = RpcAddressBuilder.of(addresses);
         return this;
     }
 
@@ -153,8 +157,8 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      */
     private void registerServiceCenter() {
         // 注册到配置中心
-        //        // 初期简单点，直接循环调用即可。
-        //        // 循环服务信息
+        // 初期简单点，直接循环调用即可
+        // 循环服务信息
         for(ServiceConfig config : this.serviceConfigList) {
             boolean register = config.register();
             final String serviceId = config.id();
@@ -164,11 +168,11 @@ public class DefaultServiceRegistry implements ServiceRegistry {
                 continue;
             }
 
-            for(RpcAddress rpcAddress : registerAddressList) {
+            for(RpcAddress rpcAddress : registerCenterList) {
                 ChannelHandler registerHandler = ChannelHandlers.objectCodecHandler(new RpcServerRegisterHandler());
-                ChannelFuture channelFuture = DefaultNettyClient.newInstance()
-                        .connect(rpcAddress.address(), rpcAddress.port(),
-                                registerHandler);
+                LOG.info("[Rpc Server] start register to {}:{}", rpcAddress.address(),
+                        rpcAddress.port());
+                ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(),registerHandler).call();
 
                 // 直接写入信息
                 RegisterMessage registerMessage = buildRegisterMessage(config);

@@ -11,11 +11,10 @@ import com.github.houbb.rpc.client.proxy.context.impl.DefaultProxyContext;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
-
-import java.util.List;
-
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
+
+import java.util.List;
 
 /**
  * 引用配置类
@@ -138,7 +137,7 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         // 循环连接
         for(RpcAddress rpcAddress : rpcAddresses) {
             final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
-            ChannelFuture channelFuture = DefaultNettyClient.newInstance().connect(rpcAddress.address(), rpcAddress.port(), channelHandler);
+            ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler).call();
             channelFutures.add(channelFuture);
         }
 

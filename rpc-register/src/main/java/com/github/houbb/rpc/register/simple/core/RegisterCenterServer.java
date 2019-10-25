@@ -7,15 +7,9 @@ package com.github.houbb.rpc.register.simple.core;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.register.simple.constant.SimpleRegisterConst;
 import com.github.houbb.rpc.register.simple.handler.RegisterCenterServerHandler;
-
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
@@ -33,6 +27,7 @@ import io.netty.handler.logging.LoggingHandler;
  * @author houbinbin
  * @since 0.0.8
  */
+@Deprecated
 public class RegisterCenterServer {
 
     private static final Log log = LogFactory.getLog(RegisterCenterServer.class);
@@ -43,10 +38,6 @@ public class RegisterCenterServer {
      * @since 0.0.8
      */
     private final int port;
-
-    public RegisterCenterServer() {
-        this.port = SimpleRegisterConst.DEFAULT_PORT;
-    }
 
     public RegisterCenterServer(int port) {
         this.port = port;

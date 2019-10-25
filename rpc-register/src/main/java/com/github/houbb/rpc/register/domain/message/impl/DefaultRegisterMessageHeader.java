@@ -9,6 +9,8 @@ import com.github.houbb.rpc.register.domain.message.RegisterMessageHeader;
  */
 class DefaultRegisterMessageHeader implements RegisterMessageHeader {
 
+    private static final long serialVersionUID = -5742810870688287022L;
+
     /**
      * 消息类型
      * @since 0.0.8
