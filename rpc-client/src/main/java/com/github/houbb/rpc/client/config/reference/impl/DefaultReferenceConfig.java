@@ -263,6 +263,9 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         //3. 发送查询请求
         ServiceEntry serviceEntry = ServiceEntryBuilder.of(serviceId);
         RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.CLIENT_LOOK_UP, serviceEntry);
+        final String seqId = RegisterMessages.seqId(registerMessage);
+        //TODO: 超时时间可以指定。
+        invokeService.addRequest(seqId, 6000);
         channelFuture.channel().writeAndFlush(registerMessage);
 
         //4. 等待查询结果
