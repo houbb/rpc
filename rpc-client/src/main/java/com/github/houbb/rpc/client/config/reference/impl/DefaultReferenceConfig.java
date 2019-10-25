@@ -165,7 +165,9 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         // 1.1 为了提升性能，可以将所有的 client=>server 的连接都调整为一个 thread。
         // 1.2 初期为了简单，直接使用同步循环的方式。
         // 循环连接
-        for(RpcAddress rpcAddress : rpcAddresses) {
+        List<RpcAddress> rpcAddressList = getRpcAddresses();
+
+        for(RpcAddress rpcAddress : rpcAddressList) {
             final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
             ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler).call();
             channelFutures.add(channelFuture);
