@@ -87,7 +87,7 @@ public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
                 break;
 
             case MessageTypeConst.CLIENT_LOOK_UP:
-                rpcRegister.lookUp(serviceEntry, channel);
+                rpcRegister.lookUp(seqId, serviceEntry, channel);
                 break;
 
             default:
