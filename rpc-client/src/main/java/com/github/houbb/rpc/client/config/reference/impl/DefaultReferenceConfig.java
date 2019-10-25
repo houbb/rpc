@@ -262,9 +262,8 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
 
         //3. 发送查询请求
         ServiceEntry serviceEntry = ServiceEntryBuilder.of(serviceId);
-        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.CLIENT_LOOK_UP,
-                serviceEntry);
-        channelFuture.channel().writeAndFlush(registerMessage).syncUninterruptibly();
+        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.CLIENT_LOOK_UP, serviceEntry);
+        channelFuture.channel().writeAndFlush(registerMessage);
 
         //4. 等待查询结果
         RpcResponse rpcResponse = invokeService.getResponse(RegisterMessages.seqId(registerMessage));
@@ -288,8 +287,12 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         ChannelHandler channelHandler = ChannelHandlers.objectCodecHandler(new RpcClientRegisterHandler(invokeService));
 
         for(RpcAddress rpcAddress : registerCenterList) {
+            final String ip = rpcAddress.address();
+            final int port = rpcAddress.port();
+            LOG.info("[Rpc Client] connect to register {}:{} ",
+                    ip, port);
             ChannelFuture channelFuture = DefaultNettyClient
-                    .newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler)
+                    .newInstance(ip, port, channelHandler)
                     .call();
 
             futureList.add(channelFuture);
