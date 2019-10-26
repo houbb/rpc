@@ -5,33 +5,26 @@
 
 package com.github.houbb.rpc.client.core;
 
-import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.config.reference.ReferenceConfig;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
-import com.github.houbb.rpc.client.handler.RpcClientRegisterHandler;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.invoke.impl.DefaultInvokeService;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.context.ProxyContext;
 import com.github.houbb.rpc.client.proxy.context.impl.DefaultProxyContext;
+import com.github.houbb.rpc.client.service.ClientRegisterService;
+import com.github.houbb.rpc.client.service.impl.ClientRegisterServiceImpl;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
-import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcChannelFuture;
-import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
-import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
-import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
-import com.github.houbb.rpc.register.domain.message.RegisterMessage;
-import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
-import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 
 import java.util.List;
 
@@ -89,20 +82,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      */
     private List<RpcAddress> rpcAddresses;
 
-    /**
-     * 用于写入信息
-     * （1）client 连接 server 端的 channel future
-     * （2）后期进行 Load-balance 路由等操作。可以放在这里执行。
-     * @since 0.0.6
-     */
-    @Deprecated
-    private List<ChannelFuture> channelFutures;
 
-    /**
-     * 调用服务管理类
-     * @since 0.0.6
-     */
-    private InvokeService invokeService;
 
     /**
      * 调用超时时间
@@ -123,10 +103,16 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     private List<RpcAddress> registerCenterList;
 
     /**
-     * 注册中心超时时间
-     * @since 0.0.8
+     * 调用服务管理类
+     * @since 0.0.6
      */
-    private long registerCenterTimeOut;
+    private InvokeService invokeService;
+
+    /**
+     * 客户端注册中心服务类
+     * @since 0.0.9
+     */
+    private ClientRegisterService clientRegisterService;
 
     /**
      * 新建一个客户端实例
@@ -141,12 +127,13 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     private ClientBs() {
         // 初始化信息
         this.rpcAddresses = Guavas.newArrayList();
-        this.channelFutures = Guavas.newArrayList();
-        this.invokeService = new DefaultInvokeService();
         // 默认为 60s 超时
         this.timeout = 60*1000;
         this.registerCenterList = Guavas.newArrayList();
-        this.registerCenterTimeOut = 60*1000;
+
+        // 依赖服务初始化
+        this.invokeService = new DefaultInvokeService();
+        this.clientRegisterService = new ClientRegisterServiceImpl(invokeService);
     }
 
     @Override
@@ -240,16 +227,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         registerCenterParamCheck();
 
         //2. 查询服务信息
-        List<ServiceEntry> serviceEntries = lookUpServiceEntryList();
-        LOG.info("[Client] register center serviceEntries: {}", serviceEntries);
-        //3. 结果转换
-        return CollectionUtil.toList(serviceEntries, new IHandler<ServiceEntry, RpcAddress>() {
-            @Override
-            public RpcAddress handle(ServiceEntry serviceEntry) {
-                return new RpcAddress(serviceEntry.ip(),
-                        serviceEntry.port(), serviceEntry.weight());
-            }
-        });
+        return clientRegisterService.queryServerAddressList(serviceId, registerCenterList);
     }
 
     /**
@@ -269,56 +247,6 @@ public class ClientBs<T> implements ReferenceConfig<T> {
             throw new RpcRuntimeException();
         }
     }
-
-    /**
-     * 查询服务信息列表
-     * @return 服务明细列表
-     * @since 0.0.8
-     */
-    @SuppressWarnings("unchecked")
-    private List<ServiceEntry> lookUpServiceEntryList() {
-        //1. 连接到注册中心
-        List<ChannelFuture> channelFutureList = connectRegisterCenter();
-
-        //2. 选择一个
-        // 直接取第一个即可，后续可以使用 load-balance 策略。
-        ChannelFuture channelFuture = channelFutureList.get(0);
-
-        //3. 发送查询请求
-        ServiceEntry serviceEntry = ServiceEntryBuilder.of(serviceId);
-        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.CLIENT_LOOK_UP, serviceEntry);
-        final String seqId = registerMessage.seqId();
-        invokeService.addRequest(seqId, registerCenterTimeOut);
-        channelFuture.channel().writeAndFlush(registerMessage);
-
-        //4. 等待查询结果
-        RpcResponse rpcResponse = invokeService.getResponse(seqId);
-        return (List<ServiceEntry>) RpcResponses.getResult(rpcResponse);
-    }
-
-    /**
-     * 连接到注册中心
-     * @return 对应的结果列表
-     * @since 0.0.8
-     */
-    private List<ChannelFuture> connectRegisterCenter() {
-        List<ChannelFuture> futureList = Guavas.newArrayList(registerCenterList.size());
-        ChannelHandler channelHandler = ChannelHandlers.objectCodecHandler(new RpcClientRegisterHandler(invokeService));
-
-        for(RpcAddress rpcAddress : registerCenterList) {
-            final String ip = rpcAddress.address();
-            final int port = rpcAddress.port();
-            LOG.info("[Rpc Client] connect to register {}:{} ",
-                    ip, port);
-            ChannelFuture channelFuture = DefaultNettyClient
-                    .newInstance(ip, port, channelHandler)
-                    .call();
-
-            futureList.add(channelFuture);
-        }
-        return futureList;
-    }
-
 
     /**
      * 构建调用上下文

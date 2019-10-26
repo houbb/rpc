@@ -20,7 +20,7 @@ import java.util.List;
  * @author houbinbin
  * @since 0.0.8
  */
-public interface ClientRegisterService {
+public interface RegisterClientService {
 
     /**
      * 监听服务信息

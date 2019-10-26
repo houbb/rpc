@@ -29,14 +29,6 @@ public interface ProxyContext<T> {
      */
     Class<T> serviceInterface();
 
-//    /**
-//     * netty channel 信息
-//     * @return channel 信息
-//     * @since 0.0.6
-//     */
-//    @Deprecated
-//    List<ChannelFuture> channelFutures();
-
     /**
      * 调用服务
      * @return 调用服务
