@@ -77,7 +77,7 @@ public class ReferenceProxy<T> implements InvocationHandler {
         // 对于信息的写入，实际上有着严格的要求。
         // writeAndFlush 实际是一个异步的操作，直接使用 sync() 可以看到异常信息。
         // 支持的必须是 ByteBuf
-        channel.writeAndFlush(rpcRequest).sync();
+        channel.writeAndFlush(rpcRequest);
 
         RpcResponse rpcResponse = proxyContext.invokeService().getResponse(seqId);
         Throwable error = rpcResponse.error();

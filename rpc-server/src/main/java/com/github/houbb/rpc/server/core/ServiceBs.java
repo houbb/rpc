@@ -1,4 +1,9 @@
-package com.github.houbb.rpc.server.registry.impl;
+/*
+ * Copyright (c)  2019. houbinbin Inc.
+ * rpc All rights reserved.
+ */
+
+package com.github.houbb.rpc.server.core;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
@@ -22,29 +27,30 @@ import com.github.houbb.rpc.server.handler.RpcServerHandler;
 import com.github.houbb.rpc.server.handler.RpcServerRegisterHandler;
 import com.github.houbb.rpc.server.registry.ServiceRegistry;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 
 /**
  * 默认服务端注册类
  * @author binbin.hou
  * @since 0.0.6
  */
-public class DefaultServiceRegistry implements ServiceRegistry {
+public class ServiceBs implements ServiceRegistry {
 
     /**
      * 日志信息
      * @since 0.0.8
      */
-    private static final Log LOG = LogFactory.getLog(DefaultServiceRegistry.class);
+    private static final Log       LOG      = LogFactory.getLog(ServiceBs.class);
     /**
      * 单例信息
      * @since 0.0.6
      */
-    private static final DefaultServiceRegistry INSTANCE = new DefaultServiceRegistry();
+    private static final ServiceBs INSTANCE = new ServiceBs();
 
     /**
      * rpc 服务端端口号
@@ -72,14 +78,14 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      */
     private List<RpcAddress> registerCenterList;
 
-    private DefaultServiceRegistry(){
+    private ServiceBs(){
         // 初始化默认参数
         this.serviceConfigList = new ArrayList<>();
         this.rpcPort = 9527;
         this.registerCenterList = Guavas.newArrayList();
     }
 
-    public static DefaultServiceRegistry getInstance() {
+    public static ServiceBs getInstance() {
         return INSTANCE;
     }
 
@@ -109,7 +115,7 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public synchronized DefaultServiceRegistry register(final String serviceId, final Object serviceImpl) {
+    public synchronized ServiceBs register(final String serviceId, final Object serviceImpl) {
         ArgUtil.notEmpty(serviceId, "serviceId");
         ArgUtil.notNull(serviceImpl, "serviceImpl");
 

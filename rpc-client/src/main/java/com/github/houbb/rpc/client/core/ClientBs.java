@@ -1,8 +1,12 @@
-package com.github.houbb.rpc.client.config.reference.impl;
+/*
+ * Copyright (c)  2019. houbinbin Inc.
+ * rpc All rights reserved.
+ */
+
+package com.github.houbb.rpc.client.core;
 
 import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.util.guava.Guavas;
-import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
@@ -26,10 +30,11 @@ import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 
 import java.util.List;
+
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 
 /**
  * 引用配置类
@@ -56,9 +61,9 @@ import java.util.List;
  * @since 0.0.6
  * @param <T> 接口泛型
  */
-public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
+public class ClientBs<T> implements ReferenceConfig<T> {
 
-    private static final Log LOG = LogFactory.getLog(DefaultReferenceConfig.class);
+    private static final Log LOG = LogFactory.getLog(ClientBs.class);
 
     /**
      * 服务唯一标识
@@ -120,7 +125,17 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
      */
     private long registerCenterTimeOut;
 
-    public DefaultReferenceConfig() {
+    /**
+     * 新建一个客户端实例
+     * @param <T> 泛型
+     * @return this
+     * @since 0.0.9
+     */
+    public static <T> ClientBs<T> newInstance() {
+        return new ClientBs<>();
+    }
+
+    private ClientBs() {
         // 初始化信息
         this.rpcAddresses = Guavas.newArrayList();
         this.channelFutures = Guavas.newArrayList();
@@ -137,7 +152,7 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
     }
 
     @Override
-    public DefaultReferenceConfig<T> serviceId(String serviceId) {
+    public ClientBs<T> serviceId(String serviceId) {
         this.serviceId = serviceId;
         return this;
     }
@@ -148,7 +163,7 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
     }
 
     @Override
-    public DefaultReferenceConfig<T> serviceInterface(Class<T> serviceInterface) {
+    public ClientBs<T> serviceInterface(Class<T> serviceInterface) {
         this.serviceInterface = serviceInterface;
         return this;
     }
@@ -190,7 +205,7 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
 
 
     @Override
-    public DefaultReferenceConfig<T> timeout(long timeout) {
+    public ClientBs<T> timeout(long timeout) {
         this.timeout = timeout;
         return this;
     }
