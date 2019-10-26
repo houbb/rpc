@@ -58,5 +58,12 @@ public class RpcAddress {
         return this;
     }
 
-
+    @Override
+    public String toString() {
+        return "RpcAddress{" +
+                "address='" + address + '\'' +
+                ", port=" + port +
+                ", weight=" + weight +
+                '}';
+    }
 }

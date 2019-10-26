@@ -1,6 +1,7 @@
 package com.github.houbb.rpc.client.proxy.context;
 
 import com.github.houbb.rpc.client.invoke.InvokeService;
+import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
 import java.util.List;
 
@@ -28,12 +29,13 @@ public interface ProxyContext<T> {
      */
     Class<T> serviceInterface();
 
-    /**
-     * netty channel 信息
-     * @return channel 信息
-     * @since 0.0.6
-     */
-    List<ChannelFuture> channelFutures();
+//    /**
+//     * netty channel 信息
+//     * @return channel 信息
+//     * @since 0.0.6
+//     */
+//    @Deprecated
+//    List<ChannelFuture> channelFutures();
 
     /**
      * 调用服务
@@ -49,5 +51,12 @@ public interface ProxyContext<T> {
      * @since 0.0.7
      */
     long timeout();
+
+    /**
+     * netty channel 信息
+     * @return channel 信息
+     * @since 0.0.9
+     */
+    List<RpcChannelFuture> channelFutures();
 
 }

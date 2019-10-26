@@ -23,7 +23,9 @@ import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
+import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcChannelFuture;
 import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
@@ -93,6 +95,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * （2）后期进行 Load-balance 路由等操作。可以放在这里执行。
      * @since 0.0.6
      */
+    @Deprecated
     private List<ChannelFuture> channelFutures;
 
     /**
@@ -187,18 +190,16 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         // 1. 启动 client 端到 server 端的连接信息
         // 1.1 为了提升性能，可以将所有的 client=>server 的连接都调整为一个 thread。
         // 1.2 初期为了简单，直接使用同步循环的方式。
-        // 循环连接
+        // 获取地址列表信息
         List<RpcAddress> rpcAddressList = getRpcAddresses();
 
-        for(RpcAddress rpcAddress : rpcAddressList) {
-            final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
-            final ChannelHandler actualChannlHandler = ChannelHandlers.objectCodecHandler(channelHandler);
-            ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), actualChannlHandler).call();
-            channelFutures.add(channelFuture);
-        }
+        //2. 循环链接
+        List<RpcChannelFuture> channelFutureList = channelFutureList(rpcAddressList);
 
-        // 2. 接口动态代理
-        ProxyContext<T> proxyContext = buildReferenceProxyContext();
+        //3. 接口动态代理
+        ProxyContext<T> proxyContext = buildProxyContext(channelFutureList);
+        //3.1 动态代理
+        //3.2 为了提升性能，可以使用 javaassit 等基于字节码的技术
         return ReferenceProxy.newProxyInstance(proxyContext);
     }
 
@@ -229,7 +230,6 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * @return rpc 地址信息列表
      * @since 0.0.8
      */
-    @SuppressWarnings("unchecked")
     private List<RpcAddress> getRpcAddresses() {
         //0. 快速返回
         if(CollectionUtil.isNotEmpty(rpcAddresses)) {
@@ -322,17 +322,48 @@ public class ClientBs<T> implements ReferenceConfig<T> {
 
     /**
      * 构建调用上下文
+     * @param channelFutureList 信息列表
      * @return 引用代理上下文
      * @since 0.0.6
      */
-    private ProxyContext<T> buildReferenceProxyContext() {
+    private ProxyContext<T> buildProxyContext(final List<RpcChannelFuture> channelFutureList) {
         DefaultProxyContext<T> proxyContext = new DefaultProxyContext<>();
         proxyContext.serviceId(this.serviceId);
         proxyContext.serviceInterface(this.serviceInterface);
-        proxyContext.channelFutures(this.channelFutures);
+        proxyContext.channelFutures(channelFutureList);
         proxyContext.invokeService(this.invokeService);
         proxyContext.timeout(this.timeout);
         return proxyContext;
+    }
+
+    /**
+     * 获取处理后的channel future 列表信息
+     * （1）权重
+     * （2）client 链接信息
+     * （3）地址信息
+     * @param rpcAddressList 地址信息列表
+     * @return 信息列表
+     * @since 0.0.9
+     */
+    private List<RpcChannelFuture> channelFutureList(final List<RpcAddress> rpcAddressList) {
+        List<RpcChannelFuture> resultList = Guavas.newArrayList();
+
+        if(CollectionUtil.isNotEmpty(rpcAddressList)) {
+            for(RpcAddress rpcAddress : rpcAddressList) {
+                final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
+                final ChannelHandler actualChannlHandler = ChannelHandlers.objectCodecHandler(channelHandler);
+
+                // 循环中每次都需要一个新的 handler
+                DefaultRpcChannelFuture future = DefaultRpcChannelFuture.newInstance();
+                ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), actualChannlHandler).call();
+
+                future.channelFuture(channelFuture).address(rpcAddress)
+                        .weight(rpcAddress.weight());
+                resultList.add(future);
+            }
+        }
+
+        return resultList;
     }
 
 }

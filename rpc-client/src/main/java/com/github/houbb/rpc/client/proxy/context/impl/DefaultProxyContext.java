@@ -2,6 +2,7 @@ package com.github.houbb.rpc.client.proxy.context.impl;
 
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.proxy.context.ProxyContext;
+import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
 import java.util.List;
 
@@ -29,9 +30,9 @@ public class DefaultProxyContext<T> implements ProxyContext<T> {
     /**
      * channel future 信息
      *
-     * @since 0.0.6
+     * @since 0.0.9
      */
-    private List<ChannelFuture> channelFutures;
+    private List<RpcChannelFuture> channelFutures;
 
     /**
      * channel handler 信息
@@ -67,11 +68,11 @@ public class DefaultProxyContext<T> implements ProxyContext<T> {
     }
 
     @Override
-    public List<ChannelFuture> channelFutures() {
+    public List<RpcChannelFuture> channelFutures() {
         return channelFutures;
     }
 
-    public DefaultProxyContext<T> channelFutures(List<ChannelFuture> channelFutures) {
+    public DefaultProxyContext<T> channelFutures(List<RpcChannelFuture> channelFutures) {
         this.channelFutures = channelFutures;
         return this;
     }

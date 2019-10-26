@@ -95,7 +95,9 @@ public class ReferenceProxy<T> implements InvocationHandler {
      * @since 0.0.6
      */
     private Channel getChannel() {
-        return proxyContext.channelFutures().get(0).channel();
+        return proxyContext.channelFutures().get(0)
+                .channelFuture()
+                .channel();
     }
 
     /**

@@ -72,4 +72,13 @@ public class DefaultRpcChannelFuture implements RpcChannelFuture {
         this.weight = weight;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "DefaultRpcChannelFuture{" +
+                "channelFuture=" + channelFuture +
+                ", address=" + address +
+                ", weight=" + weight +
+                '}';
+    }
 }
