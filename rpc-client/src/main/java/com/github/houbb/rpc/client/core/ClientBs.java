@@ -21,6 +21,7 @@ import com.github.houbb.rpc.client.service.impl.ClientRegisterServiceImpl;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
+import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlerFactory;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
@@ -52,9 +53,10 @@ import io.netty.channel.ChannelHandler;
  *
  * 优化思考：
  * （1）对于唯一的 serviceId，其实其 interface 是固定的，是否可以省去？
+ *
+ * @param <T> 接口泛型
  * @author binbin.hou
  * @since 0.0.6
- * @param <T> 接口泛型
  */
 public class ClientBs<T> implements ReferenceConfig<T> {
 
@@ -62,12 +64,14 @@ public class ClientBs<T> implements ReferenceConfig<T> {
 
     /**
      * 服务唯一标识
+     *
      * @since 0.0.6
      */
     private String serviceId;
 
     /**
      * 服务接口
+     *
      * @since 0.0.6
      */
     private Class<T> serviceInterface;
@@ -78,44 +82,50 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * （2）如果为空，则采用自动发现的方式
      *
      * 如果为 subscribe 可以自动发现，然后填充这个字段信息。
+     *
      * @since 0.0.6
      */
     private List<RpcAddress> rpcAddresses;
 
 
-
     /**
      * 调用超时时间
+     *
      * @since 0.0.7
      */
     private long timeout;
 
     /**
      * 是否进行订阅模式
+     *
      * @since 0.0.8
      */
     private boolean subscribe;
 
     /**
      * 注册中心列表
+     *
      * @since 0.0.8
      */
     private List<RpcAddress> registerCenterList;
 
     /**
      * 调用服务管理类
+     *
      * @since 0.0.6
      */
     private InvokeService invokeService;
 
     /**
      * 客户端注册中心服务类
+     *
      * @since 0.0.9
      */
     private ClientRegisterService clientRegisterService;
 
     /**
      * 新建一个客户端实例
+     *
      * @param <T> 泛型
      * @return this
      * @since 0.0.9
@@ -128,7 +138,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         // 初始化信息
         this.rpcAddresses = Guavas.newArrayList();
         // 默认为 60s 超时
-        this.timeout = 60*1000;
+        this.timeout = 60 * 1000;
         this.registerCenterList = Guavas.newArrayList();
 
         // 依赖服务初始化
@@ -169,6 +179,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * 获取对应的引用实现
      * （1）处理所有的反射代理信息-方法可以抽离，启动各自独立即可。
      * （2）启动对应的长连接
+     *
      * @return 引用代理类
      * @since 0.0.6
      */
@@ -181,7 +192,13 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         List<RpcAddress> rpcAddressList = getRpcAddresses();
 
         //2. 循环链接
-        List<RpcChannelFuture> channelFutureList = channelFutureList(rpcAddressList);
+        List<RpcChannelFuture> channelFutureList = ChannelHandlers.channelFutureList(rpcAddressList, new ChannelHandlerFactory() {
+            @Override
+            public ChannelHandler handler() {
+                final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
+                return ChannelHandlers.objectCodecHandler(channelHandler);
+            }
+        });
 
         //3. 接口动态代理
         ProxyContext<T> proxyContext = buildProxyContext(channelFutureList);
@@ -189,8 +206,6 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         //3.2 为了提升性能，可以使用 javaassit 等基于字节码的技术
         return ReferenceProxy.newProxyInstance(proxyContext);
     }
-
-
 
     @Override
     public ClientBs<T> timeout(long timeout) {
@@ -214,12 +229,13 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * 获取 rpc 地址信息列表
      * （1）默认直接通过指定的地址获取
      * （2）如果指定列表为空，且
+     *
      * @return rpc 地址信息列表
      * @since 0.0.8
      */
     private List<RpcAddress> getRpcAddresses() {
         //0. 快速返回
-        if(CollectionUtil.isNotEmpty(rpcAddresses)) {
+        if (CollectionUtil.isNotEmpty(rpcAddresses)) {
             return rpcAddresses;
         }
 
@@ -233,23 +249,19 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     /**
      * 注册中心参数检查
      * （1）如果可用列表为空，且没有指定自动发现，这个时候服务已经不可用了。
+     *
      * @since 0.0.8
      */
     private void registerCenterParamCheck() {
-        if(!subscribe) {
-            LOG.error("[Rpc Client] no available services found for serviceId:{}",
-                    serviceId);
-            throw new RpcRuntimeException();
-        }
-        if(CollectionUtil.isEmpty(registerCenterList)) {
-            LOG.error("[Rpc Client] register center address can't be null!:{}",
-                    serviceId);
+        if (!subscribe) {
+            LOG.error("[Rpc Client] no available services found for serviceId:{}", serviceId);
             throw new RpcRuntimeException();
         }
     }
 
     /**
      * 构建调用上下文
+     *
      * @param channelFutureList 信息列表
      * @return 引用代理上下文
      * @since 0.0.6
@@ -262,36 +274,6 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         proxyContext.invokeService(this.invokeService);
         proxyContext.timeout(this.timeout);
         return proxyContext;
-    }
-
-    /**
-     * 获取处理后的channel future 列表信息
-     * （1）权重
-     * （2）client 链接信息
-     * （3）地址信息
-     * @param rpcAddressList 地址信息列表
-     * @return 信息列表
-     * @since 0.0.9
-     */
-    private List<RpcChannelFuture> channelFutureList(final List<RpcAddress> rpcAddressList) {
-        List<RpcChannelFuture> resultList = Guavas.newArrayList();
-
-        if(CollectionUtil.isNotEmpty(rpcAddressList)) {
-            for(RpcAddress rpcAddress : rpcAddressList) {
-                final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
-                final ChannelHandler actualChannlHandler = ChannelHandlers.objectCodecHandler(channelHandler);
-
-                // 循环中每次都需要一个新的 handler
-                DefaultRpcChannelFuture future = DefaultRpcChannelFuture.newInstance();
-                ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), actualChannlHandler).call();
-
-                future.channelFuture(channelFuture).address(rpcAddress)
-                        .weight(rpcAddress.weight());
-                resultList.add(future);
-            }
-        }
-
-        return resultList;
     }
 
 }

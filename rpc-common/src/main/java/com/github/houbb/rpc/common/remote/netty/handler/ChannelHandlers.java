@@ -1,6 +1,16 @@
 package com.github.houbb.rpc.common.remote.netty.handler;
 
+import com.github.houbb.heaven.util.guava.Guavas;
+import com.github.houbb.heaven.util.util.CollectionUtil;
+import com.github.houbb.rpc.common.config.component.RpcAddress;
+import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
+import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcChannelFuture;
+
+import java.util.List;
+
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.serialization.ClassResolvers;
@@ -55,6 +65,36 @@ public final class ChannelHandlers {
                         .addLast(channelHandlers);
             }
         };
+    }
+
+    /**
+     * 获取处理后的channel future 列表信息
+     * （1）权重
+     * （2）client 链接信息
+     * （3）地址信息
+     * @param rpcAddressList 地址信息列表
+     * @param handlerFactory 构建工厂
+     * @return 信息列表
+     * @since 0.0.9
+     */
+    public static List<RpcChannelFuture> channelFutureList(final List<RpcAddress> rpcAddressList, final ChannelHandlerFactory handlerFactory) {
+        List<RpcChannelFuture> resultList = Guavas.newArrayList();
+
+        if(CollectionUtil.isNotEmpty(rpcAddressList)) {
+            for(RpcAddress rpcAddress : rpcAddressList) {
+                final ChannelHandler channelHandler = handlerFactory.handler();
+
+                // 循环中每次都需要一个新的 handler
+                DefaultRpcChannelFuture future = DefaultRpcChannelFuture.newInstance();
+                ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler).call();
+
+                future.channelFuture(channelFuture).address(rpcAddress)
+                        .weight(rpcAddress.weight());
+                resultList.add(future);
+            }
+        }
+
+        return resultList;
     }
 
 }

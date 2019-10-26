@@ -16,8 +16,10 @@ import com.github.houbb.rpc.client.handler.RpcClientRegisterHandler;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.service.ClientRegisterService;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
+import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlerFactory;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
+import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
@@ -94,11 +96,11 @@ public class ClientRegisterServiceImpl implements ClientRegisterService {
     private List<ServiceEntry> lookUpServiceEntryList(final String serviceId,
                                                       final List<RpcAddress> registerCenterList) {
         //1. 连接到注册中心
-        List<ChannelFuture> channelFutureList = connectRegisterCenter(registerCenterList);
+        List<RpcChannelFuture> channelFutureList = connectRegisterCenter(registerCenterList);
 
         //2. 选择一个
         // 直接取第一个即可，后续可以使用 load-balance 策略。
-        ChannelFuture channelFuture = channelFutureList.get(0);
+        ChannelFuture channelFuture = channelFutureList.get(0).channelFuture();
 
         //3. 发送查询请求
         ServiceEntry serviceEntry = ServiceEntryBuilder.of(serviceId);
@@ -121,22 +123,14 @@ public class ClientRegisterServiceImpl implements ClientRegisterService {
      * @return 对应的结果列表
      * @since 0.0.8
      */
-    private List<ChannelFuture> connectRegisterCenter(final List<RpcAddress> registerCenterList) {
-        List<ChannelFuture> futureList = Guavas.newArrayList(registerCenterList.size());
-        ChannelHandler channelHandler = ChannelHandlers.objectCodecHandler(new RpcClientRegisterHandler(invokeService));
-
-        for (RpcAddress rpcAddress : registerCenterList) {
-            final String ip = rpcAddress.address();
-            final int port = rpcAddress.port();
-            LOG.info("[Rpc Client] connect to register {}:{} ",
-                    ip, port);
-            ChannelFuture channelFuture = DefaultNettyClient
-                    .newInstance(ip, port, channelHandler)
-                    .call();
-
-            futureList.add(channelFuture);
-        }
-        return futureList;
+    private List<RpcChannelFuture> connectRegisterCenter(final List<RpcAddress> registerCenterList) {
+        return ChannelHandlers.channelFutureList(registerCenterList,
+                new ChannelHandlerFactory() {
+                    @Override
+                    public ChannelHandler handler() {
+                        return ChannelHandlers.objectCodecHandler(new RpcClientRegisterHandler(invokeService));
+                    }
+                });
     }
 
 
