@@ -5,8 +5,9 @@
 
 package com.github.houbb.rpc.common.rpc.invoke.impl;
 
+import com.github.houbb.rpc.common.rpc.domain.BaseRpc;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
-import com.github.houbb.rpc.common.rpc.invoke.InvokeContext;
+import com.github.houbb.rpc.common.rpc.invoke.RpcFilterContext;
 
 import java.util.List;
 
@@ -19,13 +20,19 @@ import java.util.List;
  * @author houbinbin
  * @since 0.0.9
  */
-public class DefaultInvokeContext implements InvokeContext {
+public class DefaultRpcFilterContext implements RpcFilterContext {
+
+    /**
+     * 请求信息
+     * @since 0.0.9
+     */
+    private BaseRpc request;
 
     /**
      * 调用唯一标识
      * @since 0.0.9
      */
-    private String seqId;
+    private String  seqId;
 
     /**
      * 此次调用的超时时间
@@ -44,8 +51,18 @@ public class DefaultInvokeContext implements InvokeContext {
      * @return 实例
      * @since 0.0.9
      */
-    public static DefaultInvokeContext newInstance() {
-        return new DefaultInvokeContext();
+    public static DefaultRpcFilterContext newInstance() {
+        return new DefaultRpcFilterContext();
+    }
+
+    @Override
+    public BaseRpc request() {
+        return request;
+    }
+
+    public DefaultRpcFilterContext request(BaseRpc request) {
+        this.request = request;
+        return this;
     }
 
     @Override
@@ -53,7 +70,7 @@ public class DefaultInvokeContext implements InvokeContext {
         return seqId;
     }
 
-    public DefaultInvokeContext seqId(String seqId) {
+    public DefaultRpcFilterContext seqId(String seqId) {
         this.seqId = seqId;
         return this;
     }
@@ -63,7 +80,7 @@ public class DefaultInvokeContext implements InvokeContext {
         return timeout;
     }
 
-    public DefaultInvokeContext timeout(long timeout) {
+    public DefaultRpcFilterContext timeout(long timeout) {
         this.timeout = timeout;
         return this;
     }
@@ -73,7 +90,7 @@ public class DefaultInvokeContext implements InvokeContext {
         return channelFutures;
     }
 
-    public DefaultInvokeContext channelFutures(List<RpcChannelFuture> channelFutures) {
+    public DefaultRpcFilterContext channelFutures(List<RpcChannelFuture> channelFutures) {
         this.channelFutures = channelFutures;
         return this;
     }
@@ -81,10 +98,10 @@ public class DefaultInvokeContext implements InvokeContext {
     @Override
     public String toString() {
         return "DefaultInvokeContext{" +
-                "seqId='" + seqId + '\'' +
+                "request=" + request +
+                ", seqId='" + seqId + '\'' +
                 ", timeout=" + timeout +
                 ", channelFutures=" + channelFutures +
                 '}';
     }
-
 }

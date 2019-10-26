@@ -7,6 +7,7 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.proxy.context.ProxyContext;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
+import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
 import com.github.houbb.rpc.common.support.id.impl.Uuid;
 import com.github.houbb.rpc.common.support.time.impl.Times;
 
@@ -66,10 +67,6 @@ public class ReferenceProxy<T> implements InvocationHandler {
         rpcRequest.paramTypeNames(ReflectMethodUtil.getParamTypeNames(method));
         rpcRequest.methodName(method.getName());
 
-        // 调用远程
-        LOG.info("[Client] start call remote with request: {}", rpcRequest);
-        proxyContext.invokeService().addRequest(seqId, proxyContext.timeout());
-
         // 这里使用 load-balance 进行选择 channel 写入。
         final Channel channel = getChannel();
         LOG.info("[Client] start call channel id: {}", channel.id().asLongText());
@@ -78,13 +75,13 @@ public class ReferenceProxy<T> implements InvocationHandler {
         // writeAndFlush 实际是一个异步的操作，直接使用 sync() 可以看到异常信息。
         // 支持的必须是 ByteBuf
         channel.writeAndFlush(rpcRequest);
+        // 调用远程
+        LOG.info("[Client] start call remote with request: {}", rpcRequest);
+        proxyContext.invokeService().addRequest(seqId, proxyContext.timeout());
 
+        // 获取结果
         RpcResponse rpcResponse = proxyContext.invokeService().getResponse(seqId);
-        Throwable error = rpcResponse.error();
-        if(ObjectUtil.isNotNull(error)) {
-            throw error;
-        }
-        return rpcResponse.result();
+        return RpcResponses.getResult(rpcResponse);
     }
 
     /**

@@ -17,13 +17,13 @@ package com.github.houbb.rpc.common.rpc.invoke;
  * @author houbinbin
  * @since 0.0.9
  */
-public interface InvokeHandler {
+public interface RpcFilter {
 
     /**
      * 调用
-     * @param invokeContext 调用上下文
+     * @param rpcFilterContext 调用上下文
      * @since 0.0.9
      */
-    void invoke(final InvokeContext invokeContext);
+    void filter(final RpcFilterContext rpcFilterContext);
 
 }

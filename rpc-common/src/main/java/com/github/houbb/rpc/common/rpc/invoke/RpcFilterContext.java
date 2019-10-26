@@ -5,6 +5,7 @@
 
 package com.github.houbb.rpc.common.rpc.invoke;
 
+import com.github.houbb.rpc.common.rpc.domain.BaseRpc;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
 import java.util.List;
@@ -21,7 +22,14 @@ import java.util.List;
  * @author houbinbin
  * @since 0.0.9
  */
-public interface InvokeContext {
+public interface RpcFilterContext {
+
+    /**
+     * 请求信息
+     * @return 请求信息
+     * @since 0.0.9
+     */
+    BaseRpc request();
 
     /**
      * 调用唯一标识
