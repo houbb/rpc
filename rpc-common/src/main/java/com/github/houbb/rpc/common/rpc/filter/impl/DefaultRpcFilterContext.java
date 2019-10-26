@@ -3,11 +3,11 @@
  * rpc All rights reserved.
  */
 
-package com.github.houbb.rpc.common.rpc.invoke.impl;
+package com.github.houbb.rpc.common.rpc.filter.impl;
 
 import com.github.houbb.rpc.common.rpc.domain.BaseRpc;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
-import com.github.houbb.rpc.common.rpc.invoke.RpcFilterContext;
+import com.github.houbb.rpc.common.rpc.filter.RpcFilterContext;
 
 import java.util.List;
 
@@ -29,12 +29,6 @@ public class DefaultRpcFilterContext implements RpcFilterContext {
     private BaseRpc request;
 
     /**
-     * 调用唯一标识
-     * @since 0.0.9
-     */
-    private String  seqId;
-
-    /**
      * 此次调用的超时时间
      * @since 0.0.9
      */
@@ -45,6 +39,12 @@ public class DefaultRpcFilterContext implements RpcFilterContext {
      * @since 0.0.9
      */
     private List<RpcChannelFuture> channelFutures;
+
+    /**
+     * 最佳匹配的 channel future 列表信息
+     * @since 0.0.9
+     */
+    private RpcChannelFuture channelFuture;
 
     /**
      * 新创建一个实例
@@ -62,16 +62,6 @@ public class DefaultRpcFilterContext implements RpcFilterContext {
 
     public DefaultRpcFilterContext request(BaseRpc request) {
         this.request = request;
-        return this;
-    }
-
-    @Override
-    public String seqId() {
-        return seqId;
-    }
-
-    public DefaultRpcFilterContext seqId(String seqId) {
-        this.seqId = seqId;
         return this;
     }
 
@@ -96,12 +86,14 @@ public class DefaultRpcFilterContext implements RpcFilterContext {
     }
 
     @Override
-    public String toString() {
-        return "DefaultInvokeContext{" +
-                "request=" + request +
-                ", seqId='" + seqId + '\'' +
-                ", timeout=" + timeout +
-                ", channelFutures=" + channelFutures +
-                '}';
+    public RpcChannelFuture channelFuture() {
+        return channelFuture;
     }
+
+    @Override
+    public DefaultRpcFilterContext channelFuture(RpcChannelFuture channelFuture) {
+        this.channelFuture = channelFuture;
+        return this;
+    }
+
 }

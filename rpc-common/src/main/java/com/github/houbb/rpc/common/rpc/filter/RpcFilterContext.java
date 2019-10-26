@@ -3,7 +3,7 @@
  * rpc All rights reserved.
  */
 
-package com.github.houbb.rpc.common.rpc.invoke;
+package com.github.houbb.rpc.common.rpc.filter;
 
 import com.github.houbb.rpc.common.rpc.domain.BaseRpc;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
@@ -32,13 +32,6 @@ public interface RpcFilterContext {
     BaseRpc request();
 
     /**
-     * 调用唯一标识
-     * @return 调用唯一标识
-     * @since 0.0.9
-     */
-    String seqId();
-
-    /**
      * 此次调用的超时时间
      * @return 超时时间
      * @since 0.0.9
@@ -51,5 +44,25 @@ public interface RpcFilterContext {
      * @since 0.0.9
      */
     List<RpcChannelFuture> channelFutures();
+
+    /**
+     * 设置 channel future
+     * （1）可以通过 load balance
+     * （2）其他各种方式
+     * @param channelFuture 消息
+     * @return this
+     * @since 0.0.9
+     */
+    RpcFilterContext channelFuture(final RpcChannelFuture channelFuture);
+
+    /**
+     * 获取 channel future
+     * （1）如果不设置，则默认取 {@link #channelFutures()}第一个
+     * （2）如果对应信息为空，则直接报错 {@link com.github.houbb.rpc.common.exception.RpcRuntimeException}
+     * @see #channelFuture(RpcChannelFuture) 设置对应的值。
+     * @since 0.0.9
+     * @return channel future
+     */
+    RpcChannelFuture channelFuture();
 
 }
