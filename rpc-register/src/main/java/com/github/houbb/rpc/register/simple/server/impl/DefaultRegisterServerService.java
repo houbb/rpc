@@ -87,6 +87,8 @@ public class DefaultRegisterServerService implements RegisterServerService {
 
         LOG.info("[Register Server] start lookUp serviceId: {}", serviceId);
         Set<ServiceEntry> serviceEntrySet = map.get(serviceId);
+        LOG.info("[Register Server] end lookUp serviceId: {}, list: {}", serviceId,
+                serviceEntrySet);
         return Guavas.newArrayList(serviceEntrySet);
     }
 

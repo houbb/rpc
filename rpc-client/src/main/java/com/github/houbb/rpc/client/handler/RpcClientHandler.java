@@ -47,14 +47,6 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
     }
 
     @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        // 每次用完要关闭，不然拿不到response，我也不知道为啥（目测得了解netty才行）
-        // 个人理解：如果不关闭，则永远会被阻塞。
-        ctx.flush();
-        ctx.close();
-    }
-
-    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("[Rpc Client] meet ex ", cause);
         ctx.close();
