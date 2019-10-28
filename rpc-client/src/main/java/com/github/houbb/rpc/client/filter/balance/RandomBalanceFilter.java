@@ -23,8 +23,13 @@ public class RandomBalanceFilter implements RpcFilter {
     public void filter(RpcFilterContext rpcFilterContext) {
         List<RpcChannelFuture> channelFutures = rpcFilterContext.channelFutures();
         final int size = channelFutures.size();
-        Random random = ThreadLocalRandom.current();
-        int index = random.nextInt(size-1);
+        int index = 0;
+
+        if(size > 1) {
+            Random random = ThreadLocalRandom.current();
+            index = random.nextInt(size-1);
+        }
+
         rpcFilterContext.channelFuture(channelFutures.get(index));
     }
 
