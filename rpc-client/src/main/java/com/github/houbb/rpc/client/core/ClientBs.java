@@ -13,9 +13,10 @@ import com.github.houbb.rpc.client.config.reference.ReferenceConfig;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.invoke.impl.DefaultInvokeService;
+import com.github.houbb.rpc.client.proxy.ProxyContext;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
-import com.github.houbb.rpc.client.proxy.context.ProxyContext;
-import com.github.houbb.rpc.client.proxy.context.impl.DefaultProxyContext;
+import com.github.houbb.rpc.client.proxy.impl.DefaultProxyContext;
+import com.github.houbb.rpc.client.proxy.impl.DefaultReferenceProxy;
 import com.github.houbb.rpc.client.service.ClientRegisterService;
 import com.github.houbb.rpc.client.service.impl.ClientRegisterServiceImpl;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
@@ -23,14 +24,10 @@ import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlerFactory;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
-import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
-import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcChannelFuture;
+import io.netty.channel.ChannelHandler;
 
 import java.util.List;
-
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 
 /**
  * 引用配置类
@@ -204,7 +201,8 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         ProxyContext<T> proxyContext = buildProxyContext(channelFutureList);
         //3.1 动态代理
         //3.2 为了提升性能，可以使用 javaassit 等基于字节码的技术
-        return ReferenceProxy.newProxyInstance(proxyContext);
+        ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext);
+        return referenceProxy.proxy();
     }
 
     @Override

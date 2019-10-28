@@ -8,6 +8,7 @@ package com.github.houbb.rpc.common.rpc.filter.impl;
 import com.github.houbb.rpc.common.rpc.domain.BaseRpc;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.rpc.filter.RpcFilterContext;
+import io.netty.channel.Channel;
 
 import java.util.List;
 
@@ -86,14 +87,14 @@ public class DefaultRpcFilterContext implements RpcFilterContext {
     }
 
     @Override
-    public RpcChannelFuture channelFuture() {
-        return channelFuture;
-    }
-
-    @Override
     public DefaultRpcFilterContext channelFuture(RpcChannelFuture channelFuture) {
         this.channelFuture = channelFuture;
         return this;
+    }
+
+    @Override
+    public Channel channel() {
+        return this.channelFuture.channelFuture().channel();
     }
 
 }

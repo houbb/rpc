@@ -7,6 +7,7 @@ package com.github.houbb.rpc.common.rpc.filter;
 
 import com.github.houbb.rpc.common.rpc.domain.BaseRpc;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import io.netty.channel.Channel;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public interface RpcFilterContext {
 
     /**
      * 请求信息
+     * @see com.github.houbb.rpc.common.rpc.domain.RpcRequest client 入参请求信息
      * @return 请求信息
      * @since 0.0.9
      */
@@ -56,13 +58,13 @@ public interface RpcFilterContext {
     RpcFilterContext channelFuture(final RpcChannelFuture channelFuture);
 
     /**
+     *
      * 获取 channel future
      * （1）如果不设置，则默认取 {@link #channelFutures()}第一个
      * （2）如果对应信息为空，则直接报错 {@link com.github.houbb.rpc.common.exception.RpcRuntimeException}
-     * @see #channelFuture(RpcChannelFuture) 设置对应的值。
+     * @return channel 信息
      * @since 0.0.9
-     * @return channel future
      */
-    RpcChannelFuture channelFuture();
+    Channel channel();
 
 }
