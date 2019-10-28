@@ -54,6 +54,12 @@ public class DefaultRpcRequest implements RpcRequest {
      */
     private Object[] paramValues;
 
+    /**
+     * 调用方式
+     * @since 0.1.0
+     */
+    private int callType;
+
     @Override
     public String seqId() {
         return seqId;
@@ -116,6 +122,16 @@ public class DefaultRpcRequest implements RpcRequest {
     }
 
     @Override
+    public int callType() {
+        return callType;
+    }
+
+    public DefaultRpcRequest callType(int callType) {
+        this.callType = callType;
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "DefaultRpcRequest{" +
                 "seqId='" + seqId + '\'' +
@@ -124,6 +140,8 @@ public class DefaultRpcRequest implements RpcRequest {
                 ", methodName='" + methodName + '\'' +
                 ", paramTypeNames=" + paramTypeNames +
                 ", paramValues=" + Arrays.toString(paramValues) +
+                ", callType=" + callType +
                 '}';
     }
+
 }

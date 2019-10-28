@@ -10,6 +10,7 @@ import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.config.reference.ReferenceConfig;
+import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.invoke.impl.DefaultInvokeService;
@@ -121,6 +122,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     private ClientRegisterService clientRegisterService;
 
     /**
+     * 调用方式
+     * @since 0.1.0
+     */
+    private CallTypeEnum callType;
+
+    /**
      * 新建一个客户端实例
      *
      * @param <T> 泛型
@@ -137,6 +144,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         // 默认为 60s 超时
         this.timeout = 60 * 1000;
         this.registerCenterList = Guavas.newArrayList();
+        this.callType = CallTypeEnum.SYNC;
 
         // 依赖服务初始化
         this.invokeService = new DefaultInvokeService();
@@ -186,7 +194,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         // 1.1 为了提升性能，可以将所有的 client=>server 的连接都调整为一个 thread。
         // 1.2 初期为了简单，直接使用同步循环的方式。
         // 获取地址列表信息
-        List<RpcAddress> rpcAddressList = getRpcAddresses();
+        List<RpcAddress> rpcAddressList = this.getRpcAddresses();
 
         //2. 循环链接
         List<RpcChannelFuture> channelFutureList = ChannelHandlers.channelFutureList(rpcAddressList, new ChannelHandlerFactory() {
@@ -220,6 +228,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     @Override
     public ReferenceConfig<T> registerCenter(String addresses) {
         this.registerCenterList = RpcAddressBuilder.of(addresses);
+        return this;
+    }
+
+    @Override
+    public ReferenceConfig<T> callType(CallTypeEnum callTypeEnum) {
+        this.callType = callTypeEnum;
         return this;
     }
 
@@ -271,6 +285,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         proxyContext.channelFutures(channelFutureList);
         proxyContext.invokeService(this.invokeService);
         proxyContext.timeout(this.timeout);
+        proxyContext.callType(this.callType);
         return proxyContext;
     }
 

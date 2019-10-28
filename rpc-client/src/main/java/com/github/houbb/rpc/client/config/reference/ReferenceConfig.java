@@ -1,5 +1,7 @@
 package com.github.houbb.rpc.client.config.reference;
 
+import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
+
 /**
  * 引用配置类
  *
@@ -100,5 +102,13 @@ public interface ReferenceConfig<T> {
      * @return this
      */
     ReferenceConfig<T> registerCenter(final String addresses);
+
+    /**
+     * 调用方式
+     * @param callTypeEnum 调用方式
+     * @since 0.1.0
+     * @return this
+     */
+    ReferenceConfig<T> callType(final CallTypeEnum callTypeEnum);
 
 }

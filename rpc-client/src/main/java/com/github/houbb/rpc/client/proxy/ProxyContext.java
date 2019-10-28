@@ -1,5 +1,6 @@
 package com.github.houbb.rpc.client.proxy;
 
+import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
@@ -48,5 +49,12 @@ public interface ProxyContext<T> {
      * @since 0.0.9
      */
     List<RpcChannelFuture> channelFutures();
+
+    /**
+     * 调用方式
+     * @return 枚举值
+     * @since 0.1.0
+     */
+    CallTypeEnum callType();
 
 }

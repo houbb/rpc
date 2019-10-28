@@ -3,6 +3,7 @@ package com.github.houbb.rpc.client.proxy.impl;
 import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.filter.balance.RandomBalanceFilter;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.proxy.ProxyContext;
@@ -56,6 +57,8 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // 反射信息处理成为 rpcRequest
+        // TODO: 这里需要添加对应的返回值类型。
+        // 避免 null 值返回时，基本类型异常。
         final String seqId = Ids.id();
         final long createTime = Times.time();
         DefaultRpcRequest rpcRequest = new DefaultRpcRequest();
@@ -65,6 +68,7 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         rpcRequest.paramValues(args);
         rpcRequest.paramTypeNames(ReflectMethodUtil.getParamTypeNames(method));
         rpcRequest.methodName(method.getName());
+        rpcRequest.callType(proxyContext.callType().code());
 
         // 这里使用 load-balance 进行选择 channel 写入。
         // 构建 filter 相关信息,结合 pipeline 进行整合
@@ -82,6 +86,11 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         invokeService.addRequest(seqId, proxyContext.timeout());
 
         // 获取结果
+        // 如果是 oneWay，则直接设置结果为 null
+        if(CallTypeEnum.ONE_WAY.equals(proxyContext.callType())) {
+            LOG.info("[Client] call type is one way, set response to null.");
+            invokeService.addResponse(seqId, null);
+        }
         RpcResponse rpcResponse = invokeService.getResponse(seqId);
         return RpcResponses.getResult(rpcResponse);
     }

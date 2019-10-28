@@ -1,5 +1,6 @@
 package com.github.houbb.rpc.client.proxy.impl;
 
+import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.proxy.ProxyContext;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
@@ -45,6 +46,12 @@ public class DefaultProxyContext<T> implements ProxyContext<T> {
      */
     private long timeout;
 
+    /**
+     * 调用方式
+     * @since 0.1.0
+     */
+    private CallTypeEnum callType;
+
     @Override
     public String serviceId() {
         return serviceId;
@@ -68,6 +75,16 @@ public class DefaultProxyContext<T> implements ProxyContext<T> {
     @Override
     public List<RpcChannelFuture> channelFutures() {
         return channelFutures;
+    }
+
+    @Override
+    public CallTypeEnum callType() {
+        return callType;
+    }
+
+    public DefaultProxyContext<T> callType(CallTypeEnum callType) {
+        this.callType = callType;
+        return this;
     }
 
     public DefaultProxyContext<T> channelFutures(List<RpcChannelFuture> channelFutures) {

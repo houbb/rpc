@@ -30,6 +30,7 @@ public interface InvokeService {
 
     /**
      * 获取标志信息对应的结果
+     * （1）需要移除对应的结果信息
      * @param seqId 序列号
      * @return 结果
      * @since 0.0.6
