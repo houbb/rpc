@@ -32,12 +32,12 @@ class OneWayCallTypeStrategy implements CallTypeStrategy {
      *
      * @since 0.1.0
      */
-    public static CallTypeStrategy getInstance() {
+    static CallTypeStrategy getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public Object result(ProxyContext proxyContext, RpcRequest rpcRequest) {
+    public RpcResponse result(ProxyContext proxyContext, RpcRequest rpcRequest) {
         final String seqId = rpcRequest.seqId();
 
         // 结果可以不是简单的 null，而是根据 result 类型处理，避免基本类型NPE。
@@ -45,7 +45,7 @@ class OneWayCallTypeStrategy implements CallTypeStrategy {
         LOG.info("[Client] call type is one way, seqId: {} set response to {}", seqId, rpcResponse);
 
         // 获取结果
-        return RpcResponses.getResult(rpcResponse);
+        return rpcResponse;
     }
 
 }

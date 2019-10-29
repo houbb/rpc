@@ -13,6 +13,7 @@ import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.support.calltype.CallTypeStrategy;
 import com.github.houbb.rpc.client.support.calltype.impl.CallTypeStrategyFactory;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
+import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.rpc.filter.RpcFilter;
 import com.github.houbb.rpc.common.rpc.filter.RpcFilterContext;
@@ -89,6 +90,10 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
 
         // 获取结果
         CallTypeStrategy callTypeStrategy = CallTypeStrategyFactory.callTypeStrategy(callType);
+        RpcResponse rpcResponse = callTypeStrategy.result(proxyContext, rpcRequest);
+
+        // 获取调用结果
+
         return callTypeStrategy.result(proxyContext, rpcRequest);
     }
 
