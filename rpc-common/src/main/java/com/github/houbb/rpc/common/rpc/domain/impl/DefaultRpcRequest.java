@@ -55,12 +55,6 @@ public class DefaultRpcRequest implements RpcRequest {
     private Object[] paramValues;
 
     /**
-     * 调用方式
-     * @since 0.1.0
-     */
-    private int callType;
-
-    /**
      * 返回值类型
      * @since 0.1.0
      */
@@ -128,16 +122,6 @@ public class DefaultRpcRequest implements RpcRequest {
     }
 
     @Override
-    public int callType() {
-        return callType;
-    }
-
-    public DefaultRpcRequest callType(int callType) {
-        this.callType = callType;
-        return this;
-    }
-
-    @Override
     public Class returnType() {
         return returnType;
     }
@@ -156,7 +140,6 @@ public class DefaultRpcRequest implements RpcRequest {
                 ", methodName='" + methodName + '\'' +
                 ", paramTypeNames=" + paramTypeNames +
                 ", paramValues=" + Arrays.toString(paramValues) +
-                ", callType=" + callType +
                 ", returnType=" + returnType +
                 '}';
     }

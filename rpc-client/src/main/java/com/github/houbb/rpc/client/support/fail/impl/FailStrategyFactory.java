@@ -1,21 +1,35 @@
 package com.github.houbb.rpc.client.support.fail.impl;
 
-import com.github.houbb.heaven.annotation.ThreadSafe;
 import com.github.houbb.rpc.client.support.fail.FailStrategy;
-import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
-import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
+import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 
 /**
  * 快速失败策略工厂
+ *
  * @author binbin.hou
  * @since 0.1.1
  */
-@ThreadSafe
-public class FailStrategyFactory implements FailStrategy {
+public final class FailStrategyFactory {
 
-    @Override
-    public Object fail(RpcResponse rpcResponse) {
-        return RpcResponses.getResult(rpcResponse);
+    private FailStrategyFactory() {
+    }
+
+    /**
+     * 失败策略
+     *
+     * @param failTypeEnum 失败策略枚举
+     * @return 失败策略实现
+     * @since 0.1.1
+     */
+    public static FailStrategy failStrategy(final FailTypeEnum failTypeEnum) {
+        switch (failTypeEnum) {
+            case FAIL_FAST:
+                return new FailFastStrategy();
+            case FAIL_OVER:
+                return new FailOverStrategy();
+            default:
+                throw new UnsupportedOperationException("not support fail type " + failTypeEnum);
+        }
     }
 
 }

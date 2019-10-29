@@ -5,20 +5,10 @@ import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.time.impl.Times;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
-import com.github.houbb.rpc.client.filter.balance.RandomBalanceFilter;
-import com.github.houbb.rpc.client.invoke.InvokeService;
-import com.github.houbb.rpc.client.proxy.ProxyContext;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
-import com.github.houbb.rpc.client.support.calltype.CallTypeStrategy;
-import com.github.houbb.rpc.client.support.calltype.impl.CallTypeStrategyFactory;
-import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
-import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
+import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
-import com.github.houbb.rpc.common.rpc.filter.RpcFilter;
-import com.github.houbb.rpc.common.rpc.filter.RpcFilterContext;
-import com.github.houbb.rpc.common.rpc.filter.impl.DefaultRpcFilterContext;
-import io.netty.channel.Channel;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -37,13 +27,21 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
     private static final Log LOG = LogFactory.getLog(DefaultReferenceProxy.class);
 
     /**
-     * 服务标识
+     * 代理上下文
+     * （1）这个信息不应该被修改，应该和指定的 service 紧密关联。
      * @since 0.0.6
      */
-    private final ProxyContext<T> proxyContext;
+    private final ServiceProxyContext<T> proxyContext;
 
-    public DefaultReferenceProxy(ProxyContext<T> proxyContext) {
+    /**
+     * 远程调用接口
+     * @since 0.1.1
+     */
+    private final RemoteInvokeService remoteInvokeService;
+
+    public DefaultReferenceProxy(ServiceProxyContext<T> proxyContext, RemoteInvokeService remoteInvokeService) {
         this.proxyContext = proxyContext;
+        this.remoteInvokeService = remoteInvokeService;
     }
 
     /**
@@ -57,44 +55,27 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // 反射信息处理成为 rpcRequest
-        // 避免 null 值返回时，基本类型异常。
-        final String seqId = Ids.uuid32();
+        // 构建基本调用参数
         final long createTime = Times.systemTime();
-        final CallTypeEnum callType = proxyContext.callType();
-
         DefaultRpcRequest rpcRequest = new DefaultRpcRequest();
         rpcRequest.serviceId(proxyContext.serviceId());
-        rpcRequest.seqId(seqId);
         rpcRequest.createTime(createTime);
         rpcRequest.paramValues(args);
         rpcRequest.paramTypeNames(ReflectMethodUtil.getParamTypeNames(method));
         rpcRequest.methodName(method.getName());
-        rpcRequest.callType(callType.code());
         rpcRequest.returnType(method.getReturnType());
 
-        // 这里使用 load-balance 进行选择 channel 写入。
-        // 构建 filter 相关信息,结合 pipeline 进行整合
-        final RpcFilterContext rpcFilterContext = buildRpcFilterContext(rpcRequest);
-        this.doFilter(rpcFilterContext);
-        final Channel channel = rpcFilterContext.channel();
-        LOG.info("[Client] start call channel id: {}", channel.id().asLongText());
+        //proxyContext 中应该是属于当前 service 的对应信息。
+        // 每一次调用，对应的 invoke 信息应该是不通的，需要创建新的对象去传递信息
+        // rpcRequest 因为要涉及到网络间传输，尽可能保证其简洁性。
+        DefaultRemoteInvokeContext<T> context = new DefaultRemoteInvokeContext<>();
+        context.request(rpcRequest);
+        context.traceId(Ids.uuid32());
+        context.serviceProxyContext(proxyContext);
+        context.remoteInvokeService(remoteInvokeService);
 
-        // 对于信息的写入，实际上有着严格的要求。
-        // writeAndFlush 实际是一个异步的操作，直接使用 sync() 可以看到异常信息。
-        // 支持的必须是 ByteBuf
-        channel.writeAndFlush(rpcRequest).syncUninterruptibly();
-        LOG.info("[Client] start call remote with request: {}", rpcRequest);
-        final InvokeService invokeService = proxyContext.invokeService();
-        invokeService.addRequest(seqId, proxyContext.timeout());
-
-        // 获取结果
-        CallTypeStrategy callTypeStrategy = CallTypeStrategyFactory.callTypeStrategy(callType);
-        RpcResponse rpcResponse = callTypeStrategy.result(proxyContext, rpcRequest);
-
-        // 获取调用结果
-
-        return callTypeStrategy.result(proxyContext, rpcRequest);
+        //3. 执行远程调用
+        return remoteInvokeService.remoteInvoke(context);
     }
 
     @Override
@@ -106,27 +87,6 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         return (T) Proxy.newProxyInstance(classLoader, interfaces, this);
     }
 
-    /**
-     * 执行过滤
-     * @param context 上下文
-     * @since 0.0.9
-     */
-    private void doFilter(final RpcFilterContext context) {
-        RpcFilter rpcFilter = new RandomBalanceFilter();
-        rpcFilter.filter(context);
-    }
 
-    /**
-     * 构建 rpc 过滤上下文
-     * @return 上下文信息
-     * @since 0.0.9
-     */
-    private RpcFilterContext buildRpcFilterContext(final RpcRequest rpcRequest) {
-        DefaultRpcFilterContext context = new DefaultRpcFilterContext();
-        context.request(rpcRequest);
-        context.timeout(proxyContext.timeout());
-        context.channelFutures(proxyContext.channelFutures());
-        return context;
-    }
 
 }

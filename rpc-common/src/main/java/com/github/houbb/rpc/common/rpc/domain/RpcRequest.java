@@ -54,13 +54,6 @@ public interface RpcRequest extends BaseRpc {
     Object[] paramValues();
 
     /**
-     * 调用方式
-     * @since 0.1.0
-     * @return this
-     */
-    int callType();
-
-    /**
      * 返回值类型
      * @return 返回值类型
      * @since 0.1.0

@@ -1,7 +1,7 @@
 package com.github.houbb.rpc.client.support.calltype.impl;
 
 import com.github.houbb.heaven.annotation.ThreadSafe;
-import com.github.houbb.rpc.client.proxy.ProxyContext;
+import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
 import com.github.houbb.rpc.client.support.calltype.CallTypeStrategy;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
@@ -29,7 +29,7 @@ class SyncCallTypeStrategy implements CallTypeStrategy {
     }
 
     @Override
-    public RpcResponse result(ProxyContext proxyContext, RpcRequest rpcRequest) {
+    public RpcResponse result(ServiceProxyContext proxyContext, RpcRequest rpcRequest) {
         final String seqId = rpcRequest.seqId();
         return proxyContext.invokeService().getResponse(seqId);
     }

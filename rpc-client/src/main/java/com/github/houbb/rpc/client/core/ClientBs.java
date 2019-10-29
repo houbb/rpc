@@ -14,10 +14,13 @@ import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.invoke.impl.DefaultInvokeService;
-import com.github.houbb.rpc.client.proxy.ProxyContext;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
-import com.github.houbb.rpc.client.proxy.impl.DefaultProxyContext;
+import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
+import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
 import com.github.houbb.rpc.client.proxy.impl.DefaultReferenceProxy;
+import com.github.houbb.rpc.client.proxy.impl.DefaultServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.impl.RemoteInvokeServiceImpl;
+import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.client.support.register.ClientRegisterService;
 import com.github.houbb.rpc.client.support.register.impl.ClientRegisterServiceImpl;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
@@ -128,6 +131,18 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     private CallTypeEnum callType;
 
     /**
+     * 失败策略
+     * @since 0.1.1
+     */
+    private FailTypeEnum failType;
+
+    /**
+     * 远程调用实现
+     * @since 0.1.1
+     */
+    private RemoteInvokeService remoteInvokeService;
+
+    /**
      * 新建一个客户端实例
      *
      * @param <T> 泛型
@@ -145,10 +160,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         this.timeout = 60 * 1000;
         this.registerCenterList = Guavas.newArrayList();
         this.callType = CallTypeEnum.SYNC;
+        this.failType = FailTypeEnum.FAIL_OVER;
 
         // 依赖服务初始化
         this.invokeService = new DefaultInvokeService();
         this.clientRegisterService = new ClientRegisterServiceImpl(invokeService);
+        this.remoteInvokeService = new RemoteInvokeServiceImpl();
     }
 
     @Override
@@ -206,10 +223,10 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         });
 
         //3. 接口动态代理
-        ProxyContext<T> proxyContext = buildProxyContext(channelFutureList);
+        ServiceProxyContext<T> proxyContext = buildServiceProxyContext(channelFutureList);
         //3.1 动态代理
         //3.2 为了提升性能，可以使用 javaassit 等基于字节码的技术
-        ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext);
+        ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext, remoteInvokeService);
         return referenceProxy.proxy();
     }
 
@@ -234,6 +251,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     @Override
     public ReferenceConfig<T> callType(CallTypeEnum callTypeEnum) {
         this.callType = callTypeEnum;
+        return this;
+    }
+
+    @Override
+    public ReferenceConfig<T> failType(FailTypeEnum failTypeEnum) {
+        this.failType = failTypeEnum;
         return this;
     }
 
@@ -278,14 +301,16 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * @return 引用代理上下文
      * @since 0.0.6
      */
-    private ProxyContext<T> buildProxyContext(final List<RpcChannelFuture> channelFutureList) {
-        DefaultProxyContext<T> proxyContext = new DefaultProxyContext<>();
+    private ServiceProxyContext<T> buildServiceProxyContext(final List<RpcChannelFuture> channelFutureList) {
+        DefaultServiceProxyContext<T> proxyContext = new DefaultServiceProxyContext<>();
         proxyContext.serviceId(this.serviceId);
         proxyContext.serviceInterface(this.serviceInterface);
         proxyContext.channelFutures(channelFutureList);
         proxyContext.invokeService(this.invokeService);
         proxyContext.timeout(this.timeout);
         proxyContext.callType(this.callType);
+        proxyContext.failType(this.failType);
+        proxyContext.retryTimes(2);
         return proxyContext;
     }
 

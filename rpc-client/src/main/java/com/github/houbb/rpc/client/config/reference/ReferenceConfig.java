@@ -1,6 +1,7 @@
 package com.github.houbb.rpc.client.config.reference;
 
 import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
+import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 
 /**
  * 引用配置类
@@ -110,5 +111,13 @@ public interface ReferenceConfig<T> {
      * @return this
      */
     ReferenceConfig<T> callType(final CallTypeEnum callTypeEnum);
+
+    /**
+     * 失败类型
+     * @param failTypeEnum 失败策略枚举
+     * @since 0.1.1
+     * @return this
+     */
+    ReferenceConfig<T> failType(final FailTypeEnum failTypeEnum);
 
 }

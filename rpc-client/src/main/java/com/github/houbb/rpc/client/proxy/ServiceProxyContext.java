@@ -2,6 +2,7 @@ package com.github.houbb.rpc.client.proxy;
 
 import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.invoke.InvokeService;
+import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * @since 0.0.6
  * @see com.github.houbb.rpc.client.config.reference.ReferenceConfig 对这里的信息进行一次转换。
  */
-public interface ProxyContext<T> {
+public interface ServiceProxyContext<T> {
 
     /**
      * 服务唯一标识
@@ -56,5 +57,19 @@ public interface ProxyContext<T> {
      * @since 0.1.0
      */
     CallTypeEnum callType();
+
+    /**
+     * 失败策略
+     * @return 失败策略枚举
+     * @since 0.1.1
+     */
+    FailTypeEnum failType();
+
+    /**
+     * 重试次数
+     * @return 重试次数
+     * @since 0.1.1
+     */
+    int retryTimes();
 
 }
