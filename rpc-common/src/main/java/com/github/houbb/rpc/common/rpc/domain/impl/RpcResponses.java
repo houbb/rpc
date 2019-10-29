@@ -42,17 +42,30 @@ public final class RpcResponses {
     /**
      * 获取结果
      * @param rpcResponse 响应
-     * @param tClass 类型
-     * @param <T> 泛型
+     * @param returnType 返回值类型
      * @return 结果
      * 如果有异常，则直接抛出异常信息。
-     * @since 0.0.8
+     * @since 0.1.1
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T getResult(final RpcResponse rpcResponse,
-                                  final Class<T> tClass) {
-        Object result = getResult(rpcResponse);
-        return (T) result;
+    public static Object getResult(final RpcResponse rpcResponse,
+                                  final Class returnType) {
+        if(ObjectUtil.isNull(rpcResponse)) {
+            // 根据返回类型处理
+            return PrimitiveUtil.getDefaultValue(returnType);
+        }
+
+        // 处理异常信息
+        Throwable throwable = rpcResponse.error();
+        if(ObjectUtil.isNotNull(throwable)) {
+            throw new RpcRuntimeException(throwable);
+        }
+
+        // 处理结果信息
+        Object result = rpcResponse.result();
+        if(ObjectUtil.isNotNull(result)) {
+            return result;
+        }
+        return PrimitiveUtil.getDefaultValue(returnType);
     }
 
     /**
@@ -63,15 +76,7 @@ public final class RpcResponses {
      * @since 0.0.8
      */
     public static Object getResult(final RpcResponse rpcResponse) {
-        if(ObjectUtil.isNull(rpcResponse)) {
-            return null;
-        }
-
-        Throwable throwable = rpcResponse.error();
-        if(ObjectUtil.isNotNull(throwable)) {
-            throw new RpcRuntimeException(throwable);
-        }
-        return rpcResponse.result();
+        return getResult(rpcResponse, Object.class);
     }
 
 }

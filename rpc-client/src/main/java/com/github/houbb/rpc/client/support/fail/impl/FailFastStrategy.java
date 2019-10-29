@@ -15,7 +15,8 @@ class FailFastStrategy implements FailStrategy {
 
     @Override
     public Object fail(final RemoteInvokeContext context) {
-        return RpcResponses.getResult(context.rpcResponse());
+        final Class returnType = context.request().returnType();
+        return RpcResponses.getResult(context.rpcResponse(), returnType);
     }
 
 }

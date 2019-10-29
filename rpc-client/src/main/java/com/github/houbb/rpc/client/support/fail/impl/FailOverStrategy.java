@@ -23,8 +23,9 @@ class FailOverStrategy implements FailStrategy {
     @Override
     public Object fail(final RemoteInvokeContext context) {
         try {
+            final Class returnType = context.request().returnType();
             final RpcResponse rpcResponse = context.rpcResponse();
-            return RpcResponses.getResult(rpcResponse);
+            return RpcResponses.getResult(rpcResponse, returnType);
         } catch (Exception e) {
             Throwable throwable = e.getCause();
             if(throwable instanceof RpcTimeoutException) {
