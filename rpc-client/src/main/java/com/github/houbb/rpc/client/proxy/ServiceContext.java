@@ -65,4 +65,11 @@ public interface ServiceContext<T> {
      */
     FailTypeEnum failType();
 
+    /**
+     * 是否进行泛化调用
+     * @return 是否
+     * @since 0.1.2
+     */
+    boolean generic();
+
 }

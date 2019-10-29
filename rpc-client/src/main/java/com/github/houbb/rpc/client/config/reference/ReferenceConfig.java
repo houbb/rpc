@@ -120,4 +120,12 @@ public interface ReferenceConfig<T> {
      */
     ReferenceConfig<T> failType(final FailTypeEnum failTypeEnum);
 
+    /**
+     * 设置是否进行泛化处理
+     * @param generic 是否进行泛化处理
+     * @since 0.1.2
+     * @return this
+     */
+    ReferenceConfig<T> generic(final boolean generic);
+
 }

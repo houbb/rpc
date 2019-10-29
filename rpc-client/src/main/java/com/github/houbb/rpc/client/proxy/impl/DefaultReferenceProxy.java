@@ -88,6 +88,4 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         return (T) Proxy.newProxyInstance(classLoader, interfaces, this);
     }
 
-
-
 }

@@ -59,6 +59,12 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
      */
     private FailTypeEnum failType;
 
+    /**
+     * 是否进行泛化调用
+     * @since 0.1.2
+     */
+    private boolean generic;
+
     @Override
     public String serviceId() {
         return serviceId;
@@ -129,4 +135,13 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
         return this;
     }
 
+    @Override
+    public boolean generic() {
+        return generic;
+    }
+
+    public DefaultServiceContext<T> generic(boolean generic) {
+        this.generic = generic;
+        return this;
+    }
 }
