@@ -7,7 +7,7 @@
     <groupId>com.github.houbb</groupId>
     <artifactId>rpc</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.9-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <modules>
         <module>rpc-server</module>
         <module>rpc-test</module>
@@ -33,7 +33,7 @@
         <project.compiler.level>1.7</project.compiler.level>
 
         <!--============================== INTER ==============================-->
-        <heaven.version>0.1.36</heaven.version>
+        <heaven.version>0.1.37</heaven.version>
         <log-integration.version>1.1.7</log-integration.version>
         <json.version>0.1.1</json.version>
 

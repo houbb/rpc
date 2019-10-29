@@ -1,7 +1,7 @@
 package com.github.houbb.rpc.register.domain.message.impl;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
-import com.github.houbb.rpc.common.support.id.impl.Ids;
+import com.github.houbb.heaven.util.id.impl.Ids;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.RegisterMessageHeader;
 
@@ -12,6 +12,8 @@ import com.github.houbb.rpc.register.domain.message.RegisterMessageHeader;
  */
 public final class RegisterMessages {
 
+    private RegisterMessages(){}
+
     /**
      * 初始化消息信息
      * @param type 类型
@@ -21,7 +23,7 @@ public final class RegisterMessages {
      */
     public static RegisterMessage of(final int type,
                                      final Object body) {
-        String seqId = Ids.id();
+        String seqId = Ids.uuid32();
         return of(type, seqId, body);
     }
 

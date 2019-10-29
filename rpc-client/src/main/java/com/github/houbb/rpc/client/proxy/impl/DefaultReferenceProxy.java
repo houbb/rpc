@@ -1,6 +1,8 @@
 package com.github.houbb.rpc.client.proxy.impl;
 
+import com.github.houbb.heaven.util.id.impl.Ids;
 import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
+import com.github.houbb.heaven.util.time.impl.Times;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
@@ -15,8 +17,6 @@ import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
 import com.github.houbb.rpc.common.rpc.filter.RpcFilter;
 import com.github.houbb.rpc.common.rpc.filter.RpcFilterContext;
 import com.github.houbb.rpc.common.rpc.filter.impl.DefaultRpcFilterContext;
-import com.github.houbb.rpc.common.support.id.impl.Ids;
-import com.github.houbb.rpc.common.support.time.impl.Times;
 import io.netty.channel.Channel;
 
 import java.lang.reflect.Method;
@@ -57,10 +57,9 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // 反射信息处理成为 rpcRequest
-        // TODO: 这里需要添加对应的返回值类型。
         // 避免 null 值返回时，基本类型异常。
-        final String seqId = Ids.id();
-        final long createTime = Times.time();
+        final String seqId = Ids.uuid32();
+        final long createTime = Times.systemTime();
         DefaultRpcRequest rpcRequest = new DefaultRpcRequest();
         rpcRequest.serviceId(proxyContext.serviceId());
         rpcRequest.seqId(seqId);
@@ -69,6 +68,7 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         rpcRequest.paramTypeNames(ReflectMethodUtil.getParamTypeNames(method));
         rpcRequest.methodName(method.getName());
         rpcRequest.callType(proxyContext.callType().code());
+        rpcRequest.returnType(method.getReturnType());
 
         // 这里使用 load-balance 进行选择 channel 写入。
         // 构建 filter 相关信息,结合 pipeline 进行整合
@@ -88,8 +88,10 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         // 获取结果
         // 如果是 oneWay，则直接设置结果为 null
         if(CallTypeEnum.ONE_WAY.equals(proxyContext.callType())) {
-            LOG.info("[Client] call type is one way, set response to null.");
-            invokeService.addResponse(seqId, null);
+            // 结果可以不是简单的 null，而是根据 result 类型处理，避免基本类型NPE。
+            RpcResponse rpcResponse = RpcResponses.result(null, rpcRequest.returnType());
+            LOG.info("[Client] call type is one way, set response to {}", rpcResponse);
+            invokeService.addResponse(seqId, rpcResponse);
         }
         RpcResponse rpcResponse = invokeService.getResponse(seqId);
         return RpcResponses.getResult(rpcResponse);

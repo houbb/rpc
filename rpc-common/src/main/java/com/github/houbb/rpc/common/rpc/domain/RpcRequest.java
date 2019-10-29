@@ -60,4 +60,11 @@ public interface RpcRequest extends BaseRpc {
      */
     int callType();
 
+    /**
+     * 返回值类型
+     * @return 返回值类型
+     * @since 0.1.0
+     */
+    Class returnType();
+
 }

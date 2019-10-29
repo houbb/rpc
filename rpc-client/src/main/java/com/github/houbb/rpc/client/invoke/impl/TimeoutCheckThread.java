@@ -1,9 +1,9 @@
 package com.github.houbb.rpc.client.invoke.impl;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
+import com.github.houbb.heaven.util.time.impl.Times;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponseFactory;
-import com.github.houbb.rpc.common.support.time.impl.Times;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +44,7 @@ public class TimeoutCheckThread implements Runnable{
     public void run() {
         for(Map.Entry<String, Long> entry : requestMap.entrySet()) {
             long expireTime = entry.getValue();
-            long currentTime = Times.time();
+            long currentTime = Times.systemTime();
 
             if(currentTime > expireTime) {
                 final String key = entry.getKey();

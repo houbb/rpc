@@ -1,15 +1,17 @@
 package com.github.houbb.rpc.client.invoke.impl;
 
 import com.github.houbb.heaven.util.lang.ObjectUtil;
+import com.github.houbb.heaven.util.time.impl.Times;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponseFactory;
-import com.github.houbb.rpc.common.support.time.impl.Times;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 调用服务接口
@@ -51,7 +53,7 @@ public class DefaultInvokeService implements InvokeService {
         LOG.info("[Client] start add request for seqId: {}, timeoutMills: {}", seqId,
                 timeoutMills);
 
-        final long expireTime = Times.time()+timeoutMills;
+        final long expireTime = Times.systemTime()+timeoutMills;
         requestMap.putIfAbsent(seqId, expireTime);
 
         return this;
@@ -67,7 +69,7 @@ public class DefaultInvokeService implements InvokeService {
         }
 
         //2. 判断是否超时
-        if(Times.time() > expireTime) {
+        if(Times.systemTime() > expireTime) {
             LOG.info("[Client] seqId:{} 信息已超时，直接返回超时结果。", seqId);
             rpcResponse = RpcResponseFactory.timeout();
         }
