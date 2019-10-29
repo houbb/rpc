@@ -22,10 +22,17 @@ public enum CallTypeEnum {
     SYNC(2),
 
     /**
-     * 同步调用：性能更高的调用方式，异步获取结果
+     * 异步调用：性能更高的调用方式，异步获取结果
      * @since 0.1.0
      */
-    ASYNC(3);
+    ASYNC(3),
+
+    /**
+     * 回调方式：通过 callback 处理结果信息
+     * @since 0.1.0
+     */
+    CALLBACK(4),
+    ;
 
     private final int code;
 

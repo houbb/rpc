@@ -3,7 +3,7 @@
  * rpc All rights reserved.
  */
 
-package com.github.houbb.rpc.client.service;
+package com.github.houbb.rpc.client.support.register;
 
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 
