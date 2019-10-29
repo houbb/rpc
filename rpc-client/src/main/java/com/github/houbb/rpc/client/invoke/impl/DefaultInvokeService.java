@@ -113,6 +113,8 @@ public class DefaultInvokeService implements InvokeService {
                 LOG.info("[Client] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
             }
 
+            // 移除这个 key
+            this.responseMap.remove(seqId);
             return rpcResponse;
         } catch (InterruptedException e) {
             throw new RpcRuntimeException(e);
