@@ -13,7 +13,7 @@ import java.util.List;
  * @since 0.0.6
  * @see com.github.houbb.rpc.client.config.reference.ReferenceConfig 对这里的信息进行一次转换。
  */
-public interface ServiceProxyContext<T> {
+public interface ServiceContext<T> {
 
     /**
      * 服务唯一标识
@@ -64,12 +64,5 @@ public interface ServiceProxyContext<T> {
      * @since 0.1.1
      */
     FailTypeEnum failType();
-
-    /**
-     * 重试次数
-     * @return 重试次数
-     * @since 0.1.1
-     */
-    int retryTimes();
 
 }

@@ -30,7 +30,7 @@ public interface RemoteInvokeContext<T> {
      * @return 服务代理信息
      * @since 0.1.1
      */
-    ServiceProxyContext<T> serviceProxyContext();
+    ServiceContext<T> serviceProxyContext();
 
     /**
      * 设置 channel future

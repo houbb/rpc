@@ -16,9 +16,9 @@ import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.invoke.impl.DefaultInvokeService;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
-import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.proxy.impl.DefaultReferenceProxy;
-import com.github.houbb.rpc.client.proxy.impl.DefaultServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.impl.DefaultServiceContext;
 import com.github.houbb.rpc.client.proxy.impl.RemoteInvokeServiceImpl;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.client.support.register.ClientRegisterService;
@@ -223,7 +223,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         });
 
         //3. 接口动态代理
-        ServiceProxyContext<T> proxyContext = buildServiceProxyContext(channelFutureList);
+        ServiceContext<T> proxyContext = buildServiceProxyContext(channelFutureList);
         //3.1 动态代理
         //3.2 为了提升性能，可以使用 javaassit 等基于字节码的技术
         ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext, remoteInvokeService);
@@ -301,8 +301,8 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * @return 引用代理上下文
      * @since 0.0.6
      */
-    private ServiceProxyContext<T> buildServiceProxyContext(final List<RpcChannelFuture> channelFutureList) {
-        DefaultServiceProxyContext<T> proxyContext = new DefaultServiceProxyContext<>();
+    private ServiceContext<T> buildServiceProxyContext(final List<RpcChannelFuture> channelFutureList) {
+        DefaultServiceContext<T> proxyContext = new DefaultServiceContext<>();
         proxyContext.serviceId(this.serviceId);
         proxyContext.serviceInterface(this.serviceInterface);
         proxyContext.channelFutures(channelFutureList);
@@ -310,7 +310,6 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         proxyContext.timeout(this.timeout);
         proxyContext.callType(this.callType);
         proxyContext.failType(this.failType);
-        proxyContext.retryTimes(2);
         return proxyContext;
     }
 

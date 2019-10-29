@@ -6,7 +6,7 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeContext;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
-import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.calltype.CallTypeStrategy;
 import com.github.houbb.rpc.client.support.calltype.impl.CallTypeStrategyFactory;
 import com.github.houbb.rpc.client.support.fail.FailStrategy;
@@ -30,7 +30,7 @@ public class RemoteInvokeServiceImpl implements RemoteInvokeService {
     public Object remoteInvoke(RemoteInvokeContext context) {
         // 设置当前调用的唯一标识
         final RpcRequest rpcRequest = context.request();
-        final ServiceProxyContext proxyContext = context.serviceProxyContext();
+        final ServiceContext proxyContext = context.serviceProxyContext();
         final String seqId = Ids.uuid32();
         rpcRequest.seqId(seqId);
 

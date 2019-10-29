@@ -1,6 +1,6 @@
 package com.github.houbb.rpc.client.support.calltype;
 
-import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 
@@ -18,7 +18,7 @@ public interface CallTypeStrategy {
      * @return 结果
      * @since 0.1.0
      */
-    RpcResponse result(final ServiceProxyContext proxyContext,
+    RpcResponse result(final ServiceContext proxyContext,
                        final RpcRequest rpcRequest);
 
 }

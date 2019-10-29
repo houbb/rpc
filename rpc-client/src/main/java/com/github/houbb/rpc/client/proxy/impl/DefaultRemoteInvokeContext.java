@@ -2,7 +2,7 @@ package com.github.houbb.rpc.client.proxy.impl;
 
 import com.github.houbb.rpc.client.proxy.RemoteInvokeContext;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
-import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
@@ -26,7 +26,7 @@ public class DefaultRemoteInvokeContext<T> implements RemoteInvokeContext<T> {
      * 服务代理上下文信息
      * @since 0.1.1
      */
-    private ServiceProxyContext<T> serviceProxyContext;
+    private ServiceContext<T> serviceContext;
 
     /**
      * channel 信息
@@ -69,12 +69,12 @@ public class DefaultRemoteInvokeContext<T> implements RemoteInvokeContext<T> {
     }
 
     @Override
-    public ServiceProxyContext<T> serviceProxyContext() {
-        return serviceProxyContext;
+    public ServiceContext<T> serviceProxyContext() {
+        return serviceContext;
     }
 
-    public DefaultRemoteInvokeContext<T> serviceProxyContext(ServiceProxyContext<T> serviceProxyContext) {
-        this.serviceProxyContext = serviceProxyContext;
+    public DefaultRemoteInvokeContext<T> serviceProxyContext(ServiceContext<T> serviceContext) {
+        this.serviceContext = serviceContext;
         return this;
     }
 

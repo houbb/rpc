@@ -2,7 +2,7 @@ package com.github.houbb.rpc.client.proxy.impl;
 
 import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.invoke.InvokeService;
-import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
@@ -13,7 +13,7 @@ import java.util.List;
  * @author binbin.hou
  * @since 0.0.6
  */
-public class DefaultServiceProxyContext<T> implements ServiceProxyContext<T> {
+public class DefaultServiceContext<T> implements ServiceContext<T> {
 
     /**
      * 服务唯一标识
@@ -59,18 +59,12 @@ public class DefaultServiceProxyContext<T> implements ServiceProxyContext<T> {
      */
     private FailTypeEnum failType;
 
-    /**
-     * 失败重试次数
-     * @since 0.1.1
-     */
-    private int retryTimes;
-
     @Override
     public String serviceId() {
         return serviceId;
     }
 
-    public DefaultServiceProxyContext<T> serviceId(String serviceId) {
+    public DefaultServiceContext<T> serviceId(String serviceId) {
         this.serviceId = serviceId;
         return this;
     }
@@ -80,7 +74,7 @@ public class DefaultServiceProxyContext<T> implements ServiceProxyContext<T> {
         return serviceInterface;
     }
 
-    public DefaultServiceProxyContext<T> serviceInterface(Class<T> serviceInterface) {
+    public DefaultServiceContext<T> serviceInterface(Class<T> serviceInterface) {
         this.serviceInterface = serviceInterface;
         return this;
     }
@@ -100,17 +94,17 @@ public class DefaultServiceProxyContext<T> implements ServiceProxyContext<T> {
         return failType;
     }
 
-    public DefaultServiceProxyContext<T> failType(FailTypeEnum failType) {
+    public DefaultServiceContext<T> failType(FailTypeEnum failType) {
         this.failType = failType;
         return this;
     }
 
-    public DefaultServiceProxyContext<T> callType(CallTypeEnum callType) {
+    public DefaultServiceContext<T> callType(CallTypeEnum callType) {
         this.callType = callType;
         return this;
     }
 
-    public DefaultServiceProxyContext<T> channelFutures(List<RpcChannelFuture> channelFutures) {
+    public DefaultServiceContext<T> channelFutures(List<RpcChannelFuture> channelFutures) {
         this.channelFutures = channelFutures;
         return this;
     }
@@ -120,7 +114,7 @@ public class DefaultServiceProxyContext<T> implements ServiceProxyContext<T> {
         return invokeService;
     }
 
-    public DefaultServiceProxyContext<T> invokeService(InvokeService invokeService) {
+    public DefaultServiceContext<T> invokeService(InvokeService invokeService) {
         this.invokeService = invokeService;
         return this;
     }
@@ -130,18 +124,9 @@ public class DefaultServiceProxyContext<T> implements ServiceProxyContext<T> {
         return timeout;
     }
 
-    public DefaultServiceProxyContext<T> timeout(long timeout) {
+    public DefaultServiceContext<T> timeout(long timeout) {
         this.timeout = timeout;
         return this;
     }
 
-    @Override
-    public int retryTimes() {
-        return retryTimes;
-    }
-
-    public DefaultServiceProxyContext<T> retryTimes(int retryTimes) {
-        this.retryTimes = retryTimes;
-        return this;
-    }
 }

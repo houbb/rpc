@@ -7,7 +7,7 @@ import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
-import com.github.houbb.rpc.client.proxy.ServiceProxyContext;
+import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 
 import java.lang.reflect.Method;
@@ -31,7 +31,7 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
      * （1）这个信息不应该被修改，应该和指定的 service 紧密关联。
      * @since 0.0.6
      */
-    private final ServiceProxyContext<T> proxyContext;
+    private final ServiceContext<T> proxyContext;
 
     /**
      * 远程调用接口
@@ -39,7 +39,7 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
      */
     private final RemoteInvokeService remoteInvokeService;
 
-    public DefaultReferenceProxy(ServiceProxyContext<T> proxyContext, RemoteInvokeService remoteInvokeService) {
+    public DefaultReferenceProxy(ServiceContext<T> proxyContext, RemoteInvokeService remoteInvokeService) {
         this.proxyContext = proxyContext;
         this.remoteInvokeService = remoteInvokeService;
     }
@@ -71,6 +71,7 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         DefaultRemoteInvokeContext<T> context = new DefaultRemoteInvokeContext<>();
         context.request(rpcRequest);
         context.traceId(Ids.uuid32());
+        context.retryTimes(2);
         context.serviceProxyContext(proxyContext);
         context.remoteInvokeService(remoteInvokeService);
 
