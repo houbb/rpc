@@ -11,6 +11,7 @@ import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyServer;
 import com.github.houbb.rpc.register.api.config.RegisterConfig;
 import com.github.houbb.rpc.register.simple.handler.RegisterCenterServerHandler;
 
+import com.github.houbb.rpc.register.support.hook.RegisterShutdownHook;
 import io.netty.channel.ChannelHandler;
 
 /**
@@ -44,6 +45,14 @@ public class RegisterBs implements RegisterConfig {
 
     @Override
     public RegisterBs start() {
+        // 添加对应的 shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                new RegisterShutdownHook().hook();
+            }
+        });
+
         ChannelHandler channelHandler = ChannelHandlers.objectCodecHandler(new RegisterCenterServerHandler());
         DefaultNettyServer.newInstance(port, channelHandler).asyncRun();
 
