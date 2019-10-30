@@ -1,7 +1,7 @@
 package com.github.houbb.rpc.client.config.reference;
 
-import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
+import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 
 /**
  * 引用配置类

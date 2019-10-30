@@ -2,6 +2,7 @@ package com.github.houbb.rpc.server.handler;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcResponse;
@@ -59,10 +60,17 @@ public class RpcServerHandler extends SimpleChannelInboundHandler {
         invokeManager.addRequest(rpcRequest.seqId(), rpcRequest.timeout());
 
         // 3. 回写到 client 端
-        RpcResponse rpcResponse = handleRpcRequest(rpcRequest);
-        ctx.writeAndFlush(rpcResponse);
+        //3.1 获取结果
+        RpcResponse rpcResponse = this.handleRpcRequest(rpcRequest);
+        //3.2 回写结果
+        final CallTypeEnum callType = rpcRequest.callType();
+        if(CallTypeEnum.SYNC.equals(callType)) {
+            ctx.writeAndFlush(rpcResponse);
+        } else {
+            log.info("[Server] seqId: {} callType: {} ignore write back.", seqId, callType);
+        }
         log.info("[Server] seqId: {} response {}", seqId, rpcResponse);
-        // 3.2 移除对应的信息，便于优雅关闭
+        // 3.3 移除对应的信息，便于优雅关闭
         invokeManager.removeReqAndResp(seqId);
     }
 

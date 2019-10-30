@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * 泛化调用
+ * TODO: 想办法对两个方法进行整合。
  * @author binbin.hou
  * @since 0.1.2
  */
@@ -66,6 +67,8 @@ public class GenericReferenceProxy implements GenericService {
         rpcRequest.paramTypeNames(paramTypeNames);
         rpcRequest.methodName("$invoke");
         rpcRequest.returnType(Object.class);
+        rpcRequest.timeout(proxyContext.timeout());
+        rpcRequest.callType(proxyContext.callType());
 
         //proxyContext 中应该是属于当前 service 的对应信息。
         // 每一次调用，对应的 invoke 信息应该是不通的，需要创建新的对象去传递信息

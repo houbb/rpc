@@ -83,8 +83,9 @@ public class DefaultNettyServer extends AbstractNettyServer {
     @Override
     public void destroy() {
         try {
-            channelFuture.channel().closeFuture().syncUninterruptibly();
-            LOG.info("[Netty Server] 关闭完成");
+            LOG.info("[Netty Server] 开始关闭");
+            channelFuture.channel().close();
+            LOG.info("[Netty Server] 完成关闭");
         } catch (Exception e) {
             LOG.error("[Netty Server] 关闭服务异常", e);
             throw new RpcRuntimeException(e);

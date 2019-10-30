@@ -51,6 +51,7 @@ public class RemoteInvokeServiceImpl implements RemoteInvokeService {
         // 获取结果
         CallTypeStrategy callTypeStrategy = CallTypeStrategyFactory.callTypeStrategy(proxyContext.callType());
         RpcResponse rpcResponse = callTypeStrategy.result(proxyContext, rpcRequest);
+        invokeManager.removeReqAndResp(seqId);
 
         // 获取调用结果
         context.rpcResponse(rpcResponse);

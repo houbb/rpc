@@ -1,5 +1,6 @@
 package com.github.houbb.rpc.common.rpc.domain.impl;
 
+import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 
 import java.util.Arrays;
@@ -65,6 +66,12 @@ public class DefaultRpcRequest implements RpcRequest {
      * @since 0.1.3
      */
     private long timeout;
+
+    /**
+     * 调用方式
+     * @since 0.1.3
+     */
+    private CallTypeEnum callType;
 
     @Override
     public String seqId() {
@@ -148,6 +155,16 @@ public class DefaultRpcRequest implements RpcRequest {
     }
 
     @Override
+    public CallTypeEnum callType() {
+        return callType;
+    }
+
+    public DefaultRpcRequest callType(CallTypeEnum callType) {
+        this.callType = callType;
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "DefaultRpcRequest{" +
                 "seqId='" + seqId + '\'' +
@@ -158,6 +175,7 @@ public class DefaultRpcRequest implements RpcRequest {
                 ", paramValues=" + Arrays.toString(paramValues) +
                 ", returnType=" + returnType +
                 ", timeout=" + timeout +
+                ", callType=" + callType +
                 '}';
     }
 

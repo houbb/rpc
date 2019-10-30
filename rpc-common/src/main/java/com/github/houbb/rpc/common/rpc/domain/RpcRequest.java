@@ -1,5 +1,7 @@
 package com.github.houbb.rpc.common.rpc.domain;
 
+import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
+
 import java.util.List;
 
 /**
@@ -66,5 +68,12 @@ public interface RpcRequest extends BaseRpc {
      * @since 0.1.3
      */
     long timeout();
+
+    /**
+     * 调用方式
+     * @return 调用方式
+     * @since 0.1.3
+     */
+    CallTypeEnum callType();
 
 }
