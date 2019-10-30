@@ -73,16 +73,29 @@ public class DefaultNettyClient extends AbstractNettyClient<ChannelFuture> {
         return channelFuture;
     }
 
+    /**
+     * 关闭客户端
+     *
+     * 即closeFuture()是开启了一个channel的监听器，负责监听channel是否关闭的状态，
+     * 如果未来监听到channel关闭了，子线程才会释放，syncUninterruptibly()让主线程同步等待子线程结果。
+     *
+     * <pre>
+     *     channelFuture.channel().closeFuture().syncUninterruptibly();
+     * </pre>
+     *
+     */
     @Override
     public void destroy() {
         try {
-            channelFuture.channel().closeFuture().syncUninterruptibly();
+            LOG.info("[Netty Client] start close future.");
+            channelFuture.channel().close();
             LOG.info("[Netty Client] 关闭完成");
         } catch (Exception e) {
             LOG.error("[Netty Client] 关闭服务异常", e);
             throw new RpcRuntimeException(e);
         } finally {
             workerGroup.shutdownGracefully();
+            LOG.info("[Netty Client] 线程池关闭完成");
         }
     }
 

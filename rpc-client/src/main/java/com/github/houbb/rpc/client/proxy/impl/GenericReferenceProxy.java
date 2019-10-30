@@ -8,8 +8,10 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.common.exception.GenericException;
+import com.github.houbb.rpc.common.exception.ShutdownException;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.support.generic.GenericService;
+import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 
 import java.util.List;
 
@@ -43,6 +45,13 @@ public class GenericReferenceProxy implements GenericService {
     @Override
     @SuppressWarnings("unchecked")
     public Object $invoke(String method, String[] parameterTypes, Object[] args) throws GenericException {
+        // 状态判断
+        final int statusCode = proxyContext.statusManager().status();
+        if(StatusEnum.ENABLE.code() != statusCode) {
+            LOG.error("[Client] current status is: {} , not enable to send request", statusCode);
+            throw new ShutdownException("Status is not enable to send request, may be during shutdown.");
+        }
+
         // 构建基本调用参数
         final long createTime = Times.systemTime();
         Object[] actualArgs = new Object[]{method, parameterTypes, args};

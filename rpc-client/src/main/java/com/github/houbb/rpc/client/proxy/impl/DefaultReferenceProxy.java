@@ -8,7 +8,9 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
+import com.github.houbb.rpc.common.exception.ShutdownException;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
+import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -55,6 +57,13 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        // 状态判断
+        final int statusCode = proxyContext.statusManager().status();
+        if(StatusEnum.ENABLE.code() != statusCode) {
+            LOG.error("[Client] current status is: {} , not enable to send request", statusCode);
+            throw new ShutdownException("Status is not enable to send request, may be during shutdown.");
+        }
+
         // 构建基本调用参数
         final long createTime = Times.systemTime();
         DefaultRpcRequest rpcRequest = new DefaultRpcRequest();
@@ -82,6 +91,9 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T proxy() {
+        // 设置状态为可用
+        proxyContext.statusManager().status(StatusEnum.ENABLE.code());
+
         final Class<T> interfaceClass = proxyContext.serviceInterface();
         ClassLoader classLoader = interfaceClass.getClassLoader();
         Class<?>[] interfaces = new Class[]{interfaceClass};

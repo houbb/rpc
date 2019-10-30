@@ -6,9 +6,6 @@ import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcChannelFuture;
-
-import java.util.List;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
@@ -18,6 +15,8 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+
+import java.util.List;
 
 /**
  * channel 工具类
@@ -86,10 +85,11 @@ public final class ChannelHandlers {
 
                 // 循环中每次都需要一个新的 handler
                 DefaultRpcChannelFuture future = DefaultRpcChannelFuture.newInstance();
-                ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler).call();
+                DefaultNettyClient nettyClient = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler);
+                ChannelFuture channelFuture = nettyClient.call();
 
                 future.channelFuture(channelFuture).address(rpcAddress)
-                        .weight(rpcAddress.weight());
+                        .weight(rpcAddress.weight()).destroyable(nettyClient);
                 resultList.add(future);
             }
         }

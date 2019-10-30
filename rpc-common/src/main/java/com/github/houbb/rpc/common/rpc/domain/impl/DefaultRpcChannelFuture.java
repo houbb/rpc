@@ -5,6 +5,7 @@
 
 package com.github.houbb.rpc.common.rpc.domain.impl;
 
+import com.github.houbb.rpc.common.api.Destroyable;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
@@ -38,6 +39,12 @@ public class DefaultRpcChannelFuture implements RpcChannelFuture {
      * @since 0.0.9
      */
     private int weight;
+
+    /**
+     * 可销毁的对象
+     * @since 0.1.3
+     */
+    private Destroyable destroyable;
 
     public static DefaultRpcChannelFuture newInstance() {
         return new DefaultRpcChannelFuture();
@@ -74,11 +81,23 @@ public class DefaultRpcChannelFuture implements RpcChannelFuture {
     }
 
     @Override
+    public Destroyable destroyable() {
+        return destroyable;
+    }
+
+    public DefaultRpcChannelFuture destroyable(Destroyable destroyable) {
+        this.destroyable = destroyable;
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "DefaultRpcChannelFuture{" +
                 "channelFuture=" + channelFuture +
                 ", address=" + address +
                 ", weight=" + weight +
+                ", destroyable=" + destroyable +
                 '}';
     }
+
 }

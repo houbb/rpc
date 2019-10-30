@@ -22,6 +22,7 @@ import com.github.houbb.rpc.client.proxy.impl.DefaultServiceContext;
 import com.github.houbb.rpc.client.proxy.impl.GenericReferenceProxy;
 import com.github.houbb.rpc.client.proxy.impl.RemoteInvokeServiceImpl;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
+import com.github.houbb.rpc.client.support.hook.ClientShutdownHook;
 import com.github.houbb.rpc.client.support.register.ClientRegisterService;
 import com.github.houbb.rpc.client.support.register.impl.ClientRegisterServiceImpl;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
@@ -30,6 +31,12 @@ import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlerFactory;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.support.hook.RpcShutdownHook;
+import com.github.houbb.rpc.common.support.hook.ShutdownHooks;
+import com.github.houbb.rpc.common.support.resource.ResourceManager;
+import com.github.houbb.rpc.common.support.resource.impl.DefaultResourceManager;
+import com.github.houbb.rpc.common.support.status.service.StatusManager;
+import com.github.houbb.rpc.common.support.status.service.impl.DefaultStatusManager;
 import io.netty.channel.ChannelHandler;
 
 import java.util.List;
@@ -150,6 +157,18 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     private boolean generic;
 
     /**
+     * 状态管理类
+     * @since 0.1.3
+     */
+    private StatusManager statusManager;
+
+    /**
+     * 资源管理类
+     * @since 0.1.3
+     */
+    private ResourceManager resourceManager;
+
+    /**
      * 新建一个客户端实例
      *
      * @param <T> 泛型
@@ -174,6 +193,8 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         this.invokeService = new DefaultInvokeService();
         this.clientRegisterService = new ClientRegisterServiceImpl(invokeService);
         this.remoteInvokeService = new RemoteInvokeServiceImpl();
+        this.statusManager = new DefaultStatusManager();
+        this.resourceManager = new DefaultResourceManager();
     }
 
     @Override
@@ -230,20 +251,27 @@ public class ClientBs<T> implements ReferenceConfig<T> {
                 return ChannelHandlers.objectCodecHandler(channelHandler);
             }
         });
-
-        //3. 接口动态代理
-        ServiceContext<T> proxyContext = buildServiceProxyContext(channelFutureList);
-        //3.1 动态代理
-        //3.2 为了提升性能，可以使用 javaassit 等基于字节码的技术
-
-        if(!this.generic) {
-            ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext, remoteInvokeService);
-            return referenceProxy.proxy();
-        } else {
-            LOG.info("[Client] generic reference proxy created.");
-            return (T) new GenericReferenceProxy(proxyContext, remoteInvokeService);
+        //2.2 循环将 nettyClient 信息放入到资源列表中
+        for(RpcChannelFuture channelFuture : channelFutureList) {
+            this.resourceManager.addDestroy(channelFuture.destroyable());
         }
 
+        //3. 生成服务端代理
+        ServiceContext<T> proxyContext = buildServiceProxyContext(channelFutureList);
+        T reference = null;
+        if(!this.generic) {
+            ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext, remoteInvokeService);
+            reference = referenceProxy.proxy();
+        } else {
+            LOG.info("[Client] generic reference proxy created.");
+            reference = (T) new GenericReferenceProxy(proxyContext, remoteInvokeService);
+        }
+
+        //4. 添加客户端钩子
+        final RpcShutdownHook rpcShutdownHook = new ClientShutdownHook(statusManager, invokeService, resourceManager);
+        ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
+
+        return reference;
     }
 
     @Override
@@ -333,6 +361,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         proxyContext.callType(this.callType);
         proxyContext.failType(this.failType);
         proxyContext.generic(this.generic);
+        proxyContext.statusManager(this.statusManager);
         return proxyContext;
     }
 

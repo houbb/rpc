@@ -5,6 +5,7 @@ import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.support.status.service.StatusManager;
 
 import java.util.List;
 
@@ -64,6 +65,12 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
      * @since 0.1.2
      */
     private boolean generic;
+
+    /**
+     * 状态管理类
+     * @since 0.1.3
+     */
+    private StatusManager statusManager;
 
     @Override
     public String serviceId() {
@@ -142,6 +149,16 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
 
     public DefaultServiceContext<T> generic(boolean generic) {
         this.generic = generic;
+        return this;
+    }
+
+    @Override
+    public StatusManager statusManager() {
+        return statusManager;
+    }
+
+    public DefaultServiceContext<T> statusManager(StatusManager statusManager) {
+        this.statusManager = statusManager;
         return this;
     }
 }

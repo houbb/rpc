@@ -5,6 +5,7 @@
 
 package com.github.houbb.rpc.common.rpc.domain;
 
+import com.github.houbb.rpc.common.api.Destroyable;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 
 import io.netty.channel.ChannelFuture;
@@ -40,5 +41,12 @@ public interface RpcChannelFuture {
      * @since 0.0.9
      */
     int weight();
+
+    /**
+     * 可销毁的对象
+     * @return 可销毁的信息
+     * @since 0.1.3
+     */
+    Destroyable destroyable();
 
 }

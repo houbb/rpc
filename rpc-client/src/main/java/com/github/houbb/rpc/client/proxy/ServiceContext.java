@@ -4,6 +4,7 @@ import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.support.status.service.StatusManager;
 
 import java.util.List;
 
@@ -71,5 +72,12 @@ public interface ServiceContext<T> {
      * @since 0.1.2
      */
     boolean generic();
+
+    /**
+     * 状态管理类
+     * @return 状态管理类
+     * @since 0.1.3
+     */
+    StatusManager statusManager();
 
 }

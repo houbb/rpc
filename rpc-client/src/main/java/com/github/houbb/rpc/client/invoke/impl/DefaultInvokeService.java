@@ -8,6 +8,7 @@ import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponseFactory;
+import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -119,6 +120,11 @@ public class DefaultInvokeService implements InvokeService {
         } catch (InterruptedException e) {
             throw new RpcRuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean remainsRequest() {
+        return this.requestMap.size() > 0;
     }
 
 }
