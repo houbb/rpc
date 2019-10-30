@@ -1,9 +1,9 @@
 package com.github.houbb.rpc.client.proxy;
 
 import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
-import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public interface ServiceContext<T> {
      * @return 调用服务
      * @since 0.0.6
      */
-    InvokeService invokeService();
+    InvokeManager invokeService();
 
     /**
      * 超时时间

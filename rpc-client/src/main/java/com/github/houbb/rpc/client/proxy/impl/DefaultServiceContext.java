@@ -1,10 +1,10 @@
 package com.github.houbb.rpc.client.proxy.impl;
 
 import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
-import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
      *
      * @since 0.0.6
      */
-    private InvokeService invokeService;
+    private InvokeManager invokeManager;
 
     /**
      * 超时时间
@@ -123,12 +123,12 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
     }
 
     @Override
-    public InvokeService invokeService() {
-        return invokeService;
+    public InvokeManager invokeService() {
+        return invokeManager;
     }
 
-    public DefaultServiceContext<T> invokeService(InvokeService invokeService) {
-        this.invokeService = invokeService;
+    public DefaultServiceContext<T> invokeService(InvokeManager invokeManager) {
+        this.invokeManager = invokeManager;
         return this;
     }
 

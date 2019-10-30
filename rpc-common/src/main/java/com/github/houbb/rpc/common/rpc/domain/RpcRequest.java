@@ -60,4 +60,11 @@ public interface RpcRequest extends BaseRpc {
      */
     Class returnType();
 
+    /**
+     * 超时时间
+     * @return 超时时间
+     * @since 0.1.3
+     */
+    long timeout();
+
 }

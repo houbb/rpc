@@ -11,7 +11,6 @@ import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.handler.RpcClientRegisterHandler;
-import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.support.register.ClientRegisterService;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlerFactory;
@@ -19,6 +18,7 @@ import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
+import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
@@ -47,7 +47,7 @@ public class ClientRegisterServiceImpl implements ClientRegisterService {
      *
      * @since 0.0.9
      */
-    private final InvokeService invokeService;
+    private final InvokeManager invokeManager;
 
     /**
      * 注册中心超时时间
@@ -56,8 +56,8 @@ public class ClientRegisterServiceImpl implements ClientRegisterService {
      */
     private long registerCenterTimeOut;
 
-    public ClientRegisterServiceImpl(InvokeService invokeService) {
-        this.invokeService = invokeService;
+    public ClientRegisterServiceImpl(InvokeManager invokeManager) {
+        this.invokeManager = invokeManager;
         this.registerCenterTimeOut = 60 * 1000;
     }
 
@@ -104,11 +104,11 @@ public class ClientRegisterServiceImpl implements ClientRegisterService {
 
         //TODO: wiriteAndFlush()+addRequest() 可以优化成为一个方法
         final String seqId = registerMessage.seqId();
-        invokeService.addRequest(seqId, registerCenterTimeOut);
+        invokeManager.addRequest(seqId, registerCenterTimeOut);
         channelFuture.channel().writeAndFlush(registerMessage);
 
         //4. 等待查询结果
-        RpcResponse rpcResponse = invokeService.getResponse(seqId);
+        RpcResponse rpcResponse = invokeManager.getResponse(seqId);
         return (List<ServiceEntry>) RpcResponses.getResult(rpcResponse);
     }
 
@@ -124,7 +124,7 @@ public class ClientRegisterServiceImpl implements ClientRegisterService {
                 new ChannelHandlerFactory() {
                     @Override
                     public ChannelHandler handler() {
-                        return ChannelHandlers.objectCodecHandler(new RpcClientRegisterHandler(invokeService));
+                        return ChannelHandlers.objectCodecHandler(new RpcClientRegisterHandler(invokeManager));
                     }
                 });
     }

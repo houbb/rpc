@@ -60,6 +60,12 @@ public class DefaultRpcRequest implements RpcRequest {
      */
     private Class returnType;
 
+    /**
+     * 超时时间
+     * @since 0.1.3
+     */
+    private long timeout;
+
     @Override
     public String seqId() {
         return seqId;
@@ -132,6 +138,16 @@ public class DefaultRpcRequest implements RpcRequest {
     }
 
     @Override
+    public long timeout() {
+        return timeout;
+    }
+
+    public DefaultRpcRequest timeout(long timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    @Override
     public String toString() {
         return "DefaultRpcRequest{" +
                 "seqId='" + seqId + '\'' +
@@ -141,6 +157,8 @@ public class DefaultRpcRequest implements RpcRequest {
                 ", paramTypeNames=" + paramTypeNames +
                 ", paramValues=" + Arrays.toString(paramValues) +
                 ", returnType=" + returnType +
+                ", timeout=" + timeout +
                 '}';
     }
+
 }

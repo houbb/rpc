@@ -7,8 +7,8 @@ package com.github.houbb.rpc.client.handler;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -29,17 +29,17 @@ public class RpcClientRegisterHandler extends SimpleChannelInboundHandler {
      * 注册服务
      * @since 0.0.8
      */
-    private final InvokeService invokeService;
+    private final InvokeManager invokeManager;
 
-    public RpcClientRegisterHandler(InvokeService invokeService) {
-        this.invokeService = invokeService;
+    public RpcClientRegisterHandler(InvokeManager invokeManager) {
+        this.invokeManager = invokeManager;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         RpcResponse rpcResponse = (RpcResponse) msg;
         log.info("[Client Register] response is :{}", rpcResponse);
-        invokeService.addResponse(rpcResponse.seqId(), rpcResponse);
+        invokeManager.addResponse(rpcResponse.seqId(), rpcResponse);
     }
 
     @Override

@@ -73,6 +73,7 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         rpcRequest.paramTypeNames(ReflectMethodUtil.getParamTypeNames(method));
         rpcRequest.methodName(method.getName());
         rpcRequest.returnType(method.getReturnType());
+        rpcRequest.timeout(proxyContext.timeout());
 
         //proxyContext 中应该是属于当前 service 的对应信息。
         // 每一次调用，对应的 invoke 信息应该是不通的，需要创建新的对象去传递信息
@@ -91,9 +92,6 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T proxy() {
-        // 设置状态为可用
-        proxyContext.statusManager().status(StatusEnum.ENABLE.code());
-
         final Class<T> interfaceClass = proxyContext.serviceInterface();
         ClassLoader classLoader = interfaceClass.getClassLoader();
         Class<?>[] interfaces = new Class[]{interfaceClass};

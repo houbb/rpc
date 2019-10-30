@@ -12,8 +12,6 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.config.reference.ReferenceConfig;
 import com.github.houbb.rpc.client.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
-import com.github.houbb.rpc.client.invoke.InvokeService;
-import com.github.houbb.rpc.client.invoke.impl.DefaultInvokeService;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
@@ -22,7 +20,6 @@ import com.github.houbb.rpc.client.proxy.impl.DefaultServiceContext;
 import com.github.houbb.rpc.client.proxy.impl.GenericReferenceProxy;
 import com.github.houbb.rpc.client.proxy.impl.RemoteInvokeServiceImpl;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
-import com.github.houbb.rpc.client.support.hook.ClientShutdownHook;
 import com.github.houbb.rpc.client.support.register.ClientRegisterService;
 import com.github.houbb.rpc.client.support.register.impl.ClientRegisterServiceImpl;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
@@ -31,10 +28,14 @@ import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlerFactory;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.support.hook.DefaultShutdownHook;
 import com.github.houbb.rpc.common.support.hook.RpcShutdownHook;
 import com.github.houbb.rpc.common.support.hook.ShutdownHooks;
+import com.github.houbb.rpc.common.support.invoke.InvokeManager;
+import com.github.houbb.rpc.common.support.invoke.impl.DefaultInvokeManager;
 import com.github.houbb.rpc.common.support.resource.ResourceManager;
 import com.github.houbb.rpc.common.support.resource.impl.DefaultResourceManager;
+import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
 import com.github.houbb.rpc.common.support.status.service.impl.DefaultStatusManager;
 import io.netty.channel.ChannelHandler;
@@ -69,6 +70,9 @@ import java.util.List;
  */
 public class ClientBs<T> implements ReferenceConfig<T> {
 
+    /**
+     * ClientBs logger
+     */
     private static final Log LOG = LogFactory.getLog(ClientBs.class);
 
     /**
@@ -123,7 +127,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      *
      * @since 0.0.6
      */
-    private InvokeService invokeService;
+    private InvokeManager invokeManager;
 
     /**
      * 客户端注册中心服务类
@@ -190,8 +194,8 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         this.generic = false;
 
         // 依赖服务初始化
-        this.invokeService = new DefaultInvokeService();
-        this.clientRegisterService = new ClientRegisterServiceImpl(invokeService);
+        this.invokeManager = new DefaultInvokeManager();
+        this.clientRegisterService = new ClientRegisterServiceImpl(invokeManager);
         this.remoteInvokeService = new RemoteInvokeServiceImpl();
         this.statusManager = new DefaultStatusManager();
         this.resourceManager = new DefaultResourceManager();
@@ -247,7 +251,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         List<RpcChannelFuture> channelFutureList = ChannelHandlers.channelFutureList(rpcAddressList, new ChannelHandlerFactory() {
             @Override
             public ChannelHandler handler() {
-                final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
+                final ChannelHandler channelHandler = new RpcClientHandler(invokeManager);
                 return ChannelHandlers.objectCodecHandler(channelHandler);
             }
         });
@@ -268,7 +272,9 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         }
 
         //4. 添加客户端钩子
-        final RpcShutdownHook rpcShutdownHook = new ClientShutdownHook(statusManager, invokeService, resourceManager);
+        // 设置状态为可用
+        proxyContext.statusManager().status(StatusEnum.ENABLE.code());
+        final RpcShutdownHook rpcShutdownHook = new DefaultShutdownHook(statusManager, invokeManager, resourceManager);
         ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
 
         return reference;
@@ -356,7 +362,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         proxyContext.serviceId(this.serviceId);
         proxyContext.serviceInterface(this.serviceInterface);
         proxyContext.channelFutures(channelFutureList);
-        proxyContext.invokeService(this.invokeService);
+        proxyContext.invokeService(this.invokeManager);
         proxyContext.timeout(this.timeout);
         proxyContext.callType(this.callType);
         proxyContext.failType(this.failType);

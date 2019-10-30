@@ -1,14 +1,12 @@
-package com.github.houbb.rpc.client.invoke.impl;
+package com.github.houbb.rpc.common.support.invoke.impl;
 
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.time.impl.Times;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.client.invoke.InvokeService;
-import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponseFactory;
-import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
+import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -19,9 +17,9 @@ import java.util.concurrent.TimeUnit;
  * @author binbin.hou
  * @since 0.0.6
  */
-public class DefaultInvokeService implements InvokeService {
+public class DefaultInvokeManager implements InvokeManager {
 
-    private static final Log LOG = LogFactory.getLog(DefaultInvokeService.class);
+    private static final Log LOG = LogFactory.getLog(DefaultInvokeManager.class);
 
     /**
      * 请求序列号 map
@@ -40,18 +38,18 @@ public class DefaultInvokeService implements InvokeService {
      */
     private final ConcurrentHashMap<String, RpcResponse> responseMap;
 
-    public DefaultInvokeService() {
+    public DefaultInvokeManager() {
         requestMap = new ConcurrentHashMap<>();
         responseMap = new ConcurrentHashMap<>();
 
-        final Runnable timeoutThread = new TimeoutCheckThread(requestMap, responseMap);
+        final Runnable timeoutThread = new InvokeTimeoutCheckThread(requestMap, responseMap);
         Executors.newScheduledThreadPool(1)
                 .scheduleAtFixedRate(timeoutThread,60, 60, TimeUnit.SECONDS);
     }
 
     @Override
-    public InvokeService addRequest(String seqId, long timeoutMills) {
-        LOG.info("[Client] start add request for seqId: {}, timeoutMills: {}", seqId,
+    public InvokeManager addRequest(String seqId, long timeoutMills) {
+        LOG.info("[Invoke] start add request for seqId: {}, timeoutMills: {}", seqId,
                 timeoutMills);
 
         final long expireTime = Times.systemTime()+timeoutMills;
@@ -61,17 +59,18 @@ public class DefaultInvokeService implements InvokeService {
     }
 
     @Override
-    public InvokeService addResponse(String seqId, RpcResponse rpcResponse) {
+    public InvokeManager addResponse(String seqId, RpcResponse rpcResponse) {
         // 1. 判断是否有效
         Long expireTime = this.requestMap.get(seqId);
         // 如果为空，可能是这个结果已经超时了，被定时 job 移除之后，响应结果才过来。直接忽略
         if(ObjectUtil.isNull(expireTime)) {
+            LOG.warn("[Invoke] seqId: {} has been removed, maybe timeout!", seqId);
             return this;
         }
 
         //2. 判断是否超时
         if(Times.systemTime() > expireTime) {
-            LOG.info("[Client] seqId:{} 信息已超时，直接返回超时结果。", seqId);
+            LOG.info("[Invoke] seqId:{} 信息已超时，直接返回超时结果。", seqId);
             rpcResponse = RpcResponseFactory.timeout();
         }
 
@@ -79,12 +78,8 @@ public class DefaultInvokeService implements InvokeService {
         // 如果 seqId 必须处理请求集合中，才允许放入。或者直接忽略丢弃。
         // 通知所有等待方
         responseMap.putIfAbsent(seqId, rpcResponse);
-        LOG.info("[Client] 获取结果信息，seqId: {}, rpcResponse: {}", seqId, rpcResponse);
-        LOG.info("[Client] seqId:{} 信息已经放入，通知所有等待方", seqId);
-
-        // 移除对应的 requestMap
-        requestMap.remove(seqId);
-        LOG.info("[Client] seqId:{} remove from request map", seqId);
+        LOG.info("[Invoke] 获取结果信息，seqId: {}, rpcResponse: {}", seqId, rpcResponse);
+        LOG.info("[Invoke] seqId:{} 信息已经放入，通知所有等待方", seqId);
 
         synchronized (this) {
             this.notifyAll();
@@ -98,33 +93,42 @@ public class DefaultInvokeService implements InvokeService {
         try {
             RpcResponse rpcResponse = this.responseMap.get(seqId);
             if(ObjectUtil.isNotNull(rpcResponse)) {
-                LOG.info("[Client] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
-                return rpcResponse;
-            }
+                LOG.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
+            } else {
+                // 进入等待
+                while (rpcResponse == null) {
+                    LOG.info("[Invoke] seq {} 对应结果为空，进入等待", seqId);
+                    // 同步等待锁
+                    synchronized (this) {
+                        this.wait();
+                    }
 
-            // 进入等待
-            while (rpcResponse == null) {
-                LOG.info("[Client] seq {} 对应结果为空，进入等待", seqId);
-                // 同步等待锁
-                synchronized (this) {
-                    this.wait();
+                    rpcResponse = this.responseMap.get(seqId);
+                    LOG.info("[Invoke] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
                 }
-
-                rpcResponse = this.responseMap.get(seqId);
-                LOG.info("[Client] seq {} 对应结果已经获取: {}", seqId, rpcResponse);
             }
 
-            // 移除这个 key
-            this.responseMap.remove(seqId);
             return rpcResponse;
         } catch (InterruptedException e) {
-            throw new RpcRuntimeException(e);
+            LOG.error("[Invoke] get response meet InterruptedException ex", e);
+            return RpcResponseFactory.interrupted();
+        } finally {
+            this.removeReqAndResp(seqId);
         }
     }
 
     @Override
     public boolean remainsRequest() {
         return this.requestMap.size() > 0;
+    }
+
+    @Override
+    public DefaultInvokeManager removeReqAndResp(String seqId) {
+        LOG.error("[Invoke] remove the request and response for seqId: {}", seqId);
+        // 移除这个 key
+        this.requestMap.remove(seqId);
+        this.responseMap.remove(seqId);
+        return this;
     }
 
 }

@@ -3,7 +3,6 @@ package com.github.houbb.rpc.client.proxy.impl;
 import com.github.houbb.heaven.util.id.impl.Ids;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
-import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeContext;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
@@ -15,6 +14,7 @@ import com.github.houbb.rpc.client.support.filter.RpcFilter;
 import com.github.houbb.rpc.client.support.filter.balance.RandomBalanceFilter;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import io.netty.channel.Channel;
 
 /**
@@ -45,8 +45,8 @@ public class RemoteInvokeServiceImpl implements RemoteInvokeService {
         // 支持的必须是 ByteBuf
         channel.writeAndFlush(rpcRequest).syncUninterruptibly();
         LOG.info("[Client] start call remote with request: {}", rpcRequest);
-        final InvokeService invokeService = proxyContext.invokeService();
-        invokeService.addRequest(seqId, proxyContext.timeout());
+        final InvokeManager invokeManager = proxyContext.invokeService();
+        invokeManager.addRequest(seqId, proxyContext.timeout());
 
         // 获取结果
         CallTypeStrategy callTypeStrategy = CallTypeStrategyFactory.callTypeStrategy(proxyContext.callType());
