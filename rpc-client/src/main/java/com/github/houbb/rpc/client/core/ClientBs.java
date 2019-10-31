@@ -31,6 +31,8 @@ import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.support.hook.DefaultShutdownHook;
 import com.github.houbb.rpc.common.support.hook.RpcShutdownHook;
 import com.github.houbb.rpc.common.support.hook.ShutdownHooks;
+import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
+import com.github.houbb.rpc.common.support.inteceptor.impl.InterceptorAdaptor;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.invoke.impl.DefaultInvokeManager;
 import com.github.houbb.rpc.common.support.resource.ResourceManager;
@@ -161,6 +163,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     private boolean generic;
 
     /**
+     * 拦截器
+     * @since 0.1.4
+     */
+    private Interceptor interceptor;
+
+    /**
      * 状态管理类
      * @since 0.1.3
      */
@@ -199,22 +207,13 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         this.remoteInvokeService = new RemoteInvokeServiceImpl();
         this.statusManager = new DefaultStatusManager();
         this.resourceManager = new DefaultResourceManager();
-    }
-
-    @Override
-    public String serviceId() {
-        return serviceId;
+        this.interceptor = new InterceptorAdaptor();
     }
 
     @Override
     public ClientBs<T> serviceId(String serviceId) {
         this.serviceId = serviceId;
         return this;
-    }
-
-    @Override
-    public Class<T> serviceInterface() {
-        return serviceInterface;
     }
 
     @Override
@@ -316,6 +315,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         return this;
     }
 
+    @Override
+    public ReferenceConfig<T> interceptor(Interceptor interceptor) {
+        this.interceptor = interceptor;
+        return this;
+    }
+
     /**
      * 获取 rpc 地址信息列表
      * （1）默认直接通过指定的地址获取
@@ -358,17 +363,18 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * @since 0.0.6
      */
     private ServiceContext<T> buildServiceProxyContext(final List<RpcChannelFuture> channelFutureList) {
-        DefaultServiceContext<T> proxyContext = new DefaultServiceContext<>();
-        proxyContext.serviceId(this.serviceId);
-        proxyContext.serviceInterface(this.serviceInterface);
-        proxyContext.channelFutures(channelFutureList);
-        proxyContext.invokeService(this.invokeManager);
-        proxyContext.timeout(this.timeout);
-        proxyContext.callType(this.callType);
-        proxyContext.failType(this.failType);
-        proxyContext.generic(this.generic);
-        proxyContext.statusManager(this.statusManager);
-        return proxyContext;
+        DefaultServiceContext<T> serviceContext = new DefaultServiceContext<>();
+        serviceContext.serviceId(this.serviceId);
+        serviceContext.serviceInterface(this.serviceInterface);
+        serviceContext.channelFutures(channelFutureList);
+        serviceContext.invokeManager(this.invokeManager);
+        serviceContext.timeout(this.timeout);
+        serviceContext.callType(this.callType);
+        serviceContext.failType(this.failType);
+        serviceContext.generic(this.generic);
+        serviceContext.statusManager(this.statusManager);
+        serviceContext.interceptor(this.interceptor);
+        return serviceContext;
     }
 
 }
