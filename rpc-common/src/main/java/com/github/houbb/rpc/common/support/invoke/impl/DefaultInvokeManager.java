@@ -112,8 +112,6 @@ public class DefaultInvokeManager implements InvokeManager {
         } catch (InterruptedException e) {
             LOG.error("[Invoke] get response meet InterruptedException ex", e);
             return RpcResponseFactory.interrupted();
-        } finally {
-            this.removeReqAndResp(seqId);
         }
     }
 
@@ -124,7 +122,7 @@ public class DefaultInvokeManager implements InvokeManager {
 
     @Override
     public DefaultInvokeManager removeReqAndResp(String seqId) {
-        LOG.error("[Invoke] remove the request and response for seqId: {}", seqId);
+        LOG.info("[Invoke] remove the request and response for seqId: {}", seqId);
         // 移除这个 key
         this.requestMap.remove(seqId);
         this.responseMap.remove(seqId);
