@@ -123,8 +123,8 @@ rpc-test 测试模块
 
 [0.1.0-callType 调用方式](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.0-callType-调用方式.md)
 
-[0.1.1-fail 失败策略](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.1-fail-失败策略)
+[0.1.1-fail 失败策略](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.1-fail-失败策略.md)
 
-[0.1.2-generic 泛化调用](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.2-generic-泛化调用)
+[0.1.2-generic 泛化调用](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.2-generic-泛化调用.md)
 
-[0.1.3-gracefully 优雅关闭](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.3-gracefully-优雅关闭)
+[0.1.3-gracefully 优雅关闭](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.3-gracefully-优雅关闭.md)
