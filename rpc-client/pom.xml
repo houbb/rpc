@@ -10,7 +10,7 @@
     <parent>
         <artifactId>rpc</artifactId>
         <groupId>com.github.houbb</groupId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.5-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -33,6 +33,11 @@
         <dependency>
             <groupId>com.github.houbb</groupId>
             <artifactId>heaven</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>json</artifactId>
         </dependency>
 
         <!--============================== OTHER ==============================-->

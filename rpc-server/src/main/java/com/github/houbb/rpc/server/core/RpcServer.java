@@ -3,8 +3,6 @@ package com.github.houbb.rpc.server.core;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.constant.RpcConstant;
-import com.github.houbb.rpc.server.decoder.CalculateRequestDecoder;
-import com.github.houbb.rpc.server.encoder.CalculateResponseEncoder;
 import com.github.houbb.rpc.server.handler.RpcServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -53,8 +51,6 @@ public class RpcServer extends Thread {
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
                             ch.pipeline()
-                                    .addLast(new CalculateRequestDecoder())
-                                    .addLast(new CalculateResponseEncoder())
                                     .addLast(new RpcServerHandler());
                         }
                     })

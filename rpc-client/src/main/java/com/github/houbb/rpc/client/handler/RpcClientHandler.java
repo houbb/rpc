@@ -5,11 +5,13 @@
 
 package com.github.houbb.rpc.client.handler;
 
+import com.github.houbb.json.bs.JsonBs;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.core.RpcClient;
 import com.github.houbb.rpc.common.model.CalculateResponse;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -34,9 +36,11 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        CalculateResponse response = (CalculateResponse)msg;
+        ByteBuf byteBuf = (ByteBuf)msg;
+        byte[] bytes = new byte[byteBuf.readableBytes()];
+        byteBuf.readBytes(bytes);
 
-        this.response = response;
+        this.response = JsonBs.deserializeBytes(bytes, CalculateResponse.class);
         log.info("[Client] response is :{}", response);
     }
 
