@@ -80,6 +80,8 @@ rpc-test 测试模块
 
 [release_0.0.7-timeout超时处理](https://github.com/houbb/rpc/tree/release_0.0.7)
 
+[release_0.0.8-register注册中心](https://github.com/houbb/rpc/tree/release_0.0.8)
+
 ## 测试代码
 
 从 v0.0.6 及其之后，为了让代码保持纯净，将测试代码全部放在 rpc-example。
@@ -103,3 +105,5 @@ rpc-test 测试模块
 [0.0.6-通用反射调用](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.6-通用反射调用.md)
 
 [0.0.7-timeout超时处理](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.7-timeout超时处理.md)
+
+[0.0.8-register注册中心](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.8-register注册中心.md)
