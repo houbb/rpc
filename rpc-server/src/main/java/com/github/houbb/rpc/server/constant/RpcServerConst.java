@@ -13,6 +13,6 @@ public final class RpcServerConst {
      * 默认端口
      * @since 0.0.1
      */
-    public static final int DEFAULT_PORT = 9627;
+    public static final int DEFAULT_PORT = 9527;
 
 }

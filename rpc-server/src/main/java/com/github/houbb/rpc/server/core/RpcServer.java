@@ -8,6 +8,8 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 /**
  * rpc 服务端
@@ -43,6 +45,8 @@ public class RpcServer extends Thread {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(workerGroup, bossGroup)
                     .channel(NioServerSocketChannel.class)
+                    // 打印日志
+                    .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<Channel>() {
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
