@@ -90,6 +90,8 @@ rpc-test 测试模块
 
 [release_0.1.2-generic 泛化调用](https://github.com/houbb/rpc/tree/release_0.1.2)
 
+[release_0.1.3-gracefully 优雅关闭](https://github.com/houbb/rpc/tree/release_0.1.3)
+
 
 ## 测试代码
 
@@ -124,3 +126,5 @@ rpc-test 测试模块
 [0.1.1-fail 失败策略](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.1-fail-失败策略)
 
 [0.1.2-generic 泛化调用](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.2-generic-泛化调用)
+
+[0.1.3-gracefully 优雅关闭](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.3-gracefully-优雅关闭)
