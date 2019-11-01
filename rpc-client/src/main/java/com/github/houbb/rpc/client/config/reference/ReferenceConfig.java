@@ -80,4 +80,11 @@ public interface ReferenceConfig<T> {
      */
     T reference();
 
+    /**
+     * 设置超时时间
+     * @since 0.0.7
+     * @return this
+     */
+    ReferenceConfig<T> timeout(final long timeoutInMills);
+
 }

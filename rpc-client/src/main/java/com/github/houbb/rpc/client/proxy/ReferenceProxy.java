@@ -8,12 +8,13 @@ import com.github.houbb.rpc.client.proxy.context.ProxyContext;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.support.id.impl.Uuid;
-import com.github.houbb.rpc.common.support.time.impl.DefaultSystemTime;
-import io.netty.channel.Channel;
+import com.github.houbb.rpc.common.support.time.impl.Times;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+
+import io.netty.channel.Channel;
 
 /**
  * 参考：https://blog.csdn.net/u012240455/article/details/79210250
@@ -51,13 +52,12 @@ public class ReferenceProxy<T> implements InvocationHandler {
      * @return 结果
      * @throws Throwable 异常
      * @since 0.0.6
-     * @see Method#getGenericSignature() 通用标识，可以根据这个来优化代码。
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // 反射信息处理成为 rpcRequest
         final String seqId = Uuid.getInstance().id();
-        final long createTime = DefaultSystemTime.getInstance().time();
+        final long createTime = Times.time();
         DefaultRpcRequest rpcRequest = new DefaultRpcRequest();
         rpcRequest.serviceId(proxyContext.serviceId());
         rpcRequest.seqId(seqId);
@@ -68,7 +68,7 @@ public class ReferenceProxy<T> implements InvocationHandler {
 
         // 调用远程
         LOG.info("[Client] start call remote with request: {}", rpcRequest);
-        proxyContext.invokeService().addRequest(seqId);
+        proxyContext.invokeService().addRequest(seqId, proxyContext.timeout());
 
         // 这里使用 load-balance 进行选择 channel 写入。
         final Channel channel = getChannel();
@@ -79,12 +79,7 @@ public class ReferenceProxy<T> implements InvocationHandler {
         // 支持的必须是 ByteBuf
         channel.writeAndFlush(rpcRequest).sync();
 
-        // 循环获取结果
-        // 通过 Loop+match  wait/notifyAll 来获取
-        // 分布式根据 redis+queue+loop
-        LOG.info("[Client] start get resp for seqId: {}", seqId);
         RpcResponse rpcResponse = proxyContext.invokeService().getResponse(seqId);
-        LOG.info("[Client] start get resp for seqId: {}", seqId);
         Throwable error = rpcResponse.error();
         if(ObjectUtil.isNotNull(error)) {
             throw error;

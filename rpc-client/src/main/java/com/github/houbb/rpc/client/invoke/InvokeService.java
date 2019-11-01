@@ -12,10 +12,12 @@ public interface InvokeService {
     /**
      * 添加请求信息
      * @param seqId 序列号
+     * @param timeoutMills 超时时间
      * @return this
      * @since 0.0.6
      */
-    InvokeService addRequest(final String seqId);
+    InvokeService addRequest(final String seqId,
+                             final long timeoutMills);
 
     /**
      * 放入结果

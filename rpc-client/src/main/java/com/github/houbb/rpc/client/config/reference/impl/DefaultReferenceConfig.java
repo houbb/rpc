@@ -79,23 +79,24 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
     private List<ChannelFuture> channelFutures;
 
     /**
-     * 客户端处理信息
-     * @since 0.0.6
-     */
-    @Deprecated
-    private RpcClientHandler channelHandler;
-
-    /**
      * 调用服务管理类
      * @since 0.0.6
      */
     private InvokeService invokeService;
+
+    /**
+     * 调用超时时间
+     * @since 0.0.7
+     */
+    private long timeout;
 
     public DefaultReferenceConfig() {
         // 初始化信息
         this.rpcAddresses = Guavas.newArrayList();
         this.channelFutures = Guavas.newArrayList();
         this.invokeService = new DefaultInvokeService();
+        // 默认为 60s 超时
+        this.timeout = 60*1000;
     }
 
     @Override
@@ -159,7 +160,6 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         // 1. 启动 client 端到 server 端的连接信息
         // 1.1 为了提升性能，可以将所有的 client=>server 的连接都调整为一个 thread。
         // 1.2 初期为了简单，直接使用同步循环的方式。
-        // 创建 handler
         // 循环连接
         for(RpcAddress rpcAddress : rpcAddresses) {
             final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
@@ -187,7 +187,13 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         proxyContext.serviceInterface(this.serviceInterface);
         proxyContext.channelFutures(this.channelFutures);
         proxyContext.invokeService(this.invokeService);
+        proxyContext.timeout(this.timeout);
         return proxyContext;
     }
 
+    @Override
+    public DefaultReferenceConfig<T> timeout(long timeout) {
+        this.timeout = timeout;
+        return this;
+    }
 }

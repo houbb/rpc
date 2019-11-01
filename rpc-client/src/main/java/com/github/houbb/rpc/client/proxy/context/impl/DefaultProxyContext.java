@@ -40,6 +40,12 @@ public class DefaultProxyContext<T> implements ProxyContext<T> {
      */
     private InvokeService invokeService;
 
+    /**
+     * 超时时间
+     * @since 0.0.7
+     */
+    private long timeout;
+
     @Override
     public String serviceId() {
         return serviceId;
@@ -77,6 +83,16 @@ public class DefaultProxyContext<T> implements ProxyContext<T> {
 
     public DefaultProxyContext<T> invokeService(InvokeService invokeService) {
         this.invokeService = invokeService;
+        return this;
+    }
+
+    @Override
+    public long timeout() {
+        return timeout;
+    }
+
+    public DefaultProxyContext<T> timeout(long timeout) {
+        this.timeout = timeout;
         return this;
     }
 }
