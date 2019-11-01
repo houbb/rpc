@@ -31,7 +31,7 @@ class SyncCallTypeStrategy implements CallTypeStrategy {
     @Override
     public RpcResponse result(ServiceContext proxyContext, RpcRequest rpcRequest) {
         final String seqId = rpcRequest.seqId();
-        return proxyContext.invokeService().getResponse(seqId);
+        return proxyContext.invokeManager().getResponse(seqId);
     }
 
 }

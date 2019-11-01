@@ -2,6 +2,7 @@ package com.github.houbb.rpc.client.config.reference;
 
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
+import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
 
 /**
  * 引用配置类
@@ -31,26 +32,19 @@ import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 public interface ReferenceConfig<T> {
 
     /**
+     * 获取对应的引用实现
+     * @return 引用代理类
+     * @since 0.0.6
+     */
+    T reference();
+
+    /**
      * 设置服务标识
      * @param serviceId 服务标识
      * @return this
      * @since 0.0.6
      */
     ReferenceConfig<T> serviceId(final String serviceId);
-
-    /**
-     * 服务唯一标识
-     * @return 服务唯一标识
-     * @since 0.0.6
-     */
-    String serviceId();
-
-    /**
-     * 服务接口
-     * @since 0.0.6
-     * @return 接口信息
-     */
-    Class<T> serviceInterface();
 
     /**
      * 设置服务接口信息
@@ -72,13 +66,6 @@ public interface ReferenceConfig<T> {
      * @since 0.0.6
      */
     ReferenceConfig<T> addresses(final String addresses);
-
-    /**
-     * 获取对应的引用实现
-     * @return 引用代理类
-     * @since 0.0.6
-     */
-    T reference();
 
     /**
      * 设置超时时间
@@ -127,5 +114,13 @@ public interface ReferenceConfig<T> {
      * @return this
      */
     ReferenceConfig<T> generic(final boolean generic);
+
+    /**
+     * 调用拦截器
+     * @param interceptor 拦截器信息
+     * @return this
+     * @since 0.1.4
+     */
+    ReferenceConfig<T> interceptor(final Interceptor interceptor);
 
 }

@@ -45,7 +45,7 @@ public class RemoteInvokeServiceImpl implements RemoteInvokeService {
         // 支持的必须是 ByteBuf
         channel.writeAndFlush(rpcRequest).syncUninterruptibly();
         LOG.info("[Client] start call remote with request: {}", rpcRequest);
-        final InvokeManager invokeManager = proxyContext.invokeService();
+        final InvokeManager invokeManager = proxyContext.invokeManager();
         invokeManager.addRequest(seqId, proxyContext.timeout());
 
         // 获取结果

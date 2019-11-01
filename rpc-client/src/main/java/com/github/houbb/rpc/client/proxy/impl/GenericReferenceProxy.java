@@ -8,9 +8,11 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.common.exception.GenericException;
-import com.github.houbb.rpc.common.exception.ShutdownException;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.support.generic.GenericService;
+import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
+import com.github.houbb.rpc.common.support.inteceptor.InterceptorContext;
+import com.github.houbb.rpc.common.support.inteceptor.impl.DefaultInterceptorContext;
 import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 
 import java.util.List;
@@ -47,11 +49,16 @@ public class GenericReferenceProxy implements GenericService {
     @SuppressWarnings("unchecked")
     public Object $invoke(String method, String[] parameterTypes, Object[] args) throws GenericException {
         // 状态判断
+        final String traceId = Ids.uuid32();
         final int statusCode = proxyContext.statusManager().status();
-        if(StatusEnum.ENABLE.code() != statusCode) {
-            LOG.error("[Client] current status is: {} , not enable to send request", statusCode);
-            throw new ShutdownException("Status is not enable to send request, may be during shutdown.");
-        }
+        StatusEnum.assertEnable(statusCode);
+
+
+        //1. 拦截器
+        final Interceptor interceptor = proxyContext.interceptor();
+        final InterceptorContext interceptorContext = DefaultInterceptorContext.newInstance()
+                .traceId(traceId);
+        interceptor.before(interceptorContext);
 
         // 构建基本调用参数
         final long createTime = Times.systemTime();
@@ -75,13 +82,15 @@ public class GenericReferenceProxy implements GenericService {
         // rpcRequest 因为要涉及到网络间传输，尽可能保证其简洁性。
         DefaultRemoteInvokeContext context = new DefaultRemoteInvokeContext();
         context.request(rpcRequest);
-        context.traceId(Ids.uuid32());
+        context.traceId(traceId);
         context.retryTimes(2);
         context.serviceProxyContext(proxyContext);
         context.remoteInvokeService(remoteInvokeService);
 
         //3. 执行远程调用
-        return remoteInvokeService.remoteInvoke(context);
+        Object result = remoteInvokeService.remoteInvoke(context);
+        interceptor.after(interceptorContext);
+        return result;
     }
 
 }

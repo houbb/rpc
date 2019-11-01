@@ -4,6 +4,7 @@ import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
+import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
 
@@ -72,6 +73,11 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
      */
     private StatusManager statusManager;
 
+    /**
+     * 拦截器
+     */
+    private Interceptor interceptor;
+
     @Override
     public String serviceId() {
         return serviceId;
@@ -123,16 +129,6 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
     }
 
     @Override
-    public InvokeManager invokeService() {
-        return invokeManager;
-    }
-
-    public DefaultServiceContext<T> invokeService(InvokeManager invokeManager) {
-        this.invokeManager = invokeManager;
-        return this;
-    }
-
-    @Override
     public long timeout() {
         return timeout;
     }
@@ -161,4 +157,42 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
         this.statusManager = statusManager;
         return this;
     }
+
+    @Override
+    public InvokeManager invokeManager() {
+        return invokeManager;
+    }
+
+    public DefaultServiceContext<T> invokeManager(InvokeManager invokeManager) {
+        this.invokeManager = invokeManager;
+        return this;
+    }
+
+    @Override
+    public Interceptor interceptor() {
+        return interceptor;
+    }
+
+    public DefaultServiceContext<T> interceptor(Interceptor interceptor) {
+        this.interceptor = interceptor;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "DefaultServiceContext{" +
+                "serviceId='" + serviceId + '\'' +
+                ", serviceInterface=" + serviceInterface +
+                ", channelFutures=" + channelFutures +
+                ", invokeManager=" + invokeManager +
+                ", timeout=" + timeout +
+                ", callType=" + callType +
+                ", failType=" + failType +
+                ", generic=" + generic +
+                ", statusManager=" + statusManager +
+                ", interceptor=" + interceptor +
+                '}';
+    }
+
 }
+
