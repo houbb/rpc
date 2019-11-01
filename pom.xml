@@ -7,7 +7,7 @@
     <groupId>com.github.houbb</groupId>
     <artifactId>rpc</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.6-SNAPSHOT</version>
     <modules>
         <module>rpc-server</module>
         <module>rpc-test</module>
@@ -32,7 +32,7 @@
         <project.compiler.level>1.7</project.compiler.level>
 
         <!--============================== INTER ==============================-->
-        <heaven.version>0.1.35</heaven.version>
+        <heaven.version>0.1.36</heaven.version>
         <log-integration.version>1.1.7</log-integration.version>
         <json.version>0.1.1</json.version>
 
@@ -63,20 +63,14 @@
             <!--============================== INTER ==============================-->
             <dependency>
                 <groupId>com.github.houbb</groupId>
-                <artifactId>heaven</artifactId>
-                <version>${heaven.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.github.houbb</groupId>
                 <artifactId>log-integration</artifactId>
                 <version>${log-integration.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.github.houbb</groupId>
-                <artifactId>json</artifactId>
-                <version>${json.version}</version>
+                <artifactId>heaven</artifactId>
+                <version>${heaven.version}</version>
             </dependency>
 
             <!--============================== OTHER ==============================-->
@@ -95,20 +89,6 @@
 
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <!--============================== SELF ==============================-->
-
-        <!--============================== INTER ==============================-->
-        <dependency>
-            <groupId>com.github.houbb</groupId>
-            <artifactId>lombok-ex</artifactId>
-            <version>0.0.2</version>
-        </dependency>
-        <!--============================== OTHER ==============================-->
-
-
-    </dependencies>
 
     <build>
         <plugins>

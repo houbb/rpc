@@ -76,6 +76,16 @@ rpc-test 测试模块
 
 [release_0.0.5-serial序列化](https://github.com/houbb/rpc/tree/release_0.0.5)
 
+[release_0.0.6-通用的反射调用](https://github.com/houbb/rpc/tree/release_0.0.6)
+
+## 测试代码
+
+从 v0.0.6 及其之后，为了让代码保持纯净，将测试代码全部放在 rpc-example。
+
+每个测试代码和实现版本一一对应。
+
+[rpc-example](https://github.com/houbb/rpc-example)
+
 # 文档说明
 
 [0.0.1-server 服务端启动](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.1-server%20服务端启动.md)
@@ -87,3 +97,5 @@ rpc-test 测试模块
 [0.0.4-p2p客户端主动调用服务端](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.4-p2p客户端主动调用服务端.md)
 
 [0.0.5-serial序列化](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.5-serial序列化.md)
+
+[0.0.6-通用反射调用](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.6-通用反射调用.md)

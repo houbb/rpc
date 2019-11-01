@@ -5,13 +5,11 @@
 
 package com.github.houbb.rpc.client.handler;
 
-import com.github.houbb.json.bs.JsonBs;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.core.RpcClient;
-import com.github.houbb.rpc.common.model.CalculateResponse;
-
-import io.netty.buffer.ByteBuf;
+import com.github.houbb.rpc.client.invoke.InvokeService;
+import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -29,19 +27,21 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
     private static final Log log = LogFactory.getLog(RpcClient.class);
 
     /**
-     * 响应信息
-     * @since 0.0.4
+     * 调用服务管理类
+     *
+     * @since 0.0.6
      */
-    private CalculateResponse response;
+    private final InvokeService invokeService;
+
+    public RpcClientHandler(InvokeService invokeService) {
+        this.invokeService = invokeService;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf byteBuf = (ByteBuf)msg;
-        byte[] bytes = new byte[byteBuf.readableBytes()];
-        byteBuf.readBytes(bytes);
-
-        this.response = JsonBs.deserializeBytes(bytes, CalculateResponse.class);
-        log.info("[Client] response is :{}", response);
+        RpcResponse rpcResponse = (RpcResponse)msg;
+        invokeService.addResponse(rpcResponse.seqId(), rpcResponse);
+        log.info("[Client] response is :{}", rpcResponse);
     }
 
     @Override
@@ -52,8 +52,9 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
         ctx.close();
     }
 
-    public CalculateResponse getResponse() {
-        return response;
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        cause.printStackTrace();
+        ctx.close();
     }
-
 }
