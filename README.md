@@ -72,19 +72,21 @@ rpc-test 测试模块
 
 [release_0.0.3-客户端调用服务端](https://github.com/houbb/rpc/tree/release_0.0.3)
 
-[release_0.0.4-p2p客户端主动调用服务端](https://github.com/houbb/rpc/tree/release_0.0.4)
+[release_0.0.4-p2p 客户端主动调用服务端](https://github.com/houbb/rpc/tree/release_0.0.4)
 
-[release_0.0.5-serial序列化](https://github.com/houbb/rpc/tree/release_0.0.5)
+[release_0.0.5-serial 序列化](https://github.com/houbb/rpc/tree/release_0.0.5)
 
 [release_0.0.6-通用的反射调用](https://github.com/houbb/rpc/tree/release_0.0.6)
 
-[release_0.0.7-timeout超时处理](https://github.com/houbb/rpc/tree/release_0.0.7)
+[release_0.0.7-timeout 超时处理](https://github.com/houbb/rpc/tree/release_0.0.7)
 
-[release_0.0.8-register注册中心](https://github.com/houbb/rpc/tree/release_0.0.8)
+[release_0.0.8-register 注册中心](https://github.com/houbb/rpc/tree/release_0.0.8)
 
 [release_0.0.9-load balance 负载均衡](https://github.com/houbb/rpc/tree/release_0.0.9)
 
 [release_0.1.0-callType 调用方式](https://github.com/houbb/rpc/tree/release_0.1.0)
+
+[release_0.1.1-fail 失败策略](https://github.com/houbb/rpc/tree/release_0.1.1)
 
 
 ## 测试代码
@@ -103,16 +105,18 @@ rpc-test 测试模块
 
 [0.0.3-客户端调用服务端](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.3-客户端调用服务端.md)
 
-[0.0.4-p2p客户端主动调用服务端](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.4-p2p客户端主动调用服务端.md)
+[0.0.4-p2p 客户端主动调用服务端](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.4-p2p客户端主动调用服务端.md)
 
-[0.0.5-serial序列化](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.5-serial序列化.md)
+[0.0.5-serial 序列化](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.5-serial序列化.md)
 
 [0.0.6-通用反射调用](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.6-通用反射调用.md)
 
-[0.0.7-timeout超时处理](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.7-timeout超时处理.md)
+[0.0.7-timeout 超时处理](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.7-timeout超时处理.md)
 
-[0.0.8-register注册中心](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.8-register注册中心.md)
+[0.0.8-register 注册中心](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.8-register注册中心.md)
 
 [0.0.9-load balance 负载均衡](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.9-load-balance-负载均衡.md)
 
 [0.1.0-callType 调用方式](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.0-callType调用方式.md)
+
+[0.1.1-fail 失败策略](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.1-fail失败策略)
