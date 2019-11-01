@@ -1,12 +1,29 @@
 package com.github.houbb.rpc.server.registry.impl;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
+import com.github.houbb.heaven.util.guava.Guavas;
+import com.github.houbb.log.integration.core.Log;
+import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.common.config.component.RpcAddress;
+import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.config.protocol.ProtocolConfig;
+import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
+import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
+import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyServer;
+import com.github.houbb.rpc.common.util.NetUtil;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
+import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
+import com.github.houbb.rpc.register.domain.message.RegisterMessage;
+import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
+import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import com.github.houbb.rpc.server.config.service.DefaultServiceConfig;
 import com.github.houbb.rpc.server.config.service.ServiceConfig;
-import com.github.houbb.rpc.server.core.RpcServer;
+import com.github.houbb.rpc.server.handler.RpcServerHandler;
+import com.github.houbb.rpc.server.handler.RpcServerRegisterHandler;
 import com.github.houbb.rpc.server.registry.ServiceRegistry;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +35,11 @@ import java.util.List;
  */
 public class DefaultServiceRegistry implements ServiceRegistry {
 
+    /**
+     * 日志信息
+     * @since 0.0.8
+     */
+    private static final Log LOG = LogFactory.getLog(DefaultServiceRegistry.class);
     /**
      * 单例信息
      * @since 0.0.6
@@ -44,10 +66,17 @@ public class DefaultServiceRegistry implements ServiceRegistry {
      */
     private List<ServiceConfig> serviceConfigList;
 
+    /**
+     * 注册中心地址列表
+     * @since 0.0.8
+     */
+    private List<RpcAddress> registerCenterList;
+
     private DefaultServiceRegistry(){
         // 初始化默认参数
         this.serviceConfigList = new ArrayList<>();
         this.rpcPort = 9527;
+        this.registerCenterList = Guavas.newArrayList();
     }
 
     public static DefaultServiceRegistry getInstance() {
@@ -86,7 +115,8 @@ public class DefaultServiceRegistry implements ServiceRegistry {
 
         // 构建对应的其他信息
         ServiceConfig serviceConfig = new DefaultServiceConfig();
-        serviceConfig.id(serviceId).reference(serviceImpl);
+        //TODO: 是否暴露服务，允许用户指定
+        serviceConfig.id(serviceId).reference(serviceImpl).register(true);
         serviceConfigList.add(serviceConfig);
 
         return this;
@@ -96,11 +126,75 @@ public class DefaultServiceRegistry implements ServiceRegistry {
     public ServiceRegistry expose() {
         // 注册所有服务信息
         DefaultServiceFactory.getInstance()
-                .registerServices(serviceConfigList);
+                .registerServicesLocal(serviceConfigList);
+        LOG.info("server register local finish.");
 
-        // 暴露 netty server 信息
-        new RpcServer(rpcPort).start();
+        // 启动 netty server 信息
+        final ChannelHandler channelHandler = ChannelHandlers
+                .objectCodecHandler(new RpcServerHandler());
+        DefaultNettyServer.newInstance(rpcPort, channelHandler).asyncRun();
+        LOG.info("server service start finish.");
+
+        // 注册到配置中心
+        this.registerServiceCenter();
+        LOG.info("server service register finish.");
+
         return this;
+    }
+
+    @Override
+    public ServiceRegistry registerCenter(String addresses) {
+        this.registerCenterList = RpcAddressBuilder.of(addresses);
+        return this;
+    }
+
+    /**
+     * 注冊服務到注册中心
+     * （1）循环服务列表注册到配置中心列表
+     * （2）如果 register 为 false，则不进行注册
+     * （3）后期可以添加延迟暴露，但是感觉意义不大。
+     * @since 0.0.8
+     */
+    private void registerServiceCenter() {
+        // 注册到配置中心
+        // 初期简单点，直接循环调用即可
+        // 循环服务信息
+        for(ServiceConfig config : this.serviceConfigList) {
+            boolean register = config.register();
+            final String serviceId = config.id();
+            if(!register) {
+                LOG.info("[Rpc Server] serviceId: {} register config is false.",
+                        serviceId);
+                continue;
+            }
+
+            for(RpcAddress rpcAddress : registerCenterList) {
+                ChannelHandler registerHandler = ChannelHandlers.objectCodecHandler(new RpcServerRegisterHandler());
+                LOG.info("[Rpc Server] start register to {}:{}", rpcAddress.address(),
+                        rpcAddress.port());
+                ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(),registerHandler).call();
+
+                // 直接写入信息
+                RegisterMessage registerMessage = buildRegisterMessage(config);
+                LOG.info("[Rpc Server] register to service center: {}", registerMessage);
+                channelFuture.channel().writeAndFlush(registerMessage);
+            }
+        }
+    }
+
+    /**
+     * 构建注册信息配置
+     * @param config 配置信息
+     * @return 注册信息
+     * @since 0.0.6
+     */
+    private RegisterMessage buildRegisterMessage(final ServiceConfig config) {
+        final String hostIp = NetUtil.getLocalHost();
+        ServiceEntry serviceEntry = ServiceEntryBuilder.of(config.id(),
+                hostIp, rpcPort);
+
+        return RegisterMessages.of(MessageTypeConst.SERVER_REGISTER,
+                serviceEntry);
     }
 
 }

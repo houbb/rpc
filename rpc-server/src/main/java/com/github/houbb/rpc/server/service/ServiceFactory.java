@@ -24,12 +24,12 @@ import java.util.List;
 public interface ServiceFactory {
 
     /**
-     * 注册服务列表信息
+     * 注册服务列表信息到本地
      * @param serviceConfigList 服务配置列表
      * @return this
      * @since 0.0.6
      */
-    ServiceFactory registerServices(final List<ServiceConfig> serviceConfigList);
+    ServiceFactory registerServicesLocal(final List<ServiceConfig> serviceConfigList);
 
     /**
      * 直接反射调用

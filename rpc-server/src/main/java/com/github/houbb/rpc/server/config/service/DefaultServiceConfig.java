@@ -29,6 +29,13 @@ public class DefaultServiceConfig<T> implements ServiceConfig<T> {
      */
     private T reference;
 
+    /**
+     * 是否注册到配置中心
+     * 默认：进行注册，如果注册中心可用的话。
+     * @since 0.0.8
+     */
+    private boolean register = true;
+
     @Override
     public String id() {
         return id;
@@ -48,6 +55,17 @@ public class DefaultServiceConfig<T> implements ServiceConfig<T> {
     @Override
     public DefaultServiceConfig<T> reference(T reference) {
         this.reference = reference;
+        return this;
+    }
+
+    @Override
+    public boolean register() {
+        return register;
+    }
+
+    @Override
+    public DefaultServiceConfig<T> register(boolean register) {
+        this.register = register;
         return this;
     }
 }

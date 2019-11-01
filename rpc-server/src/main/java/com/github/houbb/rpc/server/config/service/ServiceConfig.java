@@ -47,4 +47,18 @@ public interface ServiceConfig<T> {
      */
     ServiceConfig<T> reference(T reference);
 
+    /**
+     * 设置是否注册到注册中心
+     * @param register 是否注册到配置中心
+     * @since 0.0.8
+     */
+    ServiceConfig<T> register(final boolean register);
+
+    /**
+     * 返回是否注册到注册中心
+     * @since 0.0.8
+     * @return 是否进行注册到注册中心
+     */
+    boolean register();
+
 }

@@ -29,6 +29,10 @@ public class DefaultRpcResponse implements RpcResponse {
      */
     private Object result;
 
+    public static DefaultRpcResponse newInstance() {
+        return new DefaultRpcResponse();
+    }
+
     @Override
     public String seqId() {
         return seqId;

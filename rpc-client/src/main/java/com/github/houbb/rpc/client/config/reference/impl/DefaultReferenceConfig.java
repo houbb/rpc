@@ -1,19 +1,30 @@
 package com.github.houbb.rpc.client.config.reference.impl;
 
-import com.github.houbb.heaven.constant.PunctuationConst;
-import com.github.houbb.heaven.util.common.ArgUtil;
+import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.util.guava.Guavas;
-import com.github.houbb.heaven.util.lang.NumUtil;
+import com.github.houbb.heaven.util.util.CollectionUtil;
+import com.github.houbb.log.integration.core.Log;
+import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.config.reference.ReferenceConfig;
-import com.github.houbb.rpc.client.core.RpcClient;
-import com.github.houbb.rpc.client.core.context.impl.DefaultRpcClientContext;
 import com.github.houbb.rpc.client.handler.RpcClientHandler;
+import com.github.houbb.rpc.client.handler.RpcClientRegisterHandler;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.client.invoke.impl.DefaultInvokeService;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.context.ProxyContext;
 import com.github.houbb.rpc.client.proxy.context.impl.DefaultProxyContext;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
+import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
+import com.github.houbb.rpc.common.exception.RpcRuntimeException;
+import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
+import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
+import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+import com.github.houbb.rpc.common.rpc.domain.impl.RpcResponses;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
+import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
+import com.github.houbb.rpc.register.domain.message.RegisterMessage;
+import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
+import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 
@@ -46,6 +57,8 @@ import java.util.List;
  */
 public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
 
+    private static final Log LOG = LogFactory.getLog(DefaultReferenceConfig.class);
+
     /**
      * 服务唯一标识
      * @since 0.0.6
@@ -62,8 +75,6 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
      * 服务地址信息
      * （1）如果不为空，则直接根据地址获取
      * （2）如果为空，则采用自动发现的方式
-     *
-     * TODO: 这里调整为 set 更加合理。
      *
      * 如果为 subscribe 可以自动发现，然后填充这个字段信息。
      * @since 0.0.6
@@ -90,6 +101,24 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
      */
     private long timeout;
 
+    /**
+     * 是否进行订阅模式
+     * @since 0.0.8
+     */
+    private boolean subscribe;
+
+    /**
+     * 注册中心列表
+     * @since 0.0.8
+     */
+    private List<RpcAddress> registerCenterList;
+
+    /**
+     * 注册中心超时时间
+     * @since 0.0.8
+     */
+    private long registerCenterTimeOut;
+
     public DefaultReferenceConfig() {
         // 初始化信息
         this.rpcAddresses = Guavas.newArrayList();
@@ -97,6 +126,8 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         this.invokeService = new DefaultInvokeService();
         // 默认为 60s 超时
         this.timeout = 60*1000;
+        this.registerCenterList = Guavas.newArrayList();
+        this.registerCenterTimeOut = 60*1000;
     }
 
     @Override
@@ -123,28 +154,8 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
 
     @Override
     public ReferenceConfig<T> addresses(String addresses) {
-        ArgUtil.notEmpty(addresses, "addresses");
-
-        String[] addressArray = addresses.split(PunctuationConst.COMMA);
-        ArgUtil.notEmpty(addressArray, "addresses");
-
-        for(String address : addressArray) {
-            String[] addressSplits = address.split(PunctuationConst.COLON);
-            if(addressSplits.length < 2) {
-                throw new IllegalArgumentException("Address must be has ip and port, like 127.0.0.1:9527");
-            }
-            String ip = addressSplits[0];
-            int port = NumUtil.toIntegerThrows(addressSplits[1]);
-            // 包含权重信息
-            int weight = 1;
-            if(addressSplits.length >= 3) {
-                weight = NumUtil.toInteger(addressSplits[2], 1);
-            }
-
-            RpcAddress rpcAddress = new RpcAddress(ip, port, weight);
-            this.rpcAddresses.add(rpcAddress);
-        }
-
+        LOG.info("[Rpc Client] service address set into {} ", addresses);
+        this.rpcAddresses = RpcAddressBuilder.of(addresses);
         return this;
     }
 
@@ -161,13 +172,12 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         // 1.1 为了提升性能，可以将所有的 client=>server 的连接都调整为一个 thread。
         // 1.2 初期为了简单，直接使用同步循环的方式。
         // 循环连接
-        for(RpcAddress rpcAddress : rpcAddresses) {
+        List<RpcAddress> rpcAddressList = getRpcAddresses();
+
+        for(RpcAddress rpcAddress : rpcAddressList) {
             final ChannelHandler channelHandler = new RpcClientHandler(invokeService);
-            final DefaultRpcClientContext context = new DefaultRpcClientContext();
-            context.address(rpcAddress.address()).port(rpcAddress.port()).channelHandler(channelHandler);
-            ChannelFuture channelFuture = new RpcClient(context).connect();
-            // 循环同步等待
-            // 如果出现异常，直接中断？捕获异常继续进行？？
+            final ChannelHandler actualChannlHandler = ChannelHandlers.objectCodecHandler(channelHandler);
+            ChannelFuture channelFuture = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), actualChannlHandler).call();
             channelFutures.add(channelFuture);
         }
 
@@ -175,6 +185,124 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         ProxyContext<T> proxyContext = buildReferenceProxyContext();
         return ReferenceProxy.newProxyInstance(proxyContext);
     }
+
+
+
+    @Override
+    public DefaultReferenceConfig<T> timeout(long timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    @Override
+    public ReferenceConfig<T> subscribe(boolean subscribe) {
+        this.subscribe = subscribe;
+        return this;
+    }
+
+    @Override
+    public ReferenceConfig<T> registerCenter(String addresses) {
+        this.registerCenterList = RpcAddressBuilder.of(addresses);
+        return this;
+    }
+
+    /**
+     * 获取 rpc 地址信息列表
+     * （1）默认直接通过指定的地址获取
+     * （2）如果指定列表为空，且
+     * @return rpc 地址信息列表
+     * @since 0.0.8
+     */
+    @SuppressWarnings("unchecked")
+    private List<RpcAddress> getRpcAddresses() {
+        //0. 快速返回
+        if(CollectionUtil.isNotEmpty(rpcAddresses)) {
+            return rpcAddresses;
+        }
+
+        //1. 信息检查
+        registerCenterParamCheck();
+
+        //2. 查询服务信息
+        List<ServiceEntry> serviceEntries = lookUpServiceEntryList();
+        LOG.info("[Client] register center serviceEntries: {}", serviceEntries);
+        //3. 结果转换
+        return CollectionUtil.toList(serviceEntries, new IHandler<ServiceEntry, RpcAddress>() {
+            @Override
+            public RpcAddress handle(ServiceEntry serviceEntry) {
+                return new RpcAddress(serviceEntry.ip(),
+                        serviceEntry.port(), serviceEntry.weight());
+            }
+        });
+    }
+
+    /**
+     * 注册中心参数检查
+     * （1）如果可用列表为空，且没有指定自动发现，这个时候服务已经不可用了。
+     * @since 0.0.8
+     */
+    private void registerCenterParamCheck() {
+        if(!subscribe) {
+            LOG.error("[Rpc Client] no available services found for serviceId:{}",
+                    serviceId);
+            throw new RpcRuntimeException();
+        }
+        if(CollectionUtil.isEmpty(registerCenterList)) {
+            LOG.error("[Rpc Client] register center address can't be null!:{}",
+                    serviceId);
+            throw new RpcRuntimeException();
+        }
+    }
+
+    /**
+     * 查询服务信息列表
+     * @return 服务明细列表
+     * @since 0.0.8
+     */
+    @SuppressWarnings("unchecked")
+    private List<ServiceEntry> lookUpServiceEntryList() {
+        //1. 连接到注册中心
+        List<ChannelFuture> channelFutureList = connectRegisterCenter();
+
+        //2. 选择一个
+        // 直接取第一个即可，后续可以使用 load-balance 策略。
+        ChannelFuture channelFuture = channelFutureList.get(0);
+
+        //3. 发送查询请求
+        ServiceEntry serviceEntry = ServiceEntryBuilder.of(serviceId);
+        RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.CLIENT_LOOK_UP, serviceEntry);
+        final String seqId = registerMessage.seqId();
+        invokeService.addRequest(seqId, registerCenterTimeOut);
+        channelFuture.channel().writeAndFlush(registerMessage);
+
+        //4. 等待查询结果
+        RpcResponse rpcResponse = invokeService.getResponse(seqId);
+        return (List<ServiceEntry>) RpcResponses.getResult(rpcResponse);
+    }
+
+    /**
+     * 连接到注册中心
+     * @return 对应的结果列表
+     * @since 0.0.8
+     */
+    private List<ChannelFuture> connectRegisterCenter() {
+        List<ChannelFuture> futureList = Guavas.newArrayList(registerCenterList.size());
+        ChannelHandler channelHandler = ChannelHandlers.objectCodecHandler(new RpcClientRegisterHandler(invokeService));
+
+        for(RpcAddress rpcAddress : registerCenterList) {
+            final String ip = rpcAddress.address();
+            final int port = rpcAddress.port();
+            LOG.info("[Rpc Client] connect to register {}:{} ",
+                    ip, port);
+            ChannelFuture channelFuture = DefaultNettyClient
+                    .newInstance(ip, port, channelHandler)
+                    .call();
+
+            futureList.add(channelFuture);
+        }
+        return futureList;
+    }
+
 
     /**
      * 构建调用上下文
@@ -191,9 +319,4 @@ public class DefaultReferenceConfig<T> implements ReferenceConfig<T> {
         return proxyContext;
     }
 
-    @Override
-    public DefaultReferenceConfig<T> timeout(long timeout) {
-        this.timeout = timeout;
-        return this;
-    }
 }

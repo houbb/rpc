@@ -50,7 +50,7 @@ public class DefaultServiceFactory implements ServiceFactory {
      * @return this
      */
     @Override
-    public synchronized ServiceFactory registerServices(List<ServiceConfig> serviceConfigList) {
+    public synchronized ServiceFactory registerServicesLocal(List<ServiceConfig> serviceConfigList) {
         ArgUtil.notEmpty(serviceConfigList, "serviceConfigList");
 
         // 集合初始化

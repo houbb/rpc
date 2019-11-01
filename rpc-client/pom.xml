@@ -10,7 +10,7 @@
     <parent>
         <artifactId>rpc</artifactId>
         <groupId>com.github.houbb</groupId>
-        <version>0.0.7-SNAPSHOT</version>
+        <version>0.0.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -22,6 +22,10 @@
         <dependency>
             <groupId>com.github.houbb</groupId>
             <artifactId>rpc-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>rpc-register</artifactId>
         </dependency>
 
         <!--============================== INTER ==============================-->
@@ -36,10 +40,6 @@
         </dependency>
 
         <!--============================== OTHER ==============================-->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

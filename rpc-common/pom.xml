@@ -5,7 +5,7 @@
     <parent>
         <artifactId>rpc</artifactId>
         <groupId>com.github.houbb</groupId>
-        <version>0.0.7-SNAPSHOT</version>
+        <version>0.0.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,6 +17,17 @@
             <groupId>com.github.houbb</groupId>
             <artifactId>heaven</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>log-integration</artifactId>
+        </dependency>
+
+        <!--============================== OTHER ==============================-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

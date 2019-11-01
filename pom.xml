@@ -7,12 +7,13 @@
     <groupId>com.github.houbb</groupId>
     <artifactId>rpc</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.7-SNAPSHOT</version>
+    <version>0.0.8-SNAPSHOT</version>
     <modules>
         <module>rpc-server</module>
         <module>rpc-test</module>
         <module>rpc-client</module>
         <module>rpc-common</module>
+        <module>rpc-register</module>
     </modules>
 
     <properties>
@@ -57,6 +58,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>rpc-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>rpc-register</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
