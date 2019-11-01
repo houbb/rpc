@@ -12,7 +12,7 @@ import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
-import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
+import com.github.houbb.rpc.register.simple.server.RegisterServerService;
 
 import java.util.List;
 import java.util.Map;
@@ -28,9 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author houbinbin
  * @since 0.0.8
  */
-public class DefaultServerRegisterService implements ServerRegisterService {
+public class DefaultRegisterServerService implements RegisterServerService {
 
-    private static final Log LOG = LogFactory.getLog(DefaultServerRegisterService.class);
+    private static final Log LOG = LogFactory.getLog(DefaultRegisterServerService.class);
 
     /**
      * 存放对应的 map 信息
@@ -38,7 +38,7 @@ public class DefaultServerRegisterService implements ServerRegisterService {
      */
     private final Map<String, Set<ServiceEntry>> map;
 
-    public DefaultServerRegisterService(){
+    public DefaultRegisterServerService(){
         map = new ConcurrentHashMap<>();
     }
 
@@ -87,6 +87,8 @@ public class DefaultServerRegisterService implements ServerRegisterService {
 
         LOG.info("[Register Server] start lookUp serviceId: {}", serviceId);
         Set<ServiceEntry> serviceEntrySet = map.get(serviceId);
+        LOG.info("[Register Server] end lookUp serviceId: {}, list: {}", serviceId,
+                serviceEntrySet);
         return Guavas.newArrayList(serviceEntrySet);
     }
 

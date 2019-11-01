@@ -1,10 +1,16 @@
-package com.github.houbb.rpc.register.api.config.impl;
+/*
+ * Copyright (c)  2019. houbinbin Inc.
+ * rpc All rights reserved.
+ */
+
+package com.github.houbb.rpc.register.core;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyServer;
 import com.github.houbb.rpc.register.api.config.RegisterConfig;
 import com.github.houbb.rpc.register.simple.handler.RegisterCenterServerHandler;
+
 import io.netty.channel.ChannelHandler;
 
 /**

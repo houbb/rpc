@@ -10,9 +10,9 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcResponse;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
-import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
-import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
-import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
+import com.github.houbb.rpc.register.simple.client.RegisterClientService;
+import com.github.houbb.rpc.register.simple.server.RegisterServerService;
+import com.github.houbb.rpc.register.simple.server.impl.DefaultRegisterServerService;
 import com.github.houbb.rpc.register.spi.RpcRegister;
 import io.netty.channel.Channel;
 
@@ -33,55 +33,55 @@ import java.util.List;
  */
 public class SimpleRpcRegister implements RpcRegister {
 
-    private static final Log LOG = LogFactory.getLog(DefaultServerRegisterService.class);
+    private static final Log LOG = LogFactory.getLog(DefaultRegisterServerService.class);
 
     /**
      * 服务端信息管理
      * @since 0.0.8
      */
-    private final ServerRegisterService serverRegisterService;
+    private final RegisterServerService registerServerService;
 
     /**
      * 客户端信息管理
      * @since 0.0.8
      */
-    private final ClientRegisterService clientRegisterService;
+    private final RegisterClientService registerClientService;
 
-    public SimpleRpcRegister(ServerRegisterService serverRegisterService, ClientRegisterService clientRegisterService) {
-        this.serverRegisterService = serverRegisterService;
-        this.clientRegisterService = clientRegisterService;
+    public SimpleRpcRegister(RegisterServerService registerServerService, RegisterClientService registerClientService) {
+        this.registerServerService = registerServerService;
+        this.registerClientService = registerClientService;
     }
 
     @Override
     public void register(ServiceEntry serviceEntry) {
-        List<ServiceEntry> serviceEntryList = serverRegisterService.register(serviceEntry);
+        List<ServiceEntry> serviceEntryList = registerServerService.register(serviceEntry);
 
         // 通知监听者
-        clientRegisterService.notify(serviceEntry.serviceId(), serviceEntryList);
+        registerClientService.notify(serviceEntry.serviceId(), serviceEntryList);
     }
 
     @Override
     public void unRegister(ServiceEntry serviceEntry) {
-        List<ServiceEntry> serviceEntryList = serverRegisterService.unRegister(serviceEntry);
+        List<ServiceEntry> serviceEntryList = registerServerService.unRegister(serviceEntry);
 
         // 通知监听者
-        clientRegisterService.notify(serviceEntry.serviceId(), serviceEntryList);
+        registerClientService.notify(serviceEntry.serviceId(), serviceEntryList);
     }
 
     @Override
     public void subscribe(ServiceEntry clientEntry, final Channel channel) {
-        clientRegisterService.subscribe(clientEntry, channel);
+        registerClientService.subscribe(clientEntry, channel);
     }
 
     @Override
     public void unSubscribe(ServiceEntry clientEntry, Channel channel) {
-        clientRegisterService.unSubscribe(clientEntry, channel);
+        registerClientService.unSubscribe(clientEntry, channel);
     }
 
     @Override
     public void lookUp(String seqId, ServiceEntry clientEntry, Channel channel) {
         final String serviceId = clientEntry.serviceId();
-        List<ServiceEntry> serviceEntryList = serverRegisterService.lookUp(serviceId);
+        List<ServiceEntry> serviceEntryList = registerServerService.lookUp(serviceId);
 
         // 回写
         // 为了复用原先的相应结果，此处直接使用 rpc response

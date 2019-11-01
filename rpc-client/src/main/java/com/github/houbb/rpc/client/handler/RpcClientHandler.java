@@ -9,6 +9,8 @@ import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.invoke.InvokeService;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
+
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -21,6 +23,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @author houbinbin
  * @since 0.0.2
  */
+@ChannelHandler.Sharable
 public class RpcClientHandler extends SimpleChannelInboundHandler {
 
     private static final Log log = LogFactory.getLog(RpcClientHandler.class);
@@ -41,14 +44,6 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
         RpcResponse rpcResponse = (RpcResponse)msg;
         invokeService.addResponse(rpcResponse.seqId(), rpcResponse);
         log.info("[Client] response is :{}", rpcResponse);
-    }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        // 每次用完要关闭，不然拿不到response，我也不知道为啥（目测得了解netty才行）
-        // 个人理解：如果不关闭，则永远会被阻塞。
-        ctx.flush();
-        ctx.close();
     }
 
     @Override

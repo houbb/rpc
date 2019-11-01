@@ -5,9 +5,7 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.rpc.domain.RpcRequest;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcResponse;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
-
-import java.net.InetSocketAddress;
-
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -15,6 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * @author binbin.hou
  * @since 0.0.1
  */
+@ChannelHandler.Sharable
 public class RpcServerHandler extends SimpleChannelInboundHandler {
 
     private static final Log log = LogFactory.getLog(RpcServerHandler.class);
@@ -38,15 +37,11 @@ public class RpcServerHandler extends SimpleChannelInboundHandler {
         DefaultRpcResponse rpcResponse = handleRpcRequest(rpcRequest);
         ctx.writeAndFlush(rpcResponse);
         log.info("[Server] channel {} response {}", id, rpcResponse);
-
-//        InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
-//        String clientIP = insocket.getAddress().getHostAddress();
-//        System.out.println(clientIP);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
+        log.error("[Server] meet ex: ", cause);
         ctx.close();
     }
 

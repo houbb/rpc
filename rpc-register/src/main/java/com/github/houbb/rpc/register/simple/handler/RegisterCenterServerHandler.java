@@ -11,11 +11,11 @@ import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
 import com.github.houbb.rpc.register.simple.SimpleRpcRegister;
-import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
-import com.github.houbb.rpc.register.simple.client.impl.DefaultClientRegisterService;
+import com.github.houbb.rpc.register.simple.client.RegisterClientService;
+import com.github.houbb.rpc.register.simple.client.impl.DefaultRegisterClientService;
 import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
-import com.github.houbb.rpc.register.simple.server.ServerRegisterService;
-import com.github.houbb.rpc.register.simple.server.impl.DefaultServerRegisterService;
+import com.github.houbb.rpc.register.simple.server.RegisterServerService;
+import com.github.houbb.rpc.register.simple.server.impl.DefaultRegisterServerService;
 import com.github.houbb.rpc.register.spi.RpcRegister;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -105,9 +105,9 @@ public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
      * @since 0.0.8
      */
     private RpcRegister buildSimpleRpcRegister() {
-        final ServerRegisterService serverRegisterService = new DefaultServerRegisterService();
-        final ClientRegisterService clientRegisterService = new DefaultClientRegisterService();
-        return new SimpleRpcRegister(serverRegisterService, clientRegisterService);
+        final RegisterServerService registerServerService = new DefaultRegisterServerService();
+        final RegisterClientService registerClientService = new DefaultRegisterClientService();
+        return new SimpleRpcRegister(registerServerService, registerClientService);
     }
 
 

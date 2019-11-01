@@ -14,7 +14,7 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.message.RegisterMessage;
 import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
-import com.github.houbb.rpc.register.simple.client.ClientRegisterService;
+import com.github.houbb.rpc.register.simple.client.RegisterClientService;
 import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import io.netty.channel.Channel;
 
@@ -32,9 +32,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author houbinbin
  * @since 0.0.8
  */
-public class DefaultClientRegisterService implements ClientRegisterService {
+public class DefaultRegisterClientService implements RegisterClientService {
 
-    private static final Log LOG = LogFactory.getLog(DefaultClientRegisterService.class);
+    private static final Log LOG = LogFactory.getLog(DefaultRegisterClientService.class);
 
     /**
      * 服务信息-客户端列表 map
@@ -53,7 +53,7 @@ public class DefaultClientRegisterService implements ClientRegisterService {
      */
     private final Map<String, Set<Channel>> serviceClientChannelMap;
 
-    public DefaultClientRegisterService() {
+    public DefaultRegisterClientService() {
         this.serviceClientChannelMap = new ConcurrentHashMap<>();
     }
 

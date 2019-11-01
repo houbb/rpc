@@ -19,7 +19,7 @@ import java.util.List;
  * @author houbinbin
  * @since 0.0.8
  */
-public interface ServerRegisterService {
+public interface RegisterServerService {
 
     /**
      * 注册当前服务信息
