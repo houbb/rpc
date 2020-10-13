@@ -38,7 +38,7 @@
         <json.version>0.1.1</json.version>
 
         <!--============================== OTHER ==============================-->
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <netty.version>4.1.42.Final</netty.version>
     </properties>
 
