@@ -100,11 +100,6 @@
         <!--============================== SELF ==============================-->
 
         <!--============================== INTER ==============================-->
-        <dependency>
-            <groupId>com.github.houbb</groupId>
-            <artifactId>lombok-ex</artifactId>
-            <version>0.0.2</version>
-        </dependency>
         <!--============================== OTHER ==============================-->
 
 
@@ -208,7 +203,7 @@
     </developers>
     <!--============================== ADD For sonatype END ==============================-->
 
-
+<!--    mvn dependency:tree -Dverbose -Dincludes=com.github.houbb:lombok-ex-->
     <profiles>
         <profile>
             <id>release</id>
