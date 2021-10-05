@@ -7,10 +7,9 @@
     <groupId>com.github.houbb</groupId>
     <artifactId>rpc</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.7-SNAPSHOT</version>
+    <version>0.0.7</version>
     <modules>
         <module>rpc-server</module>
-        <module>rpc-test</module>
         <module>rpc-client</module>
         <module>rpc-common</module>
     </modules>
