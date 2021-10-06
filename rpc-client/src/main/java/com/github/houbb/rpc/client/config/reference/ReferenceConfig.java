@@ -69,6 +69,7 @@ public interface ReferenceConfig<T> {
 
     /**
      * 设置超时时间
+     * @param timeoutInMills 超时时间
      * @since 0.0.7
      * @return this
      */
@@ -86,6 +87,7 @@ public interface ReferenceConfig<T> {
     /**
      * 注册中心地址
      * （1）正常使用中，这个属性是可以固定写死，对使用者不可见的。
+     * @param addresses 注册中心地址
      * @since 0.0.8
      * @return this
      */
