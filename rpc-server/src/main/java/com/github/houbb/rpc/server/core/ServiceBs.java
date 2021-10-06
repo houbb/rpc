@@ -13,10 +13,13 @@ import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.config.protocol.ProtocolConfig;
+import com.github.houbb.rpc.common.exception.RpcRuntimeException;
 import com.github.houbb.rpc.common.remote.netty.NettyServer;
 import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyServer;
+import com.github.houbb.rpc.common.support.delay.DelayExecutor;
+import com.github.houbb.rpc.common.support.delay.DelayQueueExecutor;
 import com.github.houbb.rpc.common.support.hook.DefaultShutdownHook;
 import com.github.houbb.rpc.common.support.hook.RpcShutdownHook;
 import com.github.houbb.rpc.common.support.hook.ShutdownHooks;
@@ -114,6 +117,12 @@ public class ServiceBs implements ServiceRegistry {
      */
     private InvokeManager invokeManager;
 
+    /**
+     * 延迟执行器
+     * @since 0.1.7
+     */
+    private DelayExecutor delayExecutor;
+
     private ServiceBs() {
         // 初始化默认参数
         this.serviceConfigList = new ArrayList<>();
@@ -124,6 +133,8 @@ public class ServiceBs implements ServiceRegistry {
         this.statusManager = new DefaultStatusManager();
         this.resourceManager = new DefaultResourceManager();
         this.invokeManager = new DefaultInvokeManager();
+
+        this.delayExecutor = new DelayQueueExecutor();
     }
 
     public static ServiceBs getInstance() {
@@ -162,9 +173,39 @@ public class ServiceBs implements ServiceRegistry {
 
         // 构建对应的其他信息
         ServiceConfig serviceConfig = new DefaultServiceConfig();
-        //TODO: 是否暴露服务，允许用户指定
-        serviceConfig.id(serviceId).reference(serviceImpl).register(true);
-        serviceConfigList.add(serviceConfig);
+        serviceConfig.id(serviceId)
+                .reference(serviceImpl)
+                .register(true)
+                .delay(0);
+
+        addServiceConfig(serviceConfig);
+
+        return this;
+    }
+
+    /**
+     * 注册服务实现
+     * （1）主要用于后期服务调用
+     * （2）如何根据 id 获取实现？非常简单，id 是唯一的。
+     * 有就是有，没有就抛出异常，直接返回。
+     * （3）如果根据 {@link com.github.houbb.rpc.common.rpc.domain.RpcRequest} 获取对应的方法。
+     * <p>
+     * 3.1 根据 serviceId 获取唯一的实现
+     * 3.2 根据 {@link Class#getMethod(String, Class[])} 方法名称+参数类型唯一获取方法
+     * 3.3 根据 {@link java.lang.reflect.Method#invoke(Object, Object...)} 执行方法
+     *
+     * @param serviceConfig  服务配置信息
+     * @return this
+     * @since 0.1.7
+     */
+    @SuppressWarnings("all")
+    public synchronized ServiceBs register(final ServiceConfig serviceConfig) {
+        ArgUtil.notNull(serviceConfig, "serviceConfig");
+        ArgUtil.notNull(serviceConfig.reference(), "serviceConfig.reference");
+        ArgUtil.notNull(serviceConfig.id(), "serviceConfig.id");
+
+        // 构建对应的其他信息
+        addServiceConfig(serviceConfig);
 
         return this;
     }
@@ -189,11 +230,6 @@ public class ServiceBs implements ServiceRegistry {
         this.registerServiceCenter();
         LOG.info("server service register finish.");
 
-        // 4. 添加服务端钩子函数
-        statusManager.status(StatusEnum.ENABLE.code());
-        final RpcShutdownHook rpcShutdownHook = new DefaultShutdownHook(statusManager, invokeManager, resourceManager);
-        ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
-
         return this;
     }
 
@@ -215,7 +251,7 @@ public class ServiceBs implements ServiceRegistry {
         // 注册到配置中心
         // 初期简单点，直接循环调用即可
         // 循环服务信息
-        for (ServiceConfig config : this.serviceConfigList) {
+        for (final ServiceConfig config : this.serviceConfigList) {
             boolean register = config.register();
             final String serviceId = config.id();
             if (!register) {
@@ -224,20 +260,60 @@ public class ServiceBs implements ServiceRegistry {
                 continue;
             }
 
-            for (RpcAddress rpcAddress : registerCenterList) {
-                ChannelHandler registerHandler = ChannelHandlers.objectCodecHandler(new RpcServerRegisterHandler());
-                LOG.info("[Rpc Server] start register to {}:{}", rpcAddress.address(),
-                        rpcAddress.port());
-                DefaultNettyClient nettyClient = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), registerHandler);
-                ChannelFuture channelFuture = nettyClient.call();
-                this.resourceManager.addDestroy(nettyClient);
+            // 兼容小于 0 的情况
+            long delayMills = config.delay();
+            if(delayMills <= 0) {
+                delayMills = 0;
+            }
 
-                // 直接写入信息
-                RegisterMessage registerMessage = buildRegisterMessage(config);
-                LOG.info("[Rpc Server] register to service center: {}", registerMessage);
-                channelFuture.channel().writeAndFlush(registerMessage);
+            // ps: 这里也可以把不延迟的同步执行。
+            // 统一写可以保证逻辑的一致性
+            delayExecutor.delay(delayMills, new Runnable() {
+                @Override
+                public void run() {
+                    LOG.info("[Rpc Server] serviceId: {} delay init start.", serviceId);
+                    for (RpcAddress rpcAddress : registerCenterList) {
+                        ChannelHandler registerHandler = ChannelHandlers.objectCodecHandler(new RpcServerRegisterHandler());
+                        LOG.info("[Rpc Server] start register to {}:{}", rpcAddress.address(),
+                                rpcAddress.port());
+                        DefaultNettyClient nettyClient = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), registerHandler);
+                        ChannelFuture channelFuture = nettyClient.call();
+                        resourceManager.addDestroy(nettyClient);
+
+                        // 直接写入信息
+                        RegisterMessage registerMessage = buildRegisterMessage(config);
+                        LOG.info("[Rpc Server] register to service center: {}", registerMessage);
+                        channelFuture.channel().writeAndFlush(registerMessage);
+                    }
+
+                    // 4. 添加服务端钩子函数
+                    statusManager.status(StatusEnum.ENABLE.code());
+                    final RpcShutdownHook rpcShutdownHook = new DefaultShutdownHook(statusManager, invokeManager, resourceManager);
+                    ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
+
+                    LOG.info("[Rpc Server] serviceId: {} delay init end.", serviceId);
+                }
+            });
+        }
+    }
+
+
+    /**
+     * 添加服务配置
+     * @param serviceConfig 服务配置
+     * @since 0.1.7
+     */
+    @SuppressWarnings("all")
+    private void addServiceConfig(final ServiceConfig serviceConfig) {
+        // 判断是否存在重复的 id
+        final String id = serviceConfig.id();
+        for(ServiceConfig config : serviceConfigList) {
+            if(config.id().equals(id)) {
+                LOG.error("serviceConfig id has been registered, please check for id: {}", id);
+                throw new RpcRuntimeException();
             }
         }
+        this.serviceConfigList.add(serviceConfig);
     }
 
     /**

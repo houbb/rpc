@@ -36,6 +36,14 @@ public class DefaultServiceConfig<T> implements ServiceConfig<T> {
      */
     private boolean register = true;
 
+    /**
+     * 延迟暴露的毫秒数
+     *
+     * 默认不做延迟
+     * @since 0.1.7
+     */
+    private long delay = 0;
+
     @Override
     public String id() {
         return id;
@@ -66,6 +74,17 @@ public class DefaultServiceConfig<T> implements ServiceConfig<T> {
     @Override
     public DefaultServiceConfig<T> register(boolean register) {
         this.register = register;
+        return this;
+    }
+
+    @Override
+    public long delay() {
+        return delay;
+    }
+
+    @Override
+    public DefaultServiceConfig<T> delay(long delay) {
+        this.delay = delay;
         return this;
     }
 }

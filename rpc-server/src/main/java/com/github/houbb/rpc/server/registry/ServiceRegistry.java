@@ -1,5 +1,7 @@
 package com.github.houbb.rpc.server.registry;
 
+import com.github.houbb.rpc.server.config.service.ServiceConfig;
+
 /**
  * 服务注册类
  * （1）每个应用唯一
@@ -27,6 +29,14 @@ public interface ServiceRegistry {
      * @since 0.0.6
      */
     ServiceRegistry register(final String serviceId, final Object serviceImpl);
+
+    /**
+     * 注册服务实现
+     * @param serviceConfig 服务配置
+     * @return this
+     * @since 0.1.7
+     */
+    ServiceRegistry register(final ServiceConfig serviceConfig);
 
     /**
      * 暴露所有服务信息

@@ -61,4 +61,18 @@ public interface ServiceConfig<T> {
      */
     boolean register();
 
+    /**
+     * 设置服务延迟暴露时间
+     * @param delayInMills 延迟暴露的毫秒数
+     * @since 0.1.7
+     */
+    ServiceConfig<T> delay(final long delayInMills);
+
+    /**
+     * 获取延迟暴露毫秒数
+     * @return 暴露毫秒数
+     * @since 0.1.7
+     */
+    long delay();
+
 }
