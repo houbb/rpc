@@ -2,7 +2,101 @@
 
 [rpc](https://github.com/houbb/rpc) 是基于 netty 实现的 java rpc 框架，类似于 dubbo。
 
+[![Build Status](https://travis-ci.com/houbb/rpc.svg?branch=master)](https://travis-ci.com/houbb/rpc)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.houbb/rpc/badge.svg)](http://mvnrepository.com/artifact/com.github.houbb/rpc)
+[![](https://img.shields.io/badge/license-Apache2-FF0080.svg)](https://github.com/houbb/rpc/blob/master/LICENSE.txt)
+[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/houbb/nlp-common)
+
+> [变更日志](https://github.com/houbb/rpc/blob/master/CHANGELOG.md)
+
 主要用于个人学习，由渐入深，理解 rpc 的底层实现原理。
+
+## 特性
+
+- 基于 netty4 的客户端调用服务端
+
+- p2p 调用
+
+- serial 序列化支持
+
+- timeout 超时处理
+
+- register center 注册中心
+
+- load balance 负载均衡
+
+- callType 支持 oneway sync 等调用方式
+
+- fail 支持 failOver failFast 等失败处理策略
+
+- generic 支持泛化调用
+
+- gracefully 优雅关闭
+
+- interceptor 拦截器
+
+# 快速入门
+
+## maven 引入
+
+```xml
+<dependency>
+    <groupId>com.github.houbb</groupId>
+    <artifactId>rpc-server</artifactId>
+    <version>${rpc.version}</version>
+</dependency>
+<dependency>
+    <groupId>com.github.houbb</groupId>
+    <artifactId>rpc-client</artifactId>
+    <version>${rpc.version}</version>
+</dependency>
+<dependency>
+    <groupId>com.github.houbb</groupId>
+    <artifactId>rpc-register</artifactId>
+    <version>${rpc.version}</version>
+</dependency>
+```
+
+ps: 如果本地测试，register 注册中心可选。
+
+## 测试
+
+### 注册中心
+
+```java
+RegisterBs.newInstance().start();
+```
+
+### 服务端
+
+```java
+ServiceBs.getInstance()
+         .register(ServiceIdConst.CALC, new CalculatorServiceImpl())
+         .registerCenter(ServiceIdConst.REGISTER_CENTER)
+         .expose();
+```
+
+### 客户端
+
+```java
+// 服务配置信息
+ReferenceConfig<CalculatorService> config = ClientBs.newInstance();
+config.serviceId(ServiceIdConst.CALC);
+config.serviceInterface(CalculatorService.class);
+// 自动发现服务
+config.subscribe(true);
+config.registerCenter(ServiceIdConst.REGISTER_CENTER);
+// 拦截器测试
+config.interceptor(new CostTimeInterceptor());
+
+CalculatorService calculatorService = config.reference();
+CalculateRequest request = new CalculateRequest();
+request.setOne(10);
+request.setTwo(20);
+
+CalculateResponse response = calculatorService.sum(request);
+System.out.println(response);
+```
 
 # 前言
 
@@ -62,13 +156,11 @@ rpc-client 客户端
 
 rpc-register 注册中心
 
-rpc-test 测试模块
-
 # 代码分支
 
 [release_0.0.1-server 服务端启动](https://github.com/houbb/rpc/tree/release_0.0.1)
 
-[release_0.0.2-client 客戶端启动](https://github.com/houbb/rpc/tree/release_0.0.2)
+[release_0.0.2-client 客户端启动](https://github.com/houbb/rpc/tree/release_0.0.2)
 
 [release_0.0.3-客户端调用服务端](https://github.com/houbb/rpc/tree/release_0.0.3)
 
@@ -94,20 +186,11 @@ rpc-test 测试模块
 
 [release_0.1.4-interceptor 拦截器](https://github.com/houbb/rpc/tree/release_0.1.4)
 
-
-## 测试代码
-
-从 v0.0.6 及其之后，为了让代码保持纯净，将测试代码全部放在 rpc-example。
-
-每个测试代码和实现版本一一对应。
-
-[rpc-example](https://github.com/houbb/rpc-example)
-
 # 文档说明
 
 [0.0.1-server 服务端启动](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.1-server%20服务端启动.md)
 
-[0.0.2-client 客戶端启动](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.2-client%20客户端启动.md)
+[0.0.2-client 客户端启动](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.2-client%20客户端启动.md)
 
 [0.0.3-客户端调用服务端](https://github.com/houbb/rpc/blob/master/doc/dev/0.0.3-客户端调用服务端.md)
 
@@ -132,3 +215,39 @@ rpc-test 测试模块
 [0.1.3-gracefully 优雅关闭](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.3-gracefully-优雅关闭.md)
 
 [0.1.4-interceptor 拦截器](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.4-interceptor-拦截器.md)
+
+# 测试代码
+
+从 v0.0.6 及其之后，为了让代码保持纯净，将测试代码全部放在 rpc-example。
+
+每个测试代码和实现版本一一对应。
+
+ps: 这部分测试代码可以关注公众号【老马啸西风】，后台回复【rpc】领取。
+
+![qrcode](qrcode.jpg)
+
+# 后期 ROAD-MAP
+
+- [ ] all 模块
+  
+- [ ] spring 整合
+
+- [ ] springboot 整合
+
+- [ ] 关闭时通知 register center
+
+- [ ] heartbeat 心跳检测机制
+
+- [ ] version 版本管理
+
+- [ ] telnet 命令行治理
+
+- [ ] 完善 load-balance 实现
+  
+- [ ] 完善 filter 实现
+
+入参 出参
+
+服务端等
+
+
