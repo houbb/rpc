@@ -42,22 +42,12 @@
 ```xml
 <dependency>
     <groupId>com.github.houbb</groupId>
-    <artifactId>rpc-server</artifactId>
-    <version>${rpc.version}</version>
-</dependency>
-<dependency>
-    <groupId>com.github.houbb</groupId>
-    <artifactId>rpc-client</artifactId>
-    <version>${rpc.version}</version>
-</dependency>
-<dependency>
-    <groupId>com.github.houbb</groupId>
-    <artifactId>rpc-register</artifactId>
+    <artifactId>rpc-all</artifactId>
     <version>${rpc.version}</version>
 </dependency>
 ```
 
-ps: 如果本地测试，register 注册中心可选。
+ps: 如果本地 p2p 测试，register 注册中心可选。
 
 ## 测试
 
@@ -130,7 +120,7 @@ System.out.println(response);
 
 陆陆续续经过近一个月的完善，对 rpc 框架有了自己的体会和进一步的认知。
 
-代码实现功能，主要参考 [Apache Dubbo](http://dubbo.apache.org/en-us/)
+代码实现功能，主要参考 [Apache Dubbo](https://dubbo.apache.org/zh/docs/introduction/)
 
 # 文档
 
@@ -148,13 +138,13 @@ System.out.println(response);
 
 # rpc 模块
 
-rpc-common 公共代码
-
-rpc-server 服务端
-
-rpc-client 客户端
-
-rpc-register 注册中心
+| 模块 | 说明 |
+|:---|:---|
+| rpc-common | 公共代码 |
+| rpc-register | 注册中心 |
+| rpc-server | 服务端 |
+| rpc-client | 客户端 |
+| rpc-all | 全部引用模块（简化包引用） |
 
 # 代码分支
 
@@ -229,18 +219,18 @@ ps: 这部分测试代码可以关注公众号【老马啸西风】，后台回�
 # 后期 ROAD-MAP
 
 - [ ] all 模块
+
+- [ ] check 启动检测
   
-- [ ] spring 整合
+可以和 echo 回声检测一起实现
 
-- [ ] springboot 整合
-
+- [ ] delay 延迟暴露
+  
 - [ ] 关闭时通知 register center
 
 - [ ] heartbeat 心跳检测机制
 
-- [ ] version 版本管理
-
-- [ ] telnet 命令行治理
+- [ ] version 多版本管理
 
 - [ ] 完善 load-balance 实现
   
@@ -249,5 +239,33 @@ ps: 这部分测试代码可以关注公众号【老马啸西风】，后台回�
 入参 出参
 
 服务端等
+
+- [ ] 失败重试的拓展
+  
+尝试其他服务端
+
+指定重试策略（sisyphus）
+
+- [ ] route 路由规则
+
+- [ ] spring 整合
+
+- [ ] springboot 整合
+
+- [ ] telnet 命令行治理
+  
+- [ ] rpc-admin 控台管理
+
+服务治理
+
+- [ ] async 异步执行
+  
+- [ ] ~~cache 结果缓存？~~
+
+- [ ] ~~validator 参数校验~~
+
+- [ ] ~~服务降级~~
+
+
 
 
