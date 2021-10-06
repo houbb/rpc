@@ -218,14 +218,18 @@ ps: 这部分测试代码可以关注公众号【老马啸西风】，后台回�
 
 # 后期 ROAD-MAP
 
-- [ ] all 模块
+- [x] all 模块
 
-- [ ] check 启动检测
+- [x] check 客户端启动检测
   
 可以和 echo 回声检测一起实现
 
-- [ ] delay 延迟暴露
+- [ ] echo 回声服务
   
+- [ ] register=false 只启动，不注册
+
+- [ ] delay 延迟暴露
+
 - [ ] 关闭时通知 register center
 
 - [ ] heartbeat 心跳检测机制

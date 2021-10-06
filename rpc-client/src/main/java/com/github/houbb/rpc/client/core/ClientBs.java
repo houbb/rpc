@@ -42,6 +42,7 @@ import com.github.houbb.rpc.common.support.status.service.StatusManager;
 import com.github.houbb.rpc.common.support.status.service.impl.DefaultStatusManager;
 import io.netty.channel.ChannelHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -75,7 +76,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     /**
      * ClientBs logger
      */
-    private static final Log LOG = LogFactory.getLog(ClientBs.class);
+    private static final Log log = LogFactory.getLog(ClientBs.class);
 
     /**
      * 服务唯一标识
@@ -181,6 +182,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     private ResourceManager resourceManager;
 
     /**
+     * 客户端启动检测
+     * @since 0.1.5
+     */
+    private boolean check;
+
+    /**
      * 新建一个客户端实例
      *
      * @param <T> 泛型
@@ -200,6 +207,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         this.callType = CallTypeEnum.SYNC;
         this.failType = FailTypeEnum.FAIL_OVER;
         this.generic = false;
+        this.check = true;
 
         // 依赖服务初始化
         this.invokeManager = new DefaultInvokeManager();
@@ -224,8 +232,14 @@ public class ClientBs<T> implements ReferenceConfig<T> {
 
     @Override
     public ReferenceConfig<T> addresses(String addresses) {
-        LOG.info("[Rpc Client] service address set into {} ", addresses);
+        log.info("[Rpc Client] service address set into {} ", addresses);
         this.rpcAddresses = RpcAddressBuilder.of(addresses);
+        return this;
+    }
+
+    @Override
+    public ClientBs<T> check(boolean check) {
+        this.check = check;
         return this;
     }
 
@@ -247,13 +261,8 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         List<RpcAddress> rpcAddressList = this.getRpcAddresses();
 
         //2. 循环链接
-        List<RpcChannelFuture> channelFutureList = ChannelHandlers.channelFutureList(rpcAddressList, new ChannelHandlerFactory() {
-            @Override
-            public ChannelHandler handler() {
-                final ChannelHandler channelHandler = new RpcClientHandler(invokeManager);
-                return ChannelHandlers.objectCodecHandler(channelHandler);
-            }
-        });
+        List<RpcChannelFuture> channelFutureList = this.initChannelFutureList(rpcAddressList);
+
         //2.2 循环将 nettyClient 信息放入到资源列表中
         for(RpcChannelFuture channelFuture : channelFutureList) {
             this.resourceManager.addDestroy(channelFuture.destroyable());
@@ -266,7 +275,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
             ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext, remoteInvokeService);
             reference = referenceProxy.proxy();
         } else {
-            LOG.info("[Client] generic reference proxy created.");
+            log.info("[Client] generic reference proxy created.");
             reference = (T) new GenericReferenceProxy(proxyContext, remoteInvokeService);
         }
 
@@ -322,6 +331,57 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     }
 
     /**
+     * 初始化列表
+     * @param rpcAddressList 地址
+     * @return 结果
+     * @since 0.1.6
+     */
+    private List<RpcChannelFuture> initChannelFutureList(List<RpcAddress> rpcAddressList) {
+        // 检测可用性
+        if(this.check) {
+            //1. 列表为空
+            if(CollectionUtil.isEmpty(rpcAddressList)) {
+                log.error("[Rpc Client] rpc address list is empty!");
+                throw new RpcRuntimeException();
+            }
+
+            //2. 初始化
+            return ChannelHandlers.channelFutureList(rpcAddressList, new ChannelHandlerFactory() {
+                @Override
+                public ChannelHandler handler() {
+                    final ChannelHandler channelHandler = new RpcClientHandler(invokeManager);
+                    return ChannelHandlers.objectCodecHandler(channelHandler);
+                }
+            });
+        }
+
+        // 如果不检测可用性
+        List<RpcChannelFuture> resultList = new ArrayList<>();
+        if(CollectionUtil.isEmpty(rpcAddressList)) {
+            log.warn("[Rpc Client] rpc address list is empty, without check init.");
+            return resultList;
+        }
+        // 如果异常，则捕获
+        for(RpcAddress rpcAddress : rpcAddressList) {
+            try {
+                RpcChannelFuture future = ChannelHandlers.channelFuture(rpcAddress, new ChannelHandlerFactory() {
+                    @Override
+                    public ChannelHandler handler() {
+                        final ChannelHandler channelHandler = new RpcClientHandler(invokeManager);
+                        return ChannelHandlers.objectCodecHandler(channelHandler);
+                    }
+                });
+
+                resultList.add(future);
+            } catch (Exception exception) {
+                log.error("[Rpc Client] rpc address init failed, without check init. {}", rpcAddress, exception);
+            }
+        }
+
+        return resultList;
+    }
+
+    /**
      * 获取 rpc 地址信息列表
      * （1）默认直接通过指定的地址获取
      * （2）如果指定列表为空，且
@@ -350,7 +410,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      */
     private void registerCenterParamCheck() {
         if (!subscribe) {
-            LOG.error("[Rpc Client] no available services found for serviceId:{}", serviceId);
+            log.error("[Rpc Client] no available services found for serviceId:{}", serviceId);
             throw new RpcRuntimeException();
         }
     }

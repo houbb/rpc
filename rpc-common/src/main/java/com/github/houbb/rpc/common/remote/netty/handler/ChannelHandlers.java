@@ -97,4 +97,30 @@ public final class ChannelHandlers {
         return resultList;
     }
 
+    /**
+     * 获取处理后的channel future 信息
+     * （1）权重
+     * （2）client 链接信息
+     * （3）地址信息
+     * @param rpcAddress 地址信息
+     * @param handlerFactory 构建工厂
+     * @return 信息列表
+     * @since 0.1.6
+     */
+    public static RpcChannelFuture channelFuture(final RpcAddress rpcAddress, final ChannelHandlerFactory handlerFactory) {
+        final ChannelHandler channelHandler = handlerFactory.handler();
+
+        // 循环中每次都需要一个新的 handler
+        DefaultRpcChannelFuture future = DefaultRpcChannelFuture.newInstance();
+        DefaultNettyClient nettyClient = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), channelHandler);
+        ChannelFuture channelFuture = nettyClient.call();
+
+        future.channelFuture(channelFuture)
+                .address(rpcAddress)
+                .weight(rpcAddress.weight())
+                .destroyable(nettyClient);
+
+        return future;
+    }
+
 }

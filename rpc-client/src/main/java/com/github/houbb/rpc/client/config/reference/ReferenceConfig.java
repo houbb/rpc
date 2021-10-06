@@ -125,4 +125,12 @@ public interface ReferenceConfig<T> {
      */
     ReferenceConfig<T> interceptor(final Interceptor interceptor);
 
+    /**
+     * 是否检测状态
+     * @param check 是否检测
+     * @return this
+     * @since 0.1.5
+     */
+    ReferenceConfig<T> check(final boolean check);
+
 }
