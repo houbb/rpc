@@ -1,13 +1,13 @@
 package com.github.houbb.rpc.register.domain.message.impl;
 
-import com.github.houbb.rpc.register.domain.message.RegisterMessageHeader;
+import com.github.houbb.rpc.register.domain.message.NotifyMessageHeader;
 
 /**
- * 注冊信息頭
+ * 默认通知消息頭
  * @author binbin.hou
  * @since 0.0.8
  */
-class DefaultRegisterMessageHeader implements RegisterMessageHeader {
+class DefaultNotifyMessageHeader implements NotifyMessageHeader {
 
     private static final long serialVersionUID = -5742810870688287022L;
 
@@ -15,14 +15,14 @@ class DefaultRegisterMessageHeader implements RegisterMessageHeader {
      * 消息类型
      * @since 0.0.8
      */
-    private int type;
+    private String type;
 
     @Override
-    public int type() {
+    public String type() {
         return type;
     }
 
-    public DefaultRegisterMessageHeader type(int type) {
+    public DefaultNotifyMessageHeader type(String type) {
         this.type = type;
         return this;
     }

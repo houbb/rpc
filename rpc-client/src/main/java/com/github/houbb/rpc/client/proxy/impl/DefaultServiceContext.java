@@ -2,6 +2,7 @@ package com.github.houbb.rpc.client.proxy.impl;
 
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
+import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
@@ -28,13 +29,6 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
      * @since 0.0.6
      */
     private Class<T> serviceInterface;
-
-    /**
-     * channel future 信息
-     *
-     * @since 0.0.9
-     */
-    private List<RpcChannelFuture> channelFutures;
 
     /**
      * channel handler 信息
@@ -78,6 +72,12 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
      */
     private Interceptor interceptor;
 
+    /**
+     * 客户端注册中心管理类
+     * @since 0.1.8
+     */
+    private ClientRegisterManager clientRegisterManager;
+
     @Override
     public String serviceId() {
         return serviceId;
@@ -99,11 +99,6 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
     }
 
     @Override
-    public List<RpcChannelFuture> channelFutures() {
-        return channelFutures;
-    }
-
-    @Override
     public CallTypeEnum callType() {
         return callType;
     }
@@ -120,11 +115,6 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
 
     public DefaultServiceContext<T> callType(CallTypeEnum callType) {
         this.callType = callType;
-        return this;
-    }
-
-    public DefaultServiceContext<T> channelFutures(List<RpcChannelFuture> channelFutures) {
-        this.channelFutures = channelFutures;
         return this;
     }
 
@@ -179,19 +169,13 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
     }
 
     @Override
-    public String toString() {
-        return "DefaultServiceContext{" +
-                "serviceId='" + serviceId + '\'' +
-                ", serviceInterface=" + serviceInterface +
-                ", channelFutures=" + channelFutures +
-                ", invokeManager=" + invokeManager +
-                ", timeout=" + timeout +
-                ", callType=" + callType +
-                ", failType=" + failType +
-                ", generic=" + generic +
-                ", statusManager=" + statusManager +
-                ", interceptor=" + interceptor +
-                '}';
+    public ClientRegisterManager clientRegisterManager() {
+        return clientRegisterManager;
+    }
+
+    public DefaultServiceContext<T> clientRegisterManager(ClientRegisterManager clientRegisterManager) {
+        this.clientRegisterManager = clientRegisterManager;
+        return this;
     }
 
 }

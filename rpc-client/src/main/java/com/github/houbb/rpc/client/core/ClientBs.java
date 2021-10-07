@@ -6,11 +6,10 @@
 package com.github.houbb.rpc.client.core;
 
 import com.github.houbb.heaven.util.guava.Guavas;
-import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.config.reference.ReferenceConfig;
-import com.github.houbb.rpc.client.handler.RpcClientHandler;
+import com.github.houbb.rpc.client.model.ClientQueryServerChannelConfig;
 import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
@@ -19,14 +18,12 @@ import com.github.houbb.rpc.client.proxy.impl.DefaultServiceContext;
 import com.github.houbb.rpc.client.proxy.impl.GenericReferenceProxy;
 import com.github.houbb.rpc.client.proxy.impl.RemoteInvokeServiceImpl;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
-import com.github.houbb.rpc.client.support.register.ClientRegisterService;
-import com.github.houbb.rpc.client.support.register.impl.ClientRegisterServiceImpl;
+import com.github.houbb.rpc.client.support.hook.DefaultClientShutdownHook;
+import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
+import com.github.houbb.rpc.client.support.register.impl.DefaultClientRegisterManager;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
-import com.github.houbb.rpc.common.exception.RpcRuntimeException;
-import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlerFactory;
-import com.github.houbb.rpc.common.remote.netty.handler.ChannelHandlers;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.support.hook.DefaultShutdownHook;
 import com.github.houbb.rpc.common.support.hook.RpcShutdownHook;
@@ -40,9 +37,7 @@ import com.github.houbb.rpc.common.support.resource.impl.DefaultResourceManager;
 import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
 import com.github.houbb.rpc.common.support.status.service.impl.DefaultStatusManager;
-import io.netty.channel.ChannelHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -137,7 +132,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      *
      * @since 0.0.9
      */
-    private ClientRegisterService clientRegisterService;
+    private ClientRegisterManager clientRegisterManager;
 
     /**
      * 调用方式
@@ -211,11 +206,11 @@ public class ClientBs<T> implements ReferenceConfig<T> {
 
         // 依赖服务初始化
         this.invokeManager = new DefaultInvokeManager();
-        this.clientRegisterService = new ClientRegisterServiceImpl(invokeManager);
         this.remoteInvokeService = new RemoteInvokeServiceImpl();
         this.statusManager = new DefaultStatusManager();
         this.resourceManager = new DefaultResourceManager();
         this.interceptor = new InterceptorAdaptor();
+        this.clientRegisterManager = new DefaultClientRegisterManager(invokeManager, resourceManager);
     }
 
     @Override
@@ -254,22 +249,18 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     @Override
     @SuppressWarnings("unchecked")
     public T reference() {
-        // 1. 启动 client 端到 server 端的连接信息
-        // 1.1 为了提升性能，可以将所有的 client=>server 的连接都调整为一个 thread。
-        // 1.2 初期为了简单，直接使用同步循环的方式。
-        // 获取地址列表信息
-        List<RpcAddress> rpcAddressList = this.getRpcAddresses();
-
         //2. 循环链接
-        List<RpcChannelFuture> channelFutureList = this.initChannelFutureList(rpcAddressList);
-
-        //2.2 循环将 nettyClient 信息放入到资源列表中
-        for(RpcChannelFuture channelFuture : channelFutureList) {
-            this.resourceManager.addDestroy(channelFuture.destroyable());
-        }
+        ClientQueryServerChannelConfig queryConfig = new ClientQueryServerChannelConfig();
+        queryConfig.check(check);
+        queryConfig.serviceId(serviceId);
+        queryConfig.rpcAddresses(rpcAddresses);
+        queryConfig.registerCenterList(registerCenterList);
+        queryConfig.subscribe(subscribe);
+        clientRegisterManager.initServerChannelFutureList(queryConfig);
 
         //3. 生成服务端代理
-        ServiceContext<T> proxyContext = buildServiceProxyContext(channelFutureList);
+        ServiceContext<T> proxyContext = buildServiceProxyContext();
+
         T reference = null;
         if(!this.generic) {
             ReferenceProxy<T> referenceProxy = new DefaultReferenceProxy<>(proxyContext, remoteInvokeService);
@@ -278,11 +269,15 @@ public class ClientBs<T> implements ReferenceConfig<T> {
             log.info("[Client] generic reference proxy created.");
             reference = (T) new GenericReferenceProxy(proxyContext, remoteInvokeService);
         }
+        proxyContext.statusManager().status(StatusEnum.ENABLE.code());
 
         //4. 添加客户端钩子
         // 设置状态为可用
-        proxyContext.statusManager().status(StatusEnum.ENABLE.code());
-        final RpcShutdownHook rpcShutdownHook = new DefaultShutdownHook(statusManager, invokeManager, resourceManager);
+        final DefaultClientShutdownHook rpcShutdownHook = new DefaultClientShutdownHook();
+        rpcShutdownHook.statusManager(statusManager);
+        rpcShutdownHook.invokeManager(invokeManager);
+        rpcShutdownHook.resourceManager(resourceManager);
+        rpcShutdownHook.clientRegisterManager(clientRegisterManager);
         ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
 
         return reference;
@@ -331,102 +326,16 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     }
 
     /**
-     * 初始化列表
-     * @param rpcAddressList 地址
-     * @return 结果
-     * @since 0.1.6
-     */
-    private List<RpcChannelFuture> initChannelFutureList(List<RpcAddress> rpcAddressList) {
-        // 检测可用性
-        if(this.check) {
-            //1. 列表为空
-            if(CollectionUtil.isEmpty(rpcAddressList)) {
-                log.error("[Rpc Client] rpc address list is empty!");
-                throw new RpcRuntimeException();
-            }
-
-            //2. 初始化
-            return ChannelHandlers.channelFutureList(rpcAddressList, new ChannelHandlerFactory() {
-                @Override
-                public ChannelHandler handler() {
-                    final ChannelHandler channelHandler = new RpcClientHandler(invokeManager);
-                    return ChannelHandlers.objectCodecHandler(channelHandler);
-                }
-            });
-        }
-
-        // 如果不检测可用性
-        List<RpcChannelFuture> resultList = new ArrayList<>();
-        if(CollectionUtil.isEmpty(rpcAddressList)) {
-            log.warn("[Rpc Client] rpc address list is empty, without check init.");
-            return resultList;
-        }
-        // 如果异常，则捕获
-        for(RpcAddress rpcAddress : rpcAddressList) {
-            try {
-                RpcChannelFuture future = ChannelHandlers.channelFuture(rpcAddress, new ChannelHandlerFactory() {
-                    @Override
-                    public ChannelHandler handler() {
-                        final ChannelHandler channelHandler = new RpcClientHandler(invokeManager);
-                        return ChannelHandlers.objectCodecHandler(channelHandler);
-                    }
-                });
-
-                resultList.add(future);
-            } catch (Exception exception) {
-                log.error("[Rpc Client] rpc address init failed, without check init. {}", rpcAddress, exception);
-            }
-        }
-
-        return resultList;
-    }
-
-    /**
-     * 获取 rpc 地址信息列表
-     * （1）默认直接通过指定的地址获取
-     * （2）如果指定列表为空，且
-     *
-     * @return rpc 地址信息列表
-     * @since 0.0.8
-     */
-    private List<RpcAddress> getRpcAddresses() {
-        //0. 快速返回
-        if (CollectionUtil.isNotEmpty(rpcAddresses)) {
-            return rpcAddresses;
-        }
-
-        //1. 信息检查
-        registerCenterParamCheck();
-
-        //2. 查询服务信息
-        return clientRegisterService.queryServerAddressList(serviceId, registerCenterList);
-    }
-
-    /**
-     * 注册中心参数检查
-     * （1）如果可用列表为空，且没有指定自动发现，这个时候服务已经不可用了。
-     *
-     * @since 0.0.8
-     */
-    private void registerCenterParamCheck() {
-        if (!subscribe) {
-            log.error("[Rpc Client] no available services found for serviceId:{}", serviceId);
-            throw new RpcRuntimeException();
-        }
-    }
-
-    /**
      * 构建调用上下文
      *
-     * @param channelFutureList 信息列表
      * @return 引用代理上下文
      * @since 0.0.6
      */
-    private ServiceContext<T> buildServiceProxyContext(final List<RpcChannelFuture> channelFutureList) {
+    private ServiceContext<T> buildServiceProxyContext() {
         DefaultServiceContext<T> serviceContext = new DefaultServiceContext<>();
         serviceContext.serviceId(this.serviceId);
         serviceContext.serviceInterface(this.serviceInterface);
-        serviceContext.channelFutures(channelFutureList);
+        serviceContext.clientRegisterManager(clientRegisterManager);
         serviceContext.invokeManager(this.invokeManager);
         serviceContext.timeout(this.timeout);
         serviceContext.callType(this.callType);

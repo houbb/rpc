@@ -1,6 +1,8 @@
 package com.github.houbb.rpc.client.proxy;
 
+import com.github.houbb.rpc.client.proxy.impl.DefaultServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
+import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
@@ -47,13 +49,6 @@ public interface ServiceContext<T> {
     long timeout();
 
     /**
-     * netty channel 信息
-     * @return channel 信息
-     * @since 0.0.9
-     */
-    List<RpcChannelFuture> channelFutures();
-
-    /**
      * 调用方式
      * @return 枚举值
      * @since 0.1.0
@@ -87,5 +82,12 @@ public interface ServiceContext<T> {
      * @since 0.1.4
      */
     Interceptor interceptor();
+
+    /**
+     * 客户端注册中心管理类
+     * @return 结果
+     * @since 0.1.8
+     */
+    ClientRegisterManager clientRegisterManager();
 
 }

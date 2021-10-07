@@ -1,14 +1,14 @@
 package com.github.houbb.rpc.register.domain.message.impl;
 
-import com.github.houbb.rpc.register.domain.message.RegisterMessage;
-import com.github.houbb.rpc.register.domain.message.RegisterMessageHeader;
+import com.github.houbb.rpc.register.domain.message.NotifyMessage;
+import com.github.houbb.rpc.register.domain.message.NotifyMessageHeader;
 
 /**
  * 默认注册消息
  * @author binbin.hou
  * @since 0.0.8
  */
-class DefaultRegisterMessage implements RegisterMessage {
+class DefaultNotifyMessage implements NotifyMessage {
 
     private static final long serialVersionUID = 3979588494064088927L;
 
@@ -22,7 +22,7 @@ class DefaultRegisterMessage implements RegisterMessage {
      * 头信息
      * @since 0.0.8
      */
-    private RegisterMessageHeader header;
+    private NotifyMessageHeader header;
 
     /**
      * 消息信息体
@@ -36,17 +36,17 @@ class DefaultRegisterMessage implements RegisterMessage {
     }
 
     @Override
-    public DefaultRegisterMessage seqId(String seqId) {
+    public DefaultNotifyMessage seqId(String seqId) {
         this.seqId = seqId;
         return this;
     }
 
     @Override
-    public RegisterMessageHeader header() {
+    public NotifyMessageHeader header() {
         return header;
     }
 
-    public DefaultRegisterMessage header(RegisterMessageHeader header) {
+    public DefaultNotifyMessage header(NotifyMessageHeader header) {
         this.header = header;
         return this;
     }
@@ -56,7 +56,7 @@ class DefaultRegisterMessage implements RegisterMessage {
         return body;
     }
 
-    public DefaultRegisterMessage body(Object body) {
+    public DefaultNotifyMessage body(Object body) {
         this.body = body;
         return this;
     }

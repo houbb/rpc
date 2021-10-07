@@ -108,6 +108,8 @@ public class DefaultInvokeManager implements InvokeManager {
                 }
             }
 
+            // 移除 request
+            this.requestMap.remove(seqId);
             return rpcResponse;
         } catch (InterruptedException e) {
             LOG.error("[Invoke] get response meet InterruptedException ex", e);

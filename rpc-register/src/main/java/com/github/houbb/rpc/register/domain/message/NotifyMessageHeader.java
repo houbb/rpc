@@ -5,11 +5,11 @@ import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import java.io.Serializable;
 
 /**
- * 注冊信息頭
+ * 通知消息头
  * @author binbin.hou
  * @since 0.0.8
  */
-public interface RegisterMessageHeader extends Serializable {
+public interface NotifyMessageHeader extends Serializable {
 
     /**
      * 消息类型
@@ -17,6 +17,6 @@ public interface RegisterMessageHeader extends Serializable {
      * @since 0.0.8
      * @see MessageTypeConst 类型常量
      */
-    int type();
+    String type();
 
 }

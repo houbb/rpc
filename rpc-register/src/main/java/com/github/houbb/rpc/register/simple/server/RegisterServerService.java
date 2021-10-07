@@ -7,7 +7,9 @@ package com.github.houbb.rpc.register.simple.server;
 
 
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
+import io.netty.channel.Channel;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -26,18 +28,20 @@ public interface RegisterServerService {
      * （1）将该服务通过 {@link ServiceEntry#serviceId()} 进行分组
      * 订阅了这个 serviceId 的所有客户端
      * @param serviceEntry 注册当前服务信息
+     * @param channel channel
      * @since 0.0.8
      * @return 更新后的服务信息列表
      */
-    List<ServiceEntry> register(final ServiceEntry serviceEntry);
+    List<ServiceEntry> register(final ServiceEntry serviceEntry, Channel channel);
 
     /**
      * 注销当前服务信息
      * @param serviceEntry 注册当前服务信息
+     * @param channel channel
      * @since 0.0.8
      * @return 更新后的服务信息列表
      */
-    List<ServiceEntry> unRegister(final ServiceEntry serviceEntry);
+    List<ServiceEntry> unRegister(final ServiceEntry serviceEntry, Channel channel);
 
     /**
      * 根据服务标识发现对应的服务器信息
@@ -47,5 +51,12 @@ public interface RegisterServerService {
      * @since 0.0.8
      */
     List<ServiceEntry> lookUp(final String serviceId);
+
+    /**
+     * channel 列表
+     * @return 列表
+     * @since 0.1.8
+     */
+    Collection<Channel> channels();
 
 }

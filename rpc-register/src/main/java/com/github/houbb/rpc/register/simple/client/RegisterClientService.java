@@ -9,6 +9,7 @@ package com.github.houbb.rpc.register.simple.client;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import io.netty.channel.Channel;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -47,16 +48,36 @@ public interface RegisterClientService {
                      final Channel clientChannel);
 
     /**
-     * 通知客户端变更
+     * 注册通知
      *
      * 核心流程：
      * （1）根据 serviceId 直接获取对应的所有 client 列表信息
      * （2）根据 serviceId 获取所有的对应列表
      * （3）循环通知。
      * @param serviceId 服务信息（不可为空）
-     * @param serviceEntryList 服务明细列表 可以为空，因为可能对应的服务列表全部不可用。
+     * @param serviceEntry 服务明细
      * @since 0.0.8
      */
-    void notify(final String serviceId, final List<ServiceEntry> serviceEntryList);
+    void registerNotify(final String serviceId, final ServiceEntry serviceEntry);
+
+    /**
+     * 注册通知
+     *
+     * 核心流程：
+     * （1）根据 serviceId 直接获取对应的所有 client 列表信息
+     * （2）根据 serviceId 获取所有的对应列表
+     * （3）循环通知。
+     * @param serviceId 服务信息（不可为空）
+     * @param serviceEntry 服务明细
+     * @since 0.0.8
+     */
+    void unRegisterNotify(final String serviceId, final ServiceEntry serviceEntry);
+
+    /**
+     * channel 列表
+     * @return 列表
+     * @since 0.1.8
+     */
+    Collection<Channel> channels();
 
 }

@@ -13,7 +13,9 @@ import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.simple.server.RegisterServerService;
+import io.netty.channel.Channel;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,12 +40,19 @@ public class DefaultRegisterServerService implements RegisterServerService {
      */
     private final Map<String, Set<ServiceEntry>> map;
 
+    /**
+     * 服务端对应的 channel 信息
+     * @since 0.1.8
+     */
+    private final Map<ServiceEntry, Channel> serviceEntryChannelMap;
+
     public DefaultRegisterServerService(){
         map = new ConcurrentHashMap<>();
+        serviceEntryChannelMap = new ConcurrentHashMap<>();
     }
 
     @Override
-    public List<ServiceEntry> register(ServiceEntry serviceEntry) {
+    public List<ServiceEntry> register(ServiceEntry serviceEntry, Channel channel) {
         paramCheck(serviceEntry);
 
         final String serviceId = serviceEntry.serviceId();
@@ -56,12 +65,13 @@ public class DefaultRegisterServerService implements RegisterServerService {
         serviceEntrySet.add(serviceEntry);
         map.put(serviceId, serviceEntrySet);
 
+        serviceEntryChannelMap.put(serviceEntry, channel);
         // 返回更新后的结果
         return Guavas.newArrayList(serviceEntrySet);
     }
 
     @Override
-    public List<ServiceEntry> unRegister(ServiceEntry serviceEntry) {
+    public List<ServiceEntry> unRegister(ServiceEntry serviceEntry, Channel channel) {
         paramCheck(serviceEntry);
 
         final String serviceId = serviceEntry.serviceId();
@@ -77,6 +87,8 @@ public class DefaultRegisterServerService implements RegisterServerService {
         LOG.info("[Register Server] remove service: {}", serviceEntry);
         map.put(serviceId, serviceEntrySet);
 
+        serviceEntryChannelMap.remove(serviceEntry);
+
         // 返回更新后的结果
         return Guavas.newArrayList(serviceEntrySet);
     }
@@ -90,6 +102,11 @@ public class DefaultRegisterServerService implements RegisterServerService {
         LOG.info("[Register Server] end lookUp serviceId: {}, list: {}", serviceId,
                 serviceEntrySet);
         return Guavas.newArrayList(serviceEntrySet);
+    }
+
+    @Override
+    public Collection<Channel> channels() {
+        return serviceEntryChannelMap.values();
     }
 
     /**

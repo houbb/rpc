@@ -8,8 +8,8 @@ package com.github.houbb.rpc.register.simple.handler;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
-import com.github.houbb.rpc.register.domain.message.RegisterMessage;
-import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
+import com.github.houbb.rpc.register.domain.message.NotifyMessage;
+import com.github.houbb.rpc.register.domain.message.impl.NotifyMessages;
 import com.github.houbb.rpc.register.simple.SimpleRpcRegister;
 import com.github.houbb.rpc.register.simple.client.RegisterClientService;
 import com.github.houbb.rpc.register.simple.client.impl.DefaultRegisterClientService;
@@ -61,10 +61,10 @@ public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        RegisterMessage registerMessage = (RegisterMessage) msg;
-        Object body = registerMessage.body();
-        int type = RegisterMessages.type(registerMessage);
-        String seqId = registerMessage.seqId();
+        NotifyMessage notifyMessage = (NotifyMessage) msg;
+        Object body = notifyMessage.body();
+        String type = NotifyMessages.type(notifyMessage);
+        String seqId = notifyMessage.seqId();
         LOG.info("[Register Server] received message type: {}, seqId: {} ", type,
                 seqId);
 
@@ -72,23 +72,23 @@ public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
         ServiceEntry serviceEntry = (ServiceEntry)body;
 
         switch (type) {
-            case MessageTypeConst.SERVER_REGISTER:
-                rpcRegister.register(serviceEntry);
+            case MessageTypeConst.SERVER_REGISTER_REQ:
+                rpcRegister.register(serviceEntry, channel);
                 break;
 
-            case MessageTypeConst.SERVER_UN_REGISTER:
-                rpcRegister.unRegister(serviceEntry);
+            case MessageTypeConst.SERVER_UN_REGISTER_REQ:
+                rpcRegister.unRegister(serviceEntry, channel);
                 break;
 
-            case MessageTypeConst.CLIENT_SUBSCRIBE:
+            case MessageTypeConst.CLIENT_SUBSCRIBE_REQ:
                 rpcRegister.subscribe(serviceEntry, channel);
                 break;
 
-            case MessageTypeConst.CLIENT_UN_SUBSCRIBE:
+            case MessageTypeConst.CLIENT_UN_SUBSCRIBE_REQ:
                 rpcRegister.unSubscribe(serviceEntry, channel);
                 break;
 
-            case MessageTypeConst.CLIENT_LOOK_UP:
+            case MessageTypeConst.CLIENT_LOOK_UP_SERVER_REQ:
                 rpcRegister.lookUp(seqId, serviceEntry, channel);
                 break;
 

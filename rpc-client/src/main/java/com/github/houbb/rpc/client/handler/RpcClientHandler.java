@@ -42,7 +42,7 @@ public class RpcClientHandler extends SimpleChannelInboundHandler {
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         RpcResponse rpcResponse = (RpcResponse)msg;
         invokeManager.addResponse(rpcResponse.seqId(), rpcResponse);
-        log.info("[Client] response is :{}", rpcResponse);
+        log.info("[Client] server response is :{}", rpcResponse);
     }
 
     @Override

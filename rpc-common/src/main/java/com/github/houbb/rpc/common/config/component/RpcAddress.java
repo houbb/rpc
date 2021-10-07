@@ -1,5 +1,7 @@
 package com.github.houbb.rpc.common.config.component;
 
+import java.util.Objects;
+
 /**
  * 地址信息
  * @author binbin.hou
@@ -24,6 +26,12 @@ public class RpcAddress {
      * @since 0.0.6
      */
     private int weight;
+
+    public RpcAddress(String address, int port) {
+        this.address = address;
+        this.port = port;
+        this.weight = 0;
+    }
 
     public RpcAddress(String address, int port, int weight) {
         this.address = address;
@@ -56,6 +64,19 @@ public class RpcAddress {
     public RpcAddress weight(int weight) {
         this.weight = weight;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RpcAddress that = (RpcAddress) o;
+        return port == that.port && Objects.equals(address, that.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address, port);
     }
 
     @Override

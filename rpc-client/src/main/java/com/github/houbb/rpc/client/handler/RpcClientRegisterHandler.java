@@ -7,8 +7,16 @@ package com.github.houbb.rpc.client.handler;
 
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
+import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.common.rpc.domain.RpcResponse;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
+import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
+import com.github.houbb.rpc.register.domain.message.NotifyMessage;
+import com.github.houbb.rpc.register.domain.message.body.RegisterCenterAddNotifyBody;
+import com.github.houbb.rpc.register.domain.message.body.RegisterCenterRemoveNotifyBody;
+import com.github.houbb.rpc.register.domain.message.impl.NotifyMessages;
+import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -31,15 +39,60 @@ public class RpcClientRegisterHandler extends SimpleChannelInboundHandler {
      */
     private final InvokeManager invokeManager;
 
-    public RpcClientRegisterHandler(InvokeManager invokeManager) {
+    /**
+     * 客户端注册中心管理类
+     * @since 0.1.8
+     */
+    private final ClientRegisterManager clientRegisterManager;
+
+    public RpcClientRegisterHandler(InvokeManager invokeManager,
+                                    ClientRegisterManager clientRegisterManager) {
         this.invokeManager = invokeManager;
+        this.clientRegisterManager = clientRegisterManager;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        RpcResponse rpcResponse = (RpcResponse) msg;
-        log.info("[Client Register] response is :{}", rpcResponse);
-        invokeManager.addResponse(rpcResponse.seqId(), rpcResponse);
+        NotifyMessage notifyMessage = (NotifyMessage) msg;
+        Object body = notifyMessage.body();
+        String type = NotifyMessages.type(notifyMessage);
+        String seqId = notifyMessage.seqId();
+        log.info("[Register Client] received message type: {}, seqId: {} ", type,
+                seqId);
+
+        // 回写
+        final Channel channel = ctx.channel();
+        switch (type) {
+            case MessageTypeConst.CLIENT_LOOK_UP_SERVER_RESP:
+                RpcResponse rpcResponse = (RpcResponse) body;
+                log.info("[Register Client] Register response is :{}", rpcResponse);
+                invokeManager.addResponse(rpcResponse.seqId(), rpcResponse);
+                break;
+
+            case MessageTypeConst.SERVER_REGISTER_NOTIFY_CLIENT_REQ:
+                ServiceEntry serviceEntry = (ServiceEntry) body;
+                clientRegisterManager.serverRegisterNotify(serviceEntry);
+                break;
+
+            case MessageTypeConst.SERVER_UNREGISTER_NOTIFY_CLIENT_REQ:
+                ServiceEntry serviceEntry2 = (ServiceEntry) body;
+                clientRegisterManager.serverUnRegisterNotify(serviceEntry2);
+                break;
+
+            case MessageTypeConst.REGISTER_CENTER_ADD_NOTIFY:
+                RegisterCenterAddNotifyBody addNotifyBody = (RegisterCenterAddNotifyBody) body;
+                clientRegisterManager.addRegisterChannel(addNotifyBody, channel);
+                break;
+
+            case MessageTypeConst.REGISTER_CENTER_REMOVE_NOTIFY:
+                RegisterCenterRemoveNotifyBody removeNotifyBody = (RegisterCenterRemoveNotifyBody) body;
+                clientRegisterManager.removeRegisterChannel(removeNotifyBody);
+                break;
+
+            default:
+                log.warn("[Register Client] not support type: {} and seqId: {}",
+                        type, seqId);
+        }
     }
 
     @Override

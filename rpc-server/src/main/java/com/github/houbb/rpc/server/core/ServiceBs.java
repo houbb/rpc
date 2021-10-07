@@ -20,8 +20,6 @@ import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyClient;
 import com.github.houbb.rpc.common.remote.netty.impl.DefaultNettyServer;
 import com.github.houbb.rpc.common.support.delay.DelayExecutor;
 import com.github.houbb.rpc.common.support.delay.DelayQueueExecutor;
-import com.github.houbb.rpc.common.support.hook.DefaultShutdownHook;
-import com.github.houbb.rpc.common.support.hook.RpcShutdownHook;
 import com.github.houbb.rpc.common.support.hook.ShutdownHooks;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.invoke.impl.DefaultInvokeManager;
@@ -32,15 +30,15 @@ import com.github.houbb.rpc.common.support.status.service.StatusManager;
 import com.github.houbb.rpc.common.support.status.service.impl.DefaultStatusManager;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.entry.impl.ServiceEntryBuilder;
-import com.github.houbb.rpc.register.domain.message.RegisterMessage;
-import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
-import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import com.github.houbb.rpc.server.config.service.DefaultServiceConfig;
 import com.github.houbb.rpc.server.config.service.ServiceConfig;
 import com.github.houbb.rpc.server.handler.RpcServerHandler;
 import com.github.houbb.rpc.server.handler.RpcServerRegisterHandler;
 import com.github.houbb.rpc.server.registry.ServiceRegistry;
 import com.github.houbb.rpc.server.service.impl.DefaultServiceFactory;
+import com.github.houbb.rpc.server.support.hook.DefaultServerShutdownHook;
+import com.github.houbb.rpc.server.support.register.DefaultServerRegisterLocalManager;
+import com.github.houbb.rpc.server.support.register.ServerRegisterManager;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 
@@ -123,6 +121,12 @@ public class ServiceBs implements ServiceRegistry {
      */
     private DelayExecutor delayExecutor;
 
+    /**
+     * 服务注册中心管理
+     * @since 0.1.8
+     */
+    private ServerRegisterManager serverRegisterManager;
+
     private ServiceBs() {
         // 初始化默认参数
         this.serviceConfigList = new ArrayList<>();
@@ -133,6 +137,7 @@ public class ServiceBs implements ServiceRegistry {
         this.statusManager = new DefaultStatusManager();
         this.resourceManager = new DefaultResourceManager();
         this.invokeManager = new DefaultInvokeManager();
+        this.serverRegisterManager = new DefaultServerRegisterLocalManager();
 
         this.delayExecutor = new DelayQueueExecutor();
     }
@@ -248,6 +253,21 @@ public class ServiceBs implements ServiceRegistry {
      * @since 0.0.8
      */
     private void registerServiceCenter() {
+        // 初始化服务端到注册中心的连接信息
+        for (RpcAddress rpcAddress : registerCenterList) {
+            RpcServerRegisterHandler rpcServerRegisterHandler = new RpcServerRegisterHandler(serverRegisterManager);
+            ChannelHandler registerHandler = ChannelHandlers.objectCodecHandler(rpcServerRegisterHandler);
+            LOG.info("[Rpc Server] start register to {}:{}", rpcAddress.address(),
+                    rpcAddress.port());
+            //TODO: 针对配置中心可以进一步细化，比如某一个 ip 变更，做对应的销毁，但是没有必要，一般配置中心变动的可能性较小。
+            DefaultNettyClient nettyClient = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), registerHandler);
+            ChannelFuture channelFuture = nettyClient.call();
+            resourceManager.addDestroy(nettyClient);
+
+            // 添加到服务端管理中
+            serverRegisterManager.addRegisterChannel(rpcAddress, channelFuture.channel());
+        }
+
         // 注册到配置中心
         // 初期简单点，直接循环调用即可
         // 循环服务信息
@@ -272,29 +292,25 @@ public class ServiceBs implements ServiceRegistry {
                 @Override
                 public void run() {
                     LOG.info("[Rpc Server] serviceId: {} delay init start.", serviceId);
-                    for (RpcAddress rpcAddress : registerCenterList) {
-                        ChannelHandler registerHandler = ChannelHandlers.objectCodecHandler(new RpcServerRegisterHandler());
-                        LOG.info("[Rpc Server] start register to {}:{}", rpcAddress.address(),
-                                rpcAddress.port());
-                        DefaultNettyClient nettyClient = DefaultNettyClient.newInstance(rpcAddress.address(), rpcAddress.port(), registerHandler);
-                        ChannelFuture channelFuture = nettyClient.call();
-                        resourceManager.addDestroy(nettyClient);
-
-                        // 直接写入信息
-                        RegisterMessage registerMessage = buildRegisterMessage(config);
-                        LOG.info("[Rpc Server] register to service center: {}", registerMessage);
-                        channelFuture.channel().writeAndFlush(registerMessage);
-                    }
+                    // 服务端通知到注册中心
+                    final String hostIp = NetUtil.getLocalHost();
+                    ServiceEntry serviceEntry = ServiceEntryBuilder.of(config.id(), hostIp, rpcPort);
+                    serverRegisterManager.register(serviceEntry);
 
                     // 4. 添加服务端钩子函数
                     statusManager.status(StatusEnum.ENABLE.code());
-                    final RpcShutdownHook rpcShutdownHook = new DefaultShutdownHook(statusManager, invokeManager, resourceManager);
-                    ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
-
                     LOG.info("[Rpc Server] serviceId: {} delay init end.", serviceId);
                 }
             });
         }
+
+        // 统一添加钩子函数
+        final DefaultServerShutdownHook rpcShutdownHook = new DefaultServerShutdownHook();
+        rpcShutdownHook.statusManager(statusManager);
+        rpcShutdownHook.invokeManager(invokeManager);
+        rpcShutdownHook.resourceManager(resourceManager);
+        rpcShutdownHook.serverRegisterManager(serverRegisterManager);
+        ShutdownHooks.rpcShutdownHook(rpcShutdownHook);
     }
 
 
@@ -314,22 +330,6 @@ public class ServiceBs implements ServiceRegistry {
             }
         }
         this.serviceConfigList.add(serviceConfig);
-    }
-
-    /**
-     * 构建注册信息配置
-     *
-     * @param config 配置信息
-     * @return 注册信息
-     * @since 0.0.6
-     */
-    private RegisterMessage buildRegisterMessage(final ServiceConfig config) {
-        final String hostIp = NetUtil.getLocalHost();
-        ServiceEntry serviceEntry = ServiceEntryBuilder.of(config.id(),
-                hostIp, rpcPort);
-
-        return RegisterMessages.of(MessageTypeConst.SERVER_REGISTER,
-                serviceEntry);
     }
 
 }

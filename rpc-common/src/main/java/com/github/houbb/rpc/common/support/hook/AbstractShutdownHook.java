@@ -27,8 +27,6 @@ public abstract class AbstractShutdownHook implements RpcShutdownHook {
      * 执行 hook 操作
      * @since 0.1.3
      */
-    protected void doHook() {
-        //do nothing
-    }
+    protected abstract void doHook();
 
 }

@@ -12,15 +12,13 @@ import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
-import com.github.houbb.rpc.register.domain.message.RegisterMessage;
-import com.github.houbb.rpc.register.domain.message.impl.RegisterMessages;
+import com.github.houbb.rpc.register.domain.message.NotifyMessage;
+import com.github.houbb.rpc.register.domain.message.impl.NotifyMessages;
 import com.github.houbb.rpc.register.simple.client.RegisterClientService;
 import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import io.netty.channel.Channel;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -88,7 +86,7 @@ public class DefaultRegisterClientService implements RegisterClientService {
     }
 
     @Override
-    public void notify(String serviceId, List<ServiceEntry> serviceEntryList) {
+    public void registerNotify(String serviceId, ServiceEntry serviceEntry) {
         ArgUtil.notEmpty(serviceId, "serviceId");
 
         List<Channel> clientChannelList = clientChannelList(serviceId);
@@ -100,9 +98,40 @@ public class DefaultRegisterClientService implements RegisterClientService {
 
         // 循环通知
         for(Channel channel : clientChannelList) {
-            RegisterMessage registerMessage = RegisterMessages.of(MessageTypeConst.REGISTER_NOTIFY, serviceEntryList);
-            channel.writeAndFlush(registerMessage);
+            NotifyMessage notifyMessage = NotifyMessages.of(MessageTypeConst.SERVER_REGISTER_NOTIFY_CLIENT_REQ, serviceEntry);
+            channel.writeAndFlush(notifyMessage);
         }
+    }
+
+    @Override
+    public void unRegisterNotify(String serviceId, ServiceEntry serviceEntry) {
+        ArgUtil.notEmpty(serviceId, "serviceId");
+
+        List<Channel> clientChannelList = clientChannelList(serviceId);
+        if (CollectionUtil.isEmpty(clientChannelList)) {
+            LOG.info("[Register] notify clients is empty for service: {}",
+                    serviceId);
+            return;
+        }
+
+        // 循环通知
+        for(Channel channel : clientChannelList) {
+            NotifyMessage notifyMessage = NotifyMessages.of(MessageTypeConst.SERVER_UNREGISTER_NOTIFY_CLIENT_REQ, serviceEntry);
+            channel.writeAndFlush(notifyMessage);
+        }
+    }
+
+    @Override
+    public Collection<Channel> channels() {
+        Set<Channel> resultSet = new HashSet<>();
+
+        Collection<Set<Channel>> channelCollection =  serviceClientChannelMap.values();
+        for(Set<Channel> set : channelCollection) {
+            if(CollectionUtil.isNotEmpty(set)) {
+                resultSet.addAll(set);
+            }
+        }
+        return resultSet;
     }
 
     /**

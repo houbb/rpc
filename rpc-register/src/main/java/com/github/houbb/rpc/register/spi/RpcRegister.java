@@ -24,16 +24,18 @@ public interface RpcRegister {
      * 注册当前服务信息
      * 订阅了这个 serviceId 的所有客户端
      * @param serviceEntry 注册当前服务信息
+     * @param channel channel
      * @since 0.0.8
      */
-    void register(final ServiceEntry serviceEntry);
+    void register(final ServiceEntry serviceEntry, Channel channel);
 
     /**
      * 注销当前服务信息
      * @param serviceEntry 注册当前服务信息
+     * @param channel channel
      * @since 0.0.8
      */
-    void unRegister(final ServiceEntry serviceEntry);
+    void unRegister(final ServiceEntry serviceEntry, Channel channel);
 
     /**
      * 监听服务信息

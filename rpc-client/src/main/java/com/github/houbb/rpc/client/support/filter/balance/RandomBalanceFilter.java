@@ -4,6 +4,7 @@ import com.github.houbb.heaven.annotation.ThreadSafe;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeContext;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.filter.RpcFilter;
+import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
 import java.util.List;
@@ -21,10 +22,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class RandomBalanceFilter implements RpcFilter {
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("all")
     public void filter(RemoteInvokeContext context) {
         final ServiceContext serviceContext = context.serviceProxyContext();
-        List<RpcChannelFuture> channelFutures = serviceContext.channelFutures();
+        final ClientRegisterManager clientRegisterManager = serviceContext.clientRegisterManager();
+        final String serviceId = serviceContext.serviceId();
+        List<RpcChannelFuture> channelFutures = clientRegisterManager.queryServerChannelFutures(serviceId);
         final int size = channelFutures.size();
 
         Random random = ThreadLocalRandom.current();

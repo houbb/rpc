@@ -13,45 +13,63 @@ public final class MessageTypeConst {
     private MessageTypeConst(){}
 
     /**
-     * 服务端注册
+     * 服务端注册请求
      * @since 0.0.8
      */
-    public static final int SERVER_REGISTER = 1;
+    public static final String SERVER_REGISTER_REQ = "SERVER_REGISTER_REQ";
 
     /**
-     * 服务端注销
+     * 服务端注销请求
      * @since 0.0.8
      */
-    public static final int SERVER_UN_REGISTER = 2;
+    public static final String SERVER_UN_REGISTER_REQ = "SERVER_UN_REGISTER_REQ";
 
     /**
-     * 客户端订阅
+     * 客户端订阅请求
      * @since 0.0.8
      */
-    public static final int CLIENT_SUBSCRIBE = 3;
+    public static final String CLIENT_SUBSCRIBE_REQ = "CLIENT_SUBSCRIBE_REQ";
 
     /**
-     * 客户端取关
+     * 客户端取关请求
      * @since 0.0.8
      */
-    public static final int CLIENT_UN_SUBSCRIBE = 4;
+    public static final String CLIENT_UN_SUBSCRIBE_REQ = "CLIENT_UN_SUBSCRIBE_REQ";
 
     /**
      * 客户端查询
      * @since 0.0.8
      */
-    public static final int CLIENT_LOOK_UP = 5;
+    public static final String CLIENT_LOOK_UP_SERVER_REQ = "CLIENT_LOOK_UP_SERVER_REQ";
 
     /**
-     * 注册中心通知
+     * 客户端查询服务接口
      * @since 0.0.8
      */
-    public static final int REGISTER_NOTIFY = 6;
+    public static final String CLIENT_LOOK_UP_SERVER_RESP = "CLIENT_LOOK_UP_SERVER_RESP";
 
     /**
-     * 注册客户端查询响应
+     * 服务端注册通知客户端请求
      * @since 0.0.8
      */
-    public static final int REGISTER_LOOK_UP_RESP = 7;
+    public static final String SERVER_REGISTER_NOTIFY_CLIENT_REQ = "SERVER_REGISTER_NOTIFY_CLIENT_REQ";
+
+    /**
+     * 服务端取消注册通知客户端请求
+     * @since 0.0.8
+     */
+    public static final String SERVER_UNREGISTER_NOTIFY_CLIENT_REQ = "SERVER_UNREGISTER_NOTIFY_CLIENT_REQ";
+
+    /**
+     * 注册中心新增通知
+     * @since 0.1.8
+     */
+    public static final String REGISTER_CENTER_ADD_NOTIFY = "REGISTER_CENTER_ADD_NOTIFY";
+
+    /**
+     * 注册中心销毁通知
+     * @since 0.1.8
+     */
+    public static final String REGISTER_CENTER_REMOVE_NOTIFY = "REGISTER_CENTER_REMOVE_NOTIFY";
 
 }

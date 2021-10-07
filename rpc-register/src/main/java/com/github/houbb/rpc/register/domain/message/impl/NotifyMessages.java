@@ -2,17 +2,17 @@ package com.github.houbb.rpc.register.domain.message.impl;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.id.impl.Ids;
-import com.github.houbb.rpc.register.domain.message.RegisterMessage;
-import com.github.houbb.rpc.register.domain.message.RegisterMessageHeader;
+import com.github.houbb.rpc.register.domain.message.NotifyMessage;
+import com.github.houbb.rpc.register.domain.message.NotifyMessageHeader;
 
 /**
- * 注册消息工具类
+ * 通知消息工具类
  * @author binbin.hou
  * @since 0.0.8
  */
-public final class RegisterMessages {
+public final class NotifyMessages {
 
-    private RegisterMessages(){}
+    private NotifyMessages(){}
 
     /**
      * 初始化消息信息
@@ -21,8 +21,8 @@ public final class RegisterMessages {
      * @return 注册消息
      * @since 0.0.8
      */
-    public static RegisterMessage of(final int type,
-                                     final Object body) {
+    public static NotifyMessage of(final String type,
+                                   final Object body) {
         String seqId = Ids.uuid32();
         return of(type, seqId, body);
     }
@@ -35,11 +35,11 @@ public final class RegisterMessages {
      * @return 注册消息
      * @since 0.0.8
      */
-    public static RegisterMessage of(final int type,
-                                     final String seqId,
-                                     final Object body) {
-        DefaultRegisterMessage registerMessage = new DefaultRegisterMessage();
-        DefaultRegisterMessageHeader messageHeader = new DefaultRegisterMessageHeader();
+    public static NotifyMessage of(final String type,
+                                   final String seqId,
+                                   final Object body) {
+        DefaultNotifyMessage registerMessage = new DefaultNotifyMessage();
+        DefaultNotifyMessageHeader messageHeader = new DefaultNotifyMessageHeader();
         messageHeader.type(type);
 
         registerMessage.seqId(seqId);
@@ -50,24 +50,24 @@ public final class RegisterMessages {
 
     /**
      * 获取消息的类型
-     * @param registerMessage 注册消息
+     * @param notifyMessage 注册消息
      * @return 消息类型
      * @since 0.0.8
      */
-    public static int type(final RegisterMessage registerMessage) {
-        RegisterMessageHeader header = header(registerMessage);
+    public static String type(final NotifyMessage notifyMessage) {
+        NotifyMessageHeader header = header(notifyMessage);
         return header.type();
     }
 
     /**
      * 获取消息头
-     * @param registerMessage 消息
+     * @param notifyMessage 消息
      * @return 消息头
      * @since 0.0.8
      */
-    private static RegisterMessageHeader header(final RegisterMessage registerMessage) {
-        ArgUtil.notNull(registerMessage, "registerMessage");
-        RegisterMessageHeader messageHeader = registerMessage.header();
+    private static NotifyMessageHeader header(final NotifyMessage notifyMessage) {
+        ArgUtil.notNull(notifyMessage, "registerMessage");
+        NotifyMessageHeader messageHeader = notifyMessage.header();
         ArgUtil.notNull(messageHeader, "messageHeader");
         return messageHeader;
     }
