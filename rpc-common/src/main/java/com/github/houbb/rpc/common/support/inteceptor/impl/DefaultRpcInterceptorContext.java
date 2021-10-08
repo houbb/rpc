@@ -1,7 +1,7 @@
 package com.github.houbb.rpc.common.support.inteceptor.impl;
 
 import com.github.houbb.heaven.util.lang.ObjectUtil;
-import com.github.houbb.rpc.common.support.inteceptor.InterceptorContext;
+import com.github.houbb.rpc.common.support.inteceptor.RpcInterceptorContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
  * @author binbin.hou
  * @since 0.1.4
  */
-public class DefaultInterceptorContext implements InterceptorContext {
+public class DefaultRpcInterceptorContext implements RpcInterceptorContext {
 
     /**
      * 唯一标识
@@ -36,15 +36,21 @@ public class DefaultInterceptorContext implements InterceptorContext {
      * map 集合
      * @since 0.1.4
      */
-    private Map<String, Object> map;
+    private transient final Map<String, Object> map;
 
     /**
-     * 异常信息
-     * @since 0.1.4
+     * 获取请求参数
+     * @since 0.2.2
      */
-    private Throwable error;
+    private Object[] params;
 
-    private DefaultInterceptorContext() {
+    /**
+     * 请求结果
+     * @since 0.2.2
+     */
+    private Object result;
+
+    private DefaultRpcInterceptorContext() {
         map = new HashMap<>();
     }
 
@@ -53,8 +59,8 @@ public class DefaultInterceptorContext implements InterceptorContext {
      * @return this
      * @since 0.1.4
      */
-    public static DefaultInterceptorContext newInstance() {
-        return new DefaultInterceptorContext();
+    public static DefaultRpcInterceptorContext newInstance() {
+        return new DefaultRpcInterceptorContext();
     }
 
     @Override
@@ -62,8 +68,7 @@ public class DefaultInterceptorContext implements InterceptorContext {
         return traceId;
     }
 
-    @Override
-    public DefaultInterceptorContext traceId(String traceId) {
+    public DefaultRpcInterceptorContext traceId(String traceId) {
         this.traceId = traceId;
         return this;
     }
@@ -73,8 +78,7 @@ public class DefaultInterceptorContext implements InterceptorContext {
         return startTime;
     }
 
-    @Override
-    public DefaultInterceptorContext startTime(long startTime) {
+    public DefaultRpcInterceptorContext startTime(long startTime) {
         this.startTime = startTime;
         return this;
     }
@@ -84,14 +88,13 @@ public class DefaultInterceptorContext implements InterceptorContext {
         return endTime;
     }
 
-    @Override
-    public DefaultInterceptorContext endTime(long endTime) {
+    public DefaultRpcInterceptorContext endTime(long endTime) {
         this.endTime = endTime;
         return this;
     }
 
     @Override
-    public InterceptorContext put(String key, Object value) {
+    public RpcInterceptorContext put(String key, Object value) {
         this.map.put(key, value);
         return this;
     }
@@ -112,24 +115,22 @@ public class DefaultInterceptorContext implements InterceptorContext {
     }
 
     @Override
-    public Throwable error() {
-        return error;
+    public Object[] params() {
+        return params;
     }
 
-    @Override
-    public DefaultInterceptorContext error(Throwable error) {
-        this.error = error;
+    public DefaultRpcInterceptorContext params(Object[] params) {
+        this.params = params;
         return this;
     }
 
     @Override
-    public String toString() {
-        return "DefaultInterceptorContext{" +
-                "startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", map=" + map +
-                ", error=" + error +
-                '}';
+    public Object result() {
+        return result;
     }
 
+    public DefaultRpcInterceptorContext result(Object result) {
+        this.result = result;
+        return this;
+    }
 }

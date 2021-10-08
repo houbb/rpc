@@ -6,7 +6,7 @@ package com.github.houbb.rpc.common.support.inteceptor;
  * @author binbin.hou
  * @since 0.1.4
  */
-public interface InterceptorContext {
+public interface RpcInterceptorContext {
 
     /**
      * 调用唯一标识
@@ -16,27 +16,11 @@ public interface InterceptorContext {
     String traceId();
 
     /**
-     * 设置调用唯一标识
-     * @param traceId 唯一标识
-     * @since 0.1.4
-     * @return this
-     */
-    InterceptorContext traceId(String traceId);
-
-    /**
      * 开始时间
      * @return 开始时间
      * @since 0.1.4
      */
     long startTime();
-
-    /**
-     * 设置开始时间
-     * @param time 时间
-     * @return this
-     * @since 0.1.4
-     */
-    InterceptorContext startTime(final long time);
 
     /**
      * 结束时间
@@ -46,36 +30,13 @@ public interface InterceptorContext {
     long endTime();
 
     /**
-     * 设置结束时间
-     * @param time 时间
-     * @return this
-     * @since 0.1.4
-     */
-    InterceptorContext endTime(final long time);
-
-    /**
      * 设置值
      * @param key key
      * @param value value
      * @return this
      * @since 0.1.4
      */
-    InterceptorContext put(final String key, final Object value);
-
-    /**
-     * 异常信息
-     * @return 异常信息
-     * @since 0.1.4
-     */
-    Throwable error();
-
-    /**
-     * 设置异常信息
-     * @param error 异常信息
-     * @return this
-     * @since 0.1.4
-     */
-    InterceptorContext error(final Throwable error);
+    RpcInterceptorContext put(final String key, final Object value);
 
     /**
      * 获取对应的值
@@ -94,5 +55,19 @@ public interface InterceptorContext {
      * @since 0.1.4
      */
     <T> T get(final String key, final Class<T> tClass);
+
+    /**
+     * 获取请求参数
+     * @return 获取请求参数
+     * @since 0.2.2
+     */
+    Object[] params();
+
+    /**
+     * 请求结果
+     * @return 请求结果
+     * @since 0.2.2
+     */
+    Object result();
 
 }

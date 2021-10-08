@@ -3,7 +3,7 @@ package com.github.houbb.rpc.client.config.reference;
 import com.github.houbb.load.balance.api.ILoadBalance;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
-import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
+import com.github.houbb.rpc.common.support.inteceptor.RpcInterceptor;
 import com.github.houbb.rpc.client.support.filter.RpcFilter;
 
 /**
@@ -121,11 +121,11 @@ public interface ReferenceConfig<T> {
 
     /**
      * 调用拦截器
-     * @param interceptor 拦截器信息
+     * @param rpcInterceptor 拦截器信息
      * @return this
      * @since 0.1.4
      */
-    ReferenceConfig<T> interceptor(final Interceptor interceptor);
+    ReferenceConfig<T> rpcInterceptor(final RpcInterceptor rpcInterceptor);
 
     /**
      * 是否检测状态

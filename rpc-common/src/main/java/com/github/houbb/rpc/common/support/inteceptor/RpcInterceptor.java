@@ -29,27 +29,27 @@ package com.github.houbb.rpc.common.support.inteceptor;
  * @author binbin.hou
  * @since 0.1.4
  */
-public interface Interceptor {
+public interface RpcInterceptor {
 
     /**
      * 开始
      * @param context 上下文
      * @since 0.1.4
      */
-    void before(final InterceptorContext context);
+    void before(final RpcInterceptorContext context);
 
     /**
      * 结束
      * @param context 上下文
      * @since 0.1.4
      */
-    void after(final InterceptorContext context);
+    void after(final RpcInterceptorContext context);
 
     /**
      * 异常处理
      * @param context 上下文
      * @since 0.1.4
      */
-    void exception(final InterceptorContext context);
+    void exception(final RpcInterceptorContext context);
 
 }

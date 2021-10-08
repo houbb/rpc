@@ -21,7 +21,7 @@ import com.github.houbb.rpc.client.proxy.impl.GenericReferenceProxy;
 import com.github.houbb.rpc.client.proxy.impl.RemoteInvokeServiceImpl;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.client.support.filter.RpcFilter;
-import com.github.houbb.rpc.client.support.filter.balance.RpcFilters;
+import com.github.houbb.rpc.client.support.filter.impl.RpcFilters;
 import com.github.houbb.rpc.client.support.hook.DefaultClientShutdownHook;
 import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.client.support.register.impl.DefaultClientRegisterManager;
@@ -29,8 +29,9 @@ import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.config.component.RpcAddressBuilder;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.support.hook.ShutdownHooks;
-import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
-import com.github.houbb.rpc.common.support.inteceptor.impl.InterceptorAdaptor;
+import com.github.houbb.rpc.common.support.inteceptor.RpcInterceptor;
+import com.github.houbb.rpc.common.support.inteceptor.impl.RpcInterceptorAdaptor;
+import com.github.houbb.rpc.common.support.inteceptor.impl.RpcInterceptors;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.invoke.impl.DefaultInvokeManager;
 import com.github.houbb.rpc.common.support.resource.ResourceManager;
@@ -163,7 +164,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
      * 拦截器
      * @since 0.1.4
      */
-    private Interceptor interceptor;
+    private RpcInterceptor rpcInterceptor;
 
     /**
      * 状态管理类
@@ -227,7 +228,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         this.clientRegisterManager = new DefaultClientRegisterManager(invokeManager, resourceManager);
 
         // 拦截器与过滤器
-        this.interceptor = new InterceptorAdaptor();
+        this.rpcInterceptor = RpcInterceptors.none();
         this.rpcFilter = RpcFilters.none();
         this.loadBalance = LoadBalances.roundRobbin();
     }
@@ -351,8 +352,8 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     }
 
     @Override
-    public ReferenceConfig<T> interceptor(Interceptor interceptor) {
-        this.interceptor = interceptor;
+    public ReferenceConfig<T> rpcInterceptor(RpcInterceptor rpcInterceptor) {
+        this.rpcInterceptor = rpcInterceptor;
         return this;
     }
 
@@ -373,7 +374,7 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         serviceContext.failType(this.failType);
         serviceContext.generic(this.generic);
         serviceContext.statusManager(this.statusManager);
-        serviceContext.interceptor(this.interceptor);
+        serviceContext.interceptor(this.rpcInterceptor);
         serviceContext.rpcFilter(rpcFilter);
         serviceContext.loadBalance(loadBalance);
 

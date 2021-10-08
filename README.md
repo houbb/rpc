@@ -33,7 +33,7 @@
 
 - gracefully 优雅关闭
 
-- interceptor 拦截器
+- rpcInterceptor 拦截器
 
 - filter 过滤器
 
@@ -83,7 +83,7 @@ config.serviceInterface(CalculatorService.class);
 config.subscribe(true);
 config.registerCenter(ServiceIdConst.REGISTER_CENTER);
 // 拦截器测试
-config.interceptor(new CostTimeInterceptor());
+config.rpcInterceptor(new CostTimeInterceptor());
 
 CalculatorService calculatorService = config.reference();
 CalculateRequest request = new CalculateRequest();
@@ -180,7 +180,7 @@ System.out.println(response);
 
 [release_0.1.3-gracefully 优雅关闭](https://github.com/houbb/rpc/tree/release_0.1.3)
 
-[release_0.1.4-interceptor 拦截器](https://github.com/houbb/rpc/tree/release_0.1.4)
+[release_0.1.4-rpcInterceptor 拦截器](https://github.com/houbb/rpc/tree/release_0.1.4)
 
 # 文档说明
 
@@ -210,7 +210,7 @@ System.out.println(response);
 
 [0.1.3-gracefully 优雅关闭](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.3-gracefully-优雅关闭.md)
 
-[0.1.4-interceptor 拦截器](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.4-interceptor-拦截器.md)
+[0.1.4-rpcInterceptor 拦截器](https://github.com/houbb/rpc/blob/master/doc/dev/0.1.4-rpcInterceptor-拦截器.md)
 
 # 测试代码
 
@@ -238,13 +238,11 @@ ps: 这部分测试代码可以关注公众号【老马啸西风】，后台回�
   
 - [x] heartbeat 心跳检测机制
 
-- [ ] 完善 load-balance 实现
+- [x] 完善 load-balance 实现
   
-- [ ] 完善 filter 实现
-
-入参 出参
-
-服务端等
+- [x] 完善 filter 实现
+  
+- [x] 完善 rpcInterceptor 实现
 
 - [ ] 失败重试的拓展
   

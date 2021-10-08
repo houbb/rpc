@@ -10,9 +10,9 @@ import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.common.exception.GenericException;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
 import com.github.houbb.rpc.common.support.generic.GenericService;
-import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
-import com.github.houbb.rpc.common.support.inteceptor.InterceptorContext;
-import com.github.houbb.rpc.common.support.inteceptor.impl.DefaultInterceptorContext;
+import com.github.houbb.rpc.common.support.inteceptor.RpcInterceptor;
+import com.github.houbb.rpc.common.support.inteceptor.RpcInterceptorContext;
+import com.github.houbb.rpc.common.support.inteceptor.impl.DefaultRpcInterceptorContext;
 import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 
 import java.util.List;
@@ -55,10 +55,10 @@ public class GenericReferenceProxy implements GenericService {
 
 
         //1. 拦截器
-        final Interceptor interceptor = proxyContext.interceptor();
-        final InterceptorContext interceptorContext = DefaultInterceptorContext.newInstance()
+        final RpcInterceptor rpcInterceptor = proxyContext.interceptor();
+        final RpcInterceptorContext rpcInterceptorContext = DefaultRpcInterceptorContext.newInstance()
                 .traceId(traceId);
-        interceptor.before(interceptorContext);
+        rpcInterceptor.before(rpcInterceptorContext);
 
         // 构建基本调用参数
         final long createTime = Times.systemTime();
@@ -89,7 +89,7 @@ public class GenericReferenceProxy implements GenericService {
 
         //3. 执行远程调用
         Object result = remoteInvokeService.remoteInvoke(context);
-        interceptor.after(interceptorContext);
+        rpcInterceptor.after(rpcInterceptorContext);
         return result;
     }
 

@@ -9,9 +9,8 @@ import com.github.houbb.rpc.client.proxy.ReferenceProxy;
 import com.github.houbb.rpc.client.proxy.RemoteInvokeService;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.common.rpc.domain.impl.DefaultRpcRequest;
-import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
-import com.github.houbb.rpc.common.support.inteceptor.InterceptorContext;
-import com.github.houbb.rpc.common.support.inteceptor.impl.DefaultInterceptorContext;
+import com.github.houbb.rpc.common.support.inteceptor.RpcInterceptor;
+import com.github.houbb.rpc.common.support.inteceptor.impl.DefaultRpcInterceptorContext;
 import com.github.houbb.rpc.common.support.status.enums.StatusEnum;
 
 import java.lang.reflect.Method;
@@ -63,15 +62,17 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
         final String traceId = Ids.uuid32();
         final int statusCode = proxyContext.statusManager().status();
         StatusEnum.assertEnable(statusCode);
+        final long createTime = Times.systemTime();
 
         //1. 拦截器
-        final Interceptor interceptor = proxyContext.interceptor();
-        final InterceptorContext interceptorContext = DefaultInterceptorContext.newInstance()
-                .traceId(traceId);
-        interceptor.before(interceptorContext);
+        final RpcInterceptor rpcInterceptor = proxyContext.interceptor();
+        final DefaultRpcInterceptorContext interceptorContext = DefaultRpcInterceptorContext.newInstance()
+                .traceId(traceId)
+                .params(args)
+                .startTime(createTime);
+        rpcInterceptor.before(interceptorContext);
 
         // 构建基本调用参数
-        final long createTime = Times.systemTime();
         DefaultRpcRequest rpcRequest = new DefaultRpcRequest();
         rpcRequest.serviceId(proxyContext.serviceId());
         rpcRequest.createTime(createTime);
@@ -94,7 +95,12 @@ public class DefaultReferenceProxy<T> implements ReferenceProxy<T> {
 
         //3. 执行远程调用
         Object result = remoteInvokeService.remoteInvoke(context);
-        interceptor.after(interceptorContext);
+
+        //4. 拦截器结束
+        final long endTime = Times.systemTime();
+        interceptorContext.endTime(endTime)
+                .result(result);
+        rpcInterceptor.after(interceptorContext);
         return result;
     }
 

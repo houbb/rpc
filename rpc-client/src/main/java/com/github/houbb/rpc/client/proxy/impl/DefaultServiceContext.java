@@ -6,7 +6,7 @@ import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.client.support.filter.RpcFilter;
 import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
-import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
+import com.github.houbb.rpc.common.support.inteceptor.RpcInterceptor;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
 
@@ -69,7 +69,7 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
     /**
      * 拦截器
      */
-    private Interceptor interceptor;
+    private RpcInterceptor rpcInterceptor;
 
     /**
      * 客户端注册中心管理类
@@ -171,12 +171,12 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
     }
 
     @Override
-    public Interceptor interceptor() {
-        return interceptor;
+    public RpcInterceptor interceptor() {
+        return rpcInterceptor;
     }
 
-    public DefaultServiceContext<T> interceptor(Interceptor interceptor) {
-        this.interceptor = interceptor;
+    public DefaultServiceContext<T> interceptor(RpcInterceptor rpcInterceptor) {
+        this.rpcInterceptor = rpcInterceptor;
         return this;
     }
 
