@@ -16,6 +16,7 @@ import com.github.houbb.rpc.common.util.Waits;
  * @author Administrator
  * @since 0.1.3
  */
+@Deprecated
 public class DefaultShutdownHook extends AbstractShutdownHook {
 
     /**

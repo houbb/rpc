@@ -143,7 +143,7 @@ public class DefaultRegisterClientService implements RegisterClientService {
     private void paramCheck(final ServiceEntry serviceEntry) {
         ArgUtil.notNull(serviceEntry, "serverEntry");
         ArgUtil.notEmpty(serviceEntry.serviceId(), "serverEntry.serviceId");
-        ArgUtil.notEmpty(serviceEntry.ip(), "serverEntry.ip");
+//        ArgUtil.notEmpty(serviceEntry.ip(), "serverEntry.ip");
     }
 
     /**

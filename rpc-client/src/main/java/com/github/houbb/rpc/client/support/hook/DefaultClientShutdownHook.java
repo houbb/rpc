@@ -49,6 +49,12 @@ public class DefaultClientShutdownHook extends AbstractShutdownHook {
      */
     private ClientRegisterManager clientRegisterManager;
 
+    /**
+     * 为剩余的请求等待时间
+     * @since 0.1.8
+     */
+    private long waitMillsForRemainRequest = 60 * 1000;
+
     public static DefaultClientShutdownHook newInstance() {
         return new DefaultClientShutdownHook();
     }
@@ -73,6 +79,11 @@ public class DefaultClientShutdownHook extends AbstractShutdownHook {
         return this;
     }
 
+    public DefaultClientShutdownHook waitMillsForRemainRequest(long waitMillsForRemainRequest) {
+        this.waitMillsForRemainRequest = waitMillsForRemainRequest;
+        return this;
+    }
+
     /**
      * （1）设置 status 状态为等待关闭
      * （2）查看是否 {@link InvokeManager#remainsRequest()} 是否包含请求
@@ -90,9 +101,17 @@ public class DefaultClientShutdownHook extends AbstractShutdownHook {
         clientRegisterManager.unSubscribeServerAll();
 
         // 循环等待当前执行的请求执行完成
+        long startMills = System.currentTimeMillis();
         while (invokeManager.remainsRequest()) {
+            long currentMills = System.currentTimeMillis();
+            long costMills = currentMills - startMills;
+            if(costMills >= waitMillsForRemainRequest) {
+                LOG.warn("[Shutdown] still remains request, but timeout, break.");
+                break;
+            }
+
             LOG.info("[Shutdown] still remains request, wait for a while.");
-            Waits.waits(10);
+            Waits.waits(5);
         }
 
         // 销毁所有资源
