@@ -23,6 +23,7 @@ public interface ServerRegisterManager {
      * 注销当前服务信息
      * @param serviceId 服务标识
      * @since 0.0.8
+     * @return 服务明细
      */
     ServiceEntry unRegister(final String serviceId);
 

@@ -19,6 +19,7 @@ public interface ProtocolConfig {
 
     /**
      * 协议端口号
+     * @return 端口号
      */
     int port();
 

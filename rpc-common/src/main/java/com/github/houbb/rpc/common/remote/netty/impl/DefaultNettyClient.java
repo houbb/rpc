@@ -36,6 +36,9 @@ public class DefaultNettyClient extends AbstractNettyClient<ChannelFuture> {
 
     /**
      * 创建新的对象实例
+     * @param ip 地址
+     * @param port 端口
+     * @param channelHandler 实现类
      * @return 对象实例
      * @since 0.0.8
      */

@@ -19,6 +19,7 @@ public interface InterceptorContext {
      * 设置调用唯一标识
      * @param traceId 唯一标识
      * @since 0.1.4
+     * @return this
      */
     InterceptorContext traceId(String traceId);
 
@@ -87,6 +88,7 @@ public interface InterceptorContext {
     /**
      * 获取对应的值
      * @param key key
+     * @param <T> 泛型
      * @param tClass 类型
      * @return this
      * @since 0.1.4

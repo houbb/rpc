@@ -51,6 +51,7 @@ public interface ServiceConfig<T> {
      * 设置是否注册到注册中心
      * @param register 是否注册到配置中心
      * @since 0.0.8
+     * @return this
      */
     ServiceConfig<T> register(final boolean register);
 
@@ -65,6 +66,7 @@ public interface ServiceConfig<T> {
      * 设置服务延迟暴露时间
      * @param delayInMills 延迟暴露的毫秒数
      * @since 0.1.7
+     * @return this
      */
     ServiceConfig<T> delay(final long delayInMills);
 
