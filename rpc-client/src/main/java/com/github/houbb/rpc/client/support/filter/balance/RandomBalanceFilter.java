@@ -19,6 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @since 0.0.9
  */
 @ThreadSafe
+@Deprecated
 public class RandomBalanceFilter implements RpcFilter {
 
     @Override

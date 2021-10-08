@@ -43,15 +43,6 @@ public interface RemoteInvokeContext<T> {
     RemoteInvokeContext<T> channelFuture(final RpcChannelFuture channelFuture);
 
     /**
-     * 获取 channel future
-     * （1）如果不设置，则默认取 {@link #serviceProxyContext()}第一个 channel 信息
-     * （2）如果对应信息为空，则直接报错 {@link com.github.houbb.rpc.common.exception.RpcRuntimeException}
-     * @return channel 信息
-     * @since 0.0.9
-     */
-    Channel channel();
-
-    /**
      * 请求响应结果
      * @return 请求响应结果
      * @since 0.1.1

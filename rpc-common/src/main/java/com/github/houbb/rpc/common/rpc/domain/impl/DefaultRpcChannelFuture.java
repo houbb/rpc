@@ -9,6 +9,7 @@ import com.github.houbb.rpc.common.api.Destroyable;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 
+import com.github.houbb.rpc.common.util.IpUtils;
 import io.netty.channel.ChannelFuture;
 
 /**
@@ -68,6 +69,12 @@ public class DefaultRpcChannelFuture implements RpcChannelFuture {
     public DefaultRpcChannelFuture address(RpcAddress address) {
         this.address = address;
         return this;
+    }
+
+    @Override
+    public String url() {
+        RpcAddress rpcAddress = this.address;
+        return IpUtils.ipPort(rpcAddress.address(), rpcAddress.port());
     }
 
     @Override

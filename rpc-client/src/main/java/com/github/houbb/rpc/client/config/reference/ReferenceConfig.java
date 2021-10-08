@@ -1,8 +1,10 @@
 package com.github.houbb.rpc.client.config.reference;
 
+import com.github.houbb.load.balance.api.ILoadBalance;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
+import com.github.houbb.rpc.client.support.filter.RpcFilter;
 
 /**
  * 引用配置类
@@ -132,5 +134,21 @@ public interface ReferenceConfig<T> {
      * @since 0.1.5
      */
     ReferenceConfig<T> check(final boolean check);
+
+    /**
+     * 设置过滤器
+     * @param rpcFilter 过滤器
+     * @return this
+     * @since 0.2.0
+     */
+    ReferenceConfig<T> rpcFilter(final RpcFilter rpcFilter);
+
+    /**
+     * 负载均衡
+     * @param loadBalance 负载均衡
+     * @return this
+     * @since 0.2.0
+     */
+    ReferenceConfig<T> loadBalance(final ILoadBalance loadBalance);
 
 }

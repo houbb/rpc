@@ -1,7 +1,9 @@
 package com.github.houbb.rpc.client.proxy;
 
+import com.github.houbb.load.balance.api.ILoadBalance;
 import com.github.houbb.rpc.client.proxy.impl.DefaultServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
+import com.github.houbb.rpc.client.support.filter.balance.RpcFilters;
 import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
 import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
@@ -9,7 +11,7 @@ import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
 
-import java.util.List;
+import com.github.houbb.rpc.client.support.filter.RpcFilter;
 
 /**
  * 反射调用上下文
@@ -89,5 +91,19 @@ public interface ServiceContext<T> {
      * @since 0.1.8
      */
     ClientRegisterManager clientRegisterManager();
+
+    /**
+     * rpc 过滤器
+     * @since 0.2.0
+     * @return 过滤器
+     */
+    RpcFilter rpcFilter();
+
+    /**
+     * 负载均衡策略
+     * @return 策略
+     * @since 0.2.0
+     */
+    ILoadBalance loadBalance();
 
 }

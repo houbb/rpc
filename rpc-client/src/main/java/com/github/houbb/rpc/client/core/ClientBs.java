@@ -6,6 +6,8 @@
 package com.github.houbb.rpc.client.core;
 
 import com.github.houbb.heaven.util.guava.Guavas;
+import com.github.houbb.load.balance.api.ILoadBalance;
+import com.github.houbb.load.balance.api.impl.LoadBalances;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.client.config.reference.ReferenceConfig;
@@ -18,6 +20,8 @@ import com.github.houbb.rpc.client.proxy.impl.DefaultServiceContext;
 import com.github.houbb.rpc.client.proxy.impl.GenericReferenceProxy;
 import com.github.houbb.rpc.client.proxy.impl.RemoteInvokeServiceImpl;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
+import com.github.houbb.rpc.client.support.filter.RpcFilter;
+import com.github.houbb.rpc.client.support.filter.balance.RpcFilters;
 import com.github.houbb.rpc.client.support.hook.DefaultClientShutdownHook;
 import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.client.support.register.impl.DefaultClientRegisterManager;
@@ -190,6 +194,20 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         return new ClientBs<>();
     }
 
+    /**
+     * rpc 过滤器
+     *
+     * @since 0.2.0
+     */
+    private RpcFilter rpcFilter;
+
+    /**
+     * 负载均衡实现
+     *
+     * @since 0.2.0
+     */
+    private ILoadBalance loadBalance;
+
     private ClientBs() {
         // 初始化信息
         this.rpcAddresses = Guavas.newArrayList();
@@ -206,8 +224,12 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         this.remoteInvokeService = new RemoteInvokeServiceImpl();
         this.statusManager = new DefaultStatusManager();
         this.resourceManager = new DefaultResourceManager();
-        this.interceptor = new InterceptorAdaptor();
         this.clientRegisterManager = new DefaultClientRegisterManager(invokeManager, resourceManager);
+
+        // 拦截器与过滤器
+        this.interceptor = new InterceptorAdaptor();
+        this.rpcFilter = RpcFilters.none();
+        this.loadBalance = LoadBalances.roundRobbin();
     }
 
     @Override
@@ -232,6 +254,18 @@ public class ClientBs<T> implements ReferenceConfig<T> {
     @Override
     public ClientBs<T> check(boolean check) {
         this.check = check;
+        return this;
+    }
+
+    @Override
+    public ClientBs<T> rpcFilter(RpcFilter rpcFilter) {
+        this.rpcFilter = rpcFilter;
+        return this;
+    }
+
+    @Override
+    public ClientBs<T> loadBalance(ILoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
         return this;
     }
 
@@ -340,6 +374,9 @@ public class ClientBs<T> implements ReferenceConfig<T> {
         serviceContext.generic(this.generic);
         serviceContext.statusManager(this.statusManager);
         serviceContext.interceptor(this.interceptor);
+        serviceContext.rpcFilter(rpcFilter);
+        serviceContext.loadBalance(loadBalance);
+
         return serviceContext;
     }
 

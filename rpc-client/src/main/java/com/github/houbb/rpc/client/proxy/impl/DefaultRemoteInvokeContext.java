@@ -89,11 +89,6 @@ public class DefaultRemoteInvokeContext<T> implements RemoteInvokeContext<T> {
     }
 
     @Override
-    public Channel channel() {
-        return channelFuture.channelFuture().channel();
-    }
-
-    @Override
     public RpcResponse rpcResponse() {
         return rpcResponse;
     }

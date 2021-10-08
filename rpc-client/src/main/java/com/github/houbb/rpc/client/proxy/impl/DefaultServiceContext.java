@@ -1,15 +1,14 @@
 package com.github.houbb.rpc.client.proxy.impl;
 
+import com.github.houbb.load.balance.api.ILoadBalance;
 import com.github.houbb.rpc.client.proxy.ServiceContext;
 import com.github.houbb.rpc.client.support.fail.enums.FailTypeEnum;
+import com.github.houbb.rpc.client.support.filter.RpcFilter;
 import com.github.houbb.rpc.client.support.register.ClientRegisterManager;
 import com.github.houbb.rpc.common.constant.enums.CallTypeEnum;
-import com.github.houbb.rpc.common.rpc.domain.RpcChannelFuture;
 import com.github.houbb.rpc.common.support.inteceptor.Interceptor;
 import com.github.houbb.rpc.common.support.invoke.InvokeManager;
 import com.github.houbb.rpc.common.support.status.service.StatusManager;
-
-import java.util.List;
 
 /**
  * 反射调用上下文
@@ -77,6 +76,19 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
      * @since 0.1.8
      */
     private ClientRegisterManager clientRegisterManager;
+
+    /**
+     * rpc 过滤器
+     *
+     * @since 0.2.0
+     */
+    private RpcFilter rpcFilter;
+
+    /**
+     * 负载均衡
+     * @since 0.2.0
+     */
+    private ILoadBalance loadBalance;
 
     @Override
     public String serviceId() {
@@ -178,5 +190,24 @@ public class DefaultServiceContext<T> implements ServiceContext<T> {
         return this;
     }
 
+    @Override
+    public RpcFilter rpcFilter() {
+        return rpcFilter;
+    }
+
+    public DefaultServiceContext<T> rpcFilter(RpcFilter rpcFilter) {
+        this.rpcFilter = rpcFilter;
+        return this;
+    }
+
+    @Override
+    public ILoadBalance loadBalance() {
+        return loadBalance;
+    }
+
+    public DefaultServiceContext<T> loadBalance(ILoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
+        return this;
+    }
 }
 

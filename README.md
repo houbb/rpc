@@ -35,7 +35,11 @@
 
 - interceptor 拦截器
 
+- filter 过滤器
+
 - check 客户端启动检测服务是否可用
+
+- heartbeat 服务端心跳
 
 # 快速入门
 
@@ -232,7 +236,7 @@ ps: 这部分测试代码可以关注公众号【老马啸西风】，后台回�
 
 - [x] 优雅关闭添加超时设置
   
-- [ ] heartbeat 心跳检测机制
+- [x] heartbeat 心跳检测机制
 
 - [ ] 完善 load-balance 实现
   

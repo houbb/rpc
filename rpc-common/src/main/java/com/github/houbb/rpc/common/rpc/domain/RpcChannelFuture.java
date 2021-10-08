@@ -5,6 +5,7 @@
 
 package com.github.houbb.rpc.common.rpc.domain;
 
+import com.github.houbb.load.balance.support.server.IServer;
 import com.github.houbb.rpc.common.api.Destroyable;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 
@@ -19,7 +20,7 @@ import io.netty.channel.ChannelFuture;
  * @author houbinbin
  * @since 0.0.9
  */
-public interface RpcChannelFuture {
+public interface RpcChannelFuture extends IServer {
 
     /**
      * channel future 信息
@@ -34,13 +35,6 @@ public interface RpcChannelFuture {
      * @since 0.0.9
      */
     RpcAddress address();
-
-    /**
-     * 权重信息
-     * @return 权重
-     * @since 0.0.9
-     */
-    int weight();
 
     /**
      * 可销毁的对象
