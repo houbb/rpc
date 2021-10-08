@@ -1,12 +1,14 @@
 package com.github.houbb.rpc.server.support.register;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
+import com.github.houbb.heaven.util.net.NetUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.common.config.component.RpcAddress;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.message.NotifyMessage;
+import com.github.houbb.rpc.register.domain.message.body.ServerHeartbeatBody;
 import com.github.houbb.rpc.register.domain.message.impl.NotifyMessages;
 import com.github.houbb.rpc.register.simple.constant.MessageTypeConst;
 import io.netty.channel.Channel;
@@ -14,6 +16,9 @@ import io.netty.channel.Channel;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 默认的服务端注册管理实现
@@ -35,9 +40,49 @@ public class DefaultServerRegisterLocalManager implements ServerRegisterManager 
      */
     private final Map<String, Channel> registerCenterChannelMap;
 
+    /**
+     * 服务端端口号
+     * @since 0.2.0
+     */
+    private int port;
+
+    /**
+     * 心跳执行器
+     * @since 0.2.0
+     */
+    private final ScheduledExecutorService heartbeatExecutor;
+
     public DefaultServerRegisterLocalManager() {
         this.serviceEntryMap = new HashMap<>();
         this.registerCenterChannelMap = new HashMap<>();
+
+        heartbeatExecutor = Executors.newSingleThreadScheduledExecutor();
+        heartbeatExecutor.scheduleAtFixedRate(new HeartbeatThread(), 5, 2, TimeUnit.SECONDS);
+    }
+
+    private class HeartbeatThread implements Runnable {
+        @Override
+        public void run() {
+            //1. 每 2 秒钟，向 channel 发送请求信息
+            log.debug(("[HEARTBEAT] 开始定时执行心跳"));
+            String currentIp = NetUtil.getLocalIp();
+            ServerHeartbeatBody body = new ServerHeartbeatBody();
+            body.ip(currentIp);
+            body.port(port);
+            body.time(System.currentTimeMillis());
+
+            NotifyMessage notifyMessage = NotifyMessages.of(MessageTypeConst.SERVER_HEARTBEAT_REQ, body);
+            for(Channel channel : registerCenterChannelMap.values()) {
+                channel.writeAndFlush(notifyMessage);
+            }
+            log.debug("[HEARTBEAT] 完成定时执行心跳");
+        }
+    }
+
+    @Override
+    public DefaultServerRegisterLocalManager port(int port) {
+        this.port = port;
+        return this;
     }
 
     @Override

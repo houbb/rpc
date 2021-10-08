@@ -15,10 +15,7 @@ import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.simple.server.RegisterServerService;
 import io.netty.channel.Channel;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -71,7 +68,7 @@ public class DefaultRegisterServerService implements RegisterServerService {
     }
 
     @Override
-    public List<ServiceEntry> unRegister(ServiceEntry serviceEntry, Channel channel) {
+    public List<ServiceEntry> unRegister(ServiceEntry serviceEntry) {
         paramCheck(serviceEntry);
 
         final String serviceId = serviceEntry.serviceId();
@@ -107,6 +104,28 @@ public class DefaultRegisterServerService implements RegisterServerService {
     @Override
     public Collection<Channel> channels() {
         return serviceEntryChannelMap.values();
+    }
+
+    @Override
+    public Collection<ServiceEntry> serviceEntries() {
+        return serviceEntryChannelMap.keySet();
+    }
+
+    @Override
+    public Collection<ServiceEntry> serviceEntries(String ipPort) {
+        Collection<ServiceEntry> serviceEntries = serviceEntries();
+
+        Set<ServiceEntry> set = new HashSet<>();
+        for(ServiceEntry serviceEntry : serviceEntries) {
+            String ip = serviceEntry.ip();
+            int port = serviceEntry.port();
+            String key = ip+":"+port;
+
+            if(key.equals(ipPort)) {
+                set.add(serviceEntry);
+            }
+        }
+        return set;
     }
 
     /**

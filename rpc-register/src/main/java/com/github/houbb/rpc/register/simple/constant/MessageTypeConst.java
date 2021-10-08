@@ -72,4 +72,10 @@ public final class MessageTypeConst {
      */
     public static final String REGISTER_CENTER_REMOVE_NOTIFY = "REGISTER_CENTER_REMOVE_NOTIFY";
 
+    /**
+     * 服务端心跳
+     * @since 0.2.0
+     */
+    public static final String SERVER_HEARTBEAT_REQ = "SERVER_HEARTBEAT_REQ";
+
 }

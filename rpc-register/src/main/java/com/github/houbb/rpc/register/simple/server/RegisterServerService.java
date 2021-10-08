@@ -10,7 +10,9 @@ import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import io.netty.channel.Channel;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p> 服务端注册服务类 </p>
@@ -37,11 +39,10 @@ public interface RegisterServerService {
     /**
      * 注销当前服务信息
      * @param serviceEntry 注册当前服务信息
-     * @param channel channel
      * @since 0.0.8
      * @return 更新后的服务信息列表
      */
-    List<ServiceEntry> unRegister(final ServiceEntry serviceEntry, Channel channel);
+    List<ServiceEntry> unRegister(final ServiceEntry serviceEntry);
 
     /**
      * 根据服务标识发现对应的服务器信息
@@ -58,5 +59,20 @@ public interface RegisterServerService {
      * @since 0.1.8
      */
     Collection<Channel> channels();
+
+    /**
+     * 所有的服务明细
+     * @return 结果
+     * @since 0.2.0
+     */
+    Collection<ServiceEntry> serviceEntries();
+
+    /**
+     * 所有的指定地址端口的服务明细
+     * @param ipPort 地址
+     * @return 结果
+     * @since 0.2.0
+     */
+    Collection<ServiceEntry> serviceEntries(String ipPort);
 
 }

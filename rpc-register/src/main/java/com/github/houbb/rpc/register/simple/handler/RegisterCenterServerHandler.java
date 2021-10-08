@@ -9,6 +9,7 @@ import com.github.houbb.log.integration.core.Log;
 import com.github.houbb.log.integration.core.LogFactory;
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
 import com.github.houbb.rpc.register.domain.message.NotifyMessage;
+import com.github.houbb.rpc.register.domain.message.body.ServerHeartbeatBody;
 import com.github.houbb.rpc.register.domain.message.impl.NotifyMessages;
 import com.github.houbb.rpc.register.simple.SimpleRpcRegister;
 import com.github.houbb.rpc.register.simple.client.RegisterClientService;
@@ -69,27 +70,31 @@ public class RegisterCenterServerHandler extends SimpleChannelInboundHandler {
                 seqId);
 
         final Channel channel = ctx.channel();
-        ServiceEntry serviceEntry = (ServiceEntry)body;
 
         switch (type) {
             case MessageTypeConst.SERVER_REGISTER_REQ:
-                rpcRegister.register(serviceEntry, channel);
+                rpcRegister.register((ServiceEntry)body, channel);
                 break;
 
             case MessageTypeConst.SERVER_UN_REGISTER_REQ:
-                rpcRegister.unRegister(serviceEntry, channel);
+                rpcRegister.unRegister((ServiceEntry)body);
                 break;
 
             case MessageTypeConst.CLIENT_SUBSCRIBE_REQ:
-                rpcRegister.subscribe(serviceEntry, channel);
+                rpcRegister.subscribe((ServiceEntry)body, channel);
                 break;
 
             case MessageTypeConst.CLIENT_UN_SUBSCRIBE_REQ:
-                rpcRegister.unSubscribe(serviceEntry, channel);
+                rpcRegister.unSubscribe((ServiceEntry)body, channel);
                 break;
 
             case MessageTypeConst.CLIENT_LOOK_UP_SERVER_REQ:
-                rpcRegister.lookUp(seqId, serviceEntry, channel);
+                rpcRegister.lookUp(seqId, (ServiceEntry)body, channel);
+                break;
+
+            case MessageTypeConst.SERVER_HEARTBEAT_REQ:
+                ServerHeartbeatBody heartbeatBody = (ServerHeartbeatBody) body;
+                rpcRegister.serverHeartbeat(heartbeatBody, channel);
                 break;
 
             default:

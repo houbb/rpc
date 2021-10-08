@@ -11,6 +11,14 @@ import io.netty.channel.Channel;
 public interface ServerRegisterManager {
 
     /**
+     * 设置端口号
+     * @param port 端口号
+     * @return 结果
+     * @since 0.2.0
+     */
+    ServerRegisterManager port(final int port);
+
+    /**
      * 注册当前服务信息
      * （1）将该服务通过 {@link ServiceEntry#serviceId()} 进行分组
      * 订阅了这个 serviceId 的所有客户端

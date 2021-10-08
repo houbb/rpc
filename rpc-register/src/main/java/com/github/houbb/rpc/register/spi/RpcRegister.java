@@ -7,6 +7,7 @@ package com.github.houbb.rpc.register.spi;
 
 
 import com.github.houbb.rpc.register.domain.entry.ServiceEntry;
+import com.github.houbb.rpc.register.domain.message.body.ServerHeartbeatBody;
 import io.netty.channel.Channel;
 
 /**
@@ -32,10 +33,9 @@ public interface RpcRegister {
     /**
      * 注销当前服务信息
      * @param serviceEntry 注册当前服务信息
-     * @param channel channel
      * @since 0.0.8
      */
-    void unRegister(final ServiceEntry serviceEntry, Channel channel);
+    void unRegister(final ServiceEntry serviceEntry);
 
     /**
      * 监听服务信息
@@ -67,5 +67,13 @@ public interface RpcRegister {
      * @since 0.0.8
      */
     void lookUp(String seqId, ServiceEntry clientEntry, final Channel channel);
+
+    /**
+     * 服务端心跳检测
+     * @param heartbeatBody 心跳对象
+     * @param channel 频道信息
+     * @since 0.2.0
+     */
+    void serverHeartbeat(final ServerHeartbeatBody heartbeatBody, final Channel channel);
 
 }

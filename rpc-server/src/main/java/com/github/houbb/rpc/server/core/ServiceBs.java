@@ -138,6 +138,7 @@ public class ServiceBs implements ServiceRegistry {
         this.resourceManager = new DefaultResourceManager();
         this.invokeManager = new DefaultInvokeManager();
         this.serverRegisterManager = new DefaultServerRegisterLocalManager();
+        serverRegisterManager.port(rpcPort);
 
         this.delayExecutor = new DelayQueueExecutor();
     }
@@ -151,6 +152,7 @@ public class ServiceBs implements ServiceRegistry {
         ArgUtil.positive(port, "port");
 
         this.rpcPort = port;
+        serverRegisterManager.port(rpcPort);
         return this;
     }
 

@@ -77,7 +77,7 @@ public class DefaultRegisterClientService implements RegisterClientService {
 
         if (CollectionUtil.isEmpty(channelSet)) {
             // 服务列表为空
-            LOG.info("[Register Client] remove host set is empty. entry: {}", clientEntry);
+            LOG.info("[unSubscribe Client] remove host set is empty. entry: {}", clientEntry);
             return;
         }
 
@@ -109,7 +109,7 @@ public class DefaultRegisterClientService implements RegisterClientService {
 
         List<Channel> clientChannelList = clientChannelList(serviceId);
         if (CollectionUtil.isEmpty(clientChannelList)) {
-            LOG.info("[Register] notify clients is empty for service: {}",
+            LOG.info("[UnRegister] notify clients is empty for service: {}",
                     serviceId);
             return;
         }
