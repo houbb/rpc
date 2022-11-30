@@ -277,13 +277,6 @@ ps: 这部分测试代码可以关注公众号【老马啸西风】，后台回�
 - [ ] ~~version 多版本管理~~
 
 
-
-select sum(renting_total_num) from xiaoqu_summary_info;
-
-
-select count(*) from house_rent_info;
-
-
 # 中间件等工具开源矩阵
 
 [heaven: 收集开发中常用的工具类](https://github.com/houbb/heaven)
